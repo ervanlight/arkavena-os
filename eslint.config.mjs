@@ -96,6 +96,27 @@ export default tseslint.config(
     settings: {
       'boundaries/elements': elements,
       'boundaries/include': ['src/**/*'],
+      // Without this, the plugin cannot resolve `@/...` imports to a local
+      // file, so it classifies every one of them as an external package --
+      // which silently ALLOWS every cross-module and app-into-module-internals
+      // violation (they get swept into the "third-party is unrestricted"
+      // policy below) and, just as bad, silently BLOCKS legitimate local
+      // imports from domain/ (they get swept into the "no infrastructure"
+      // disallow). scripts/verify-boundaries.ts is what caught this -- five of
+      // its checks failed silently before this was configured correctly.
+      //
+      // The deprecated `boundaries/alias` setting looks like the obvious fix
+      // and takes a config value without complaint, but it is dead code in v7
+      // -- it only emits the deprecation warning and resolves nothing (read
+      // Settings/Settings.js: deprecateAlias does exactly one thing, warn).
+      // `import/resolver` plus a real resolver package is the only path that
+      // works, which is why eslint-import-resolver-typescript is a direct
+      // devDependency rather than a transitive one pulled in by
+      // eslint-config-next -- relying on a transitive dependency here would
+      // make this silently break again on an unrelated dependency bump.
+      'import/resolver': {
+        typescript: { project: './tsconfig.json' },
+      },
     },
     rules: {
       'boundaries/dependencies': [

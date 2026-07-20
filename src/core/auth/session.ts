@@ -59,35 +59,18 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
     .maybeSingle();
 
   if (error !== null || data === null) return null;
+  if (data.status === 'suspended') return null;
 
-  // TEMPORARY, remove this cast the moment `pnpm db:types` runs against the
-  // linked project (ADR 0006). database.types.ts is a placeholder empty
-  // schema until then, which types every query as `never`. This shape is not
-  // a guess: it is exactly the Wave 1 migration in
-  // supabase/migrations/20260720000200_wave1_identity_kernel.sql, so there is
-  // nothing here for the real generated type to later contradict.
-  const row = data as unknown as {
-    id: string;
-    email: string;
-    full_name: string;
-    organization_id: string;
-    org_role: Role | null;
-    status: 'invited' | 'active' | 'suspended';
-    organizations: { name: string } | null;
-  };
-
-  if (row.status === 'suspended') return null;
-
-  const organization = row.organizations;
+  const organization = data.organizations;
 
   return {
-    id: row.id,
-    email: row.email,
-    fullName: row.full_name,
-    organizationId: row.organization_id,
+    id: data.id,
+    email: data.email,
+    fullName: data.full_name,
+    organizationId: data.organization_id,
     organizationName: organization?.name ?? '',
-    orgRole: row.org_role,
-    status: row.status,
+    orgRole: data.org_role,
+    status: data.status,
   };
 });
 

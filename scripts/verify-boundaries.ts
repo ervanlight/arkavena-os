@@ -122,7 +122,9 @@ const fixtures: Fixture[] = [
   {
     name: "control: app/ may import a module's public index.ts",
     path: `src/app/zz-fixture-ok/page.tsx`,
-    content: `import { bPublic } from '@/modules/zz-fixture-b';\nexport default function P() {\n  return null as unknown as JSX.Element & typeof bPublic;\n}\n`,
+    // A genuine value import, not a type-only one -- consistent-type-imports
+    // would flag a type-only import and be mistaken for a boundaries failure.
+    content: `import { bPublic } from '@/modules/zz-fixture-b';\nexport default function P() {\n  console.log(bPublic);\n  return null;\n}\n`,
     expect: null,
   },
 ];

@@ -115,9 +115,10 @@ safeAction(schema, permission, async (input, ctx) => {
 
 ```
 pnpm dev            # Next.js dev
-pnpm db:link        # sekali saja: supabase link ke project cloud
-pnpm db:push        # terapkan migration ke project yang sudah di-link
-pnpm db:types       # generate database.types.ts dari project yang di-link
+pnpm db:push        # terapkan migration, via --db-url (butuh SUPABASE_DB_URL)
+pnpm db:types       # generate database.types.ts via Management API
+                    #   (butuh SUPABASE_ACCESS_TOKEN — lihat ADR 0006 addendum:
+                    #   --db-url diam-diam butuh container postgres-meta)
 pnpm gen:rls-check  # verifikasi matrix.ts ↔ RLS policies (butuh SUPABASE_DB_URL)
 pnpm test           # unit (Vitest), tanpa database
 pnpm test:db        # integration + RLS test, terhadap SUPABASE_DB_URL

@@ -36,8 +36,8 @@ Actions runner.
 corepack enable
 pnpm install
 cp .env.example .env.local   # fill in from the Supabase dashboard
-pnpm db:link                 # one-time: supabase link --project-ref ...
-pnpm db:push                 # apply migrations to the dev project
+pnpm db:push                 # apply migrations to the dev project (no login needed, uses --db-url)
+pnpm db:types                # regenerate types (needs SUPABASE_ACCESS_TOKEN -- see ADR 0006 addendum)
 pnpm dev
 ```
 
@@ -50,9 +50,10 @@ matters.
 
 ```
 pnpm dev            # Next.js dev server
-pnpm db:link        # one-time: link the CLI to the cloud dev project
-pnpm db:push        # apply pending migrations to the linked project
-pnpm db:types       # regenerate core/db/database.types.ts from the linked project
+pnpm db:push        # apply pending migrations, via --db-url (needs SUPABASE_DB_URL)
+pnpm db:types       # regenerate core/db/database.types.ts, via the Management API
+                    #   (needs SUPABASE_ACCESS_TOKEN -- see ADR 0006 addendum: --db-url
+                    #   would try to run postgres-meta in a container instead)
 pnpm gen:rls-check  # verify matrix.ts and pg_policies agree (needs SUPABASE_DB_URL)
 pnpm test           # unit tests (Vitest) -- no database needed
 pnpm test:db        # integration + RLS tests, against SUPABASE_DB_URL

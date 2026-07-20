@@ -2,6 +2,7 @@
   "name": "buildtrust-os",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "packageManager": "pnpm@11.15.1",
   "engines": {
     "node": ">=20.9.0"
@@ -16,9 +17,8 @@
     "test:watch": "vitest --project unit",
     "test:db": "vitest run --project db",
     "test:e2e": "playwright test",
-    "db:link": "supabase link --project-ref rwdftlsbdkcktoeeixle",
-    "db:push": "supabase db push --linked",
-    "db:types": "supabase gen types typescript --linked --schema public > src/core/db/database.types.ts",
+    "db:push": "supabase db push --db-url \"$SUPABASE_DB_URL\"",
+    "db:types": "supabase gen types typescript --project-id rwdftlsbdkcktoeeixle --schema public > src/core/db/database.types.ts",
     "db:types:check": "tsx scripts/check-db-types.ts",
     "gen:rls-check": "tsx scripts/rls-check.ts",
     "verify:boundaries": "tsx scripts/verify-boundaries.ts"
@@ -42,6 +42,7 @@
     "@vitejs/plugin-react": "6.0.3",
     "eslint": "10.7.0",
     "eslint-config-next": "16.2.10",
+    "eslint-import-resolver-typescript": "4.4.5",
     "eslint-plugin-boundaries": "7.0.2",
     "pg": "8.22.0",
     "supabase": "2.109.1",

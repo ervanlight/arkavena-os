@@ -1,10 +1,18 @@
 -- Wave 0, part 2: the kernel functions every later wave builds on.
 --
 -- Four of these are referenced by name in ARCHITECTURE.md 2.1. They are created
--- before any table exists, which Postgres allows: a plpgsql body is resolved
--- when it first runs, not when it is defined. That ordering is deliberate --
--- Wave 1 tables attach these triggers as they are created, so the functions
--- have to exist first.
+-- before any table exists, which Postgres allows for a PL/pgSQL body: it is
+-- resolved when it first runs, not when it is defined. That ordering is
+-- deliberate -- Wave 1 tables attach these triggers as they are created, so
+-- the functions have to exist first.
+--
+-- This is why fn_current_org_id and fn_current_org_role below are written in
+-- plpgsql rather than plain SQL, even though each is a single query. A
+-- LANGUAGE SQL function body is parsed and validated against the catalog at
+-- CREATE time -- confirmed by pushing this migration against the real
+-- database before any table existed, which failed with "relation public.users
+-- does not exist" until these two were converted. plpgsql defers that check
+-- to first execution, which is what the ordering above actually depends on.
 
 -- ---------------------------------------------------------------------------
 -- fn_set_updated_at
@@ -44,15 +52,19 @@ comment on function fn_set_updated_at() is
 
 create or replace function fn_current_org_id()
 returns uuid
-language sql
+language plpgsql
 stable
 security definer
 set search_path = public, pg_catalog
 as $$
-  select u.organization_id
-  from public.users u
-  where u.id = (select auth.uid())
-    and u.deleted_at is null;
+begin
+  return (
+    select u.organization_id
+    from public.users u
+    where u.id = (select auth.uid())
+      and u.deleted_at is null
+  );
+end;
 $$;
 
 comment on function fn_current_org_id() is
@@ -64,16 +76,20 @@ comment on function fn_current_org_id() is
 
 create or replace function fn_current_org_role()
 returns org_role
-language sql
+language plpgsql
 stable
 security definer
 set search_path = public, pg_catalog
 as $$
-  select u.org_role
-  from public.users u
-  where u.id = (select auth.uid())
-    and u.deleted_at is null
-    and u.status = 'active';
+begin
+  return (
+    select u.org_role
+    from public.users u
+    where u.id = (select auth.uid())
+      and u.deleted_at is null
+      and u.status = 'active'
+  );
+end;
 $$;
 
 comment on function fn_current_org_role() is
