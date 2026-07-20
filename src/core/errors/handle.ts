@@ -1,4 +1,11 @@
-import { ConflictError, InfraError, NotFoundError, PermissionError, isAppError } from './app-error';
+import {
+  ConflictError,
+  InfraError,
+  InternalError,
+  NotFoundError,
+  PermissionError,
+  isAppError,
+} from './app-error';
 import type { AppError } from './app-error';
 import { ERROR_CODES, ERROR_MESSAGES_ID, type ErrorCode } from './codes';
 
@@ -101,9 +108,24 @@ export function asAppError(error: unknown, meta?: Record<string, unknown>): AppE
       case ERROR_CODES.NOT_FOUND:
         return new NotFoundError(message, options);
       default:
-        break;
+        // A Postgres error we have no mapping for is still a database failure.
+        return new InfraError(message, options);
     }
   }
 
-  return new InfraError(message, options);
+  // A network-layer failure is genuinely worth retrying; an arbitrary throw is
+  // a bug in our code, and telling the user to try again would send them into a
+  // loop that cannot succeed.
+  if (isNetworkFailure(error)) {
+    return new InfraError(message, options);
+  }
+
+  return new InternalError(message, options);
+}
+
+/** Fetch and undici surface connection problems as a TypeError with a cause. */
+function isNetworkFailure(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  if (error.name === 'AbortError' || error.name === 'TimeoutError') return true;
+  return error instanceof TypeError && /fetch failed|network|ECONN|ENOTFOUND|socket/i.test(error.message);
 }

@@ -106,6 +106,18 @@ export class RateLimitError extends AppError {
 }
 
 /**
+ * A bug. Something threw that we had no category for.
+ *
+ * Kept separate from InfraError because the two tell the user to do different
+ * things. "The system is temporarily unavailable" invites a retry; if the cause
+ * was a TypeError in our own code, that retry will fail exactly the same way
+ * forever. This one says the failure has been recorded instead.
+ */
+export class InternalError extends AppError {
+  readonly code = ERROR_CODES.INTERNAL_ERROR;
+}
+
+/**
  * A business rule said no.
  *
  * Domain layers return this inside a Result rather than throwing it

@@ -1,0 +1,64 @@
+# Error codes
+
+The catalogue of stable error codes (ARCHITECTURE.md §5.1, CLAUDE.md §5). The
+executable version is `src/core/errors/codes.ts`; this is the version to read.
+
+Codes are stable identifiers. Logs aggregate on them and the UI maps them to
+Indonesian text, so renaming one breaks two things at once. Adding an error
+means adding a code — never a free-form string thrown at a call site, because a
+free-form string cannot be counted, searched, or translated.
+
+## Kernel codes
+
+| Code | HTTP | Indonesian message shown to the user | When |
+| --- | --- | --- | --- |
+| `VALIDATION_FAILED` | 422 | Data yang dimasukkan belum benar. Periksa kembali isian Anda. | Zod rejected the input at a boundary, or a database check constraint fired |
+| `UNAUTHENTICATED` | 401 | Sesi Anda sudah berakhir. Silakan masuk kembali. | No signed-in user |
+| `PERMISSION_DENIED` | 403 | Anda tidak memiliki akses untuk tindakan ini. | The matrix said no, or RLS refused (SQLSTATE 42501) |
+| `ORG_CONTEXT_MISSING` | 403 | Akun Anda belum terhubung ke organisasi mana pun. Hubungi admin. | Signed in, but no usable organisation |
+| `NOT_FOUND` | 404 | Data yang Anda cari tidak ditemukan. | The row does not exist, or RLS hides it |
+| `CONFLICT` | 409 | Data ini baru saja diubah orang lain. Muat ulang halaman lalu coba lagi. | Unique or FK violation, or an optimistic-lock miss |
+| `AUDIT_REASON_REQUIRED` | 422 | Alasan wajib diisi untuk tindakan persetujuan atau override. | An override or approval reached the audit layer with no reason |
+| `INFRA_UNAVAILABLE` | 503 | Sistem sedang tidak dapat diakses. Coba beberapa saat lagi. | Supabase, storage, or the network failed |
+| `RATE_LIMITED` | 429 | Terlalu banyak percobaan. Tunggu sebentar sebelum mencoba lagi. | Too many magic link requests |
+| `INTERNAL_ERROR` | 500 | Terjadi kesalahan pada sistem. Tim kami sudah dicatat kejadiannya. | Anything uncategorised. An unexpected one in the logs is a bug, not a category |
+
+## Three distinctions worth keeping
+
+**`ORG_CONTEXT_MISSING` is not `UNAUTHENTICATED`.** Signing in again fixes the
+second and cannot fix the first. Collapsing them sends a user with a suspended
+account into a sign-in loop instead of to an administrator.
+
+**`INTERNAL_ERROR` is not `INFRA_UNAVAILABLE`.** "Temporarily unavailable"
+invites a retry. If the cause was a `TypeError` in our own code, that retry
+fails identically forever. `asAppError` only classifies something as
+infrastructure when there is evidence — a Postgres error code, or a network-layer
+failure.
+
+**`PERMISSION_DENIED` covers RLS refusals.** SQLSTATE 42501 means "you are not
+allowed", not "the database is broken". Reporting it as a system failure sends
+the user to the wrong person for help.
+
+## What the user sees versus what is logged
+
+ARCHITECTURE.md §5.1 rule 4 keeps these apart, and `AppError` has a field for
+each: `userMessage` (Indonesian, safe for anyone including a client in the
+portal) and `message` plus `meta` (technical, log only).
+
+`toActionResult` only ever reads the user-facing side. That is what stops a
+Supabase error naming `estimates.margin_amount` from reaching a client's screen,
+and `safe-action.test.ts` asserts it with that exact scenario.
+
+## Domain codes
+
+Each phase adds its own as its rules are built:
+
+| Phase | Codes it will add |
+| --- | --- |
+| Fase 2 — Cash Gate | `CASH_GATE_RED`, `CASH_GATE_OVERDUE`, `CASH_GATE_OVERRIDE_REQUIRES_REASON` |
+| Fase 3 — Scope & Variation | `VARIATION_INVALID_TRANSITION`, `VARIATION_NOT_FUNDED` |
+| Fase 5 — Quality Gate | `HOLD_POINT_PENDING`, `HOLD_POINT_OVERRIDE_DENIED` |
+
+They are not defined yet. Declaring codes for rules that do not exist would be
+building ahead of the sequence (CLAUDE.md law 7), and an unused code in a
+catalogue is indistinguishable from a rule someone forgot to implement.
