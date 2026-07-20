@@ -89,6 +89,61 @@ The system fails closed by construction. That is a property of how the policies
 are written, and `supabase/tests/rls.test.ts` asserts it directly rather than
 assuming it.
 
+## Fase 1 — crm(dasar), projects (Wave 2-6)
+
+"External (project member)" here is narrower than Wave 1's "External": it
+means specifically a user holding a `project_role` **on that project**, via
+`fn_has_project_role()` -- not merely an external user in general. All six
+project roles (site_coordinator, mandor, client_approver, client_viewer,
+supplier, subcontractor) get identical access in Fase 1; nothing yet
+distinguishes between them at the row level.
+
+| Table | Owner | Technical Director | Finance | QS | Procurement | External (project member) |
+| --- | --- | --- | --- | --- | --- | --- |
+| `clients` | CRUD (org) | CRUD (org) | CRUD (org) | CRUD (org) | CRUD (org) | — |
+| `sites` | CRUD (org) | CRUD (org) | CRUD (org) | CRUD (org) | CRUD (org) | — |
+| `client_users` | SELECT, INSERT, DELETE (org) | SELECT, INSERT, DELETE (org) | SELECT, INSERT, DELETE (org) | SELECT, INSERT, DELETE (org) | SELECT, INSERT, DELETE (org) | SELECT (self only) |
+| `projects` | CRUD (org) | CRUD (org) | CRUD (org) | CRUD (org) | CRUD (org) | SELECT (own project) |
+| `project_members` | SELECT, INSERT, UPDATE, DELETE (org) | SELECT, INSERT, UPDATE, DELETE (org) | SELECT, INSERT, UPDATE, DELETE (org) | SELECT, INSERT, UPDATE, DELETE (org) | SELECT, INSERT, UPDATE, DELETE (org) | SELECT (own row only, not the whole roster) |
+| `zones` | CRUD (org) | CRUD (org) | CRUD (org) | CRUD (org) | CRUD (org) | SELECT (own project) |
+| `contracts` | CRUD (org) | CRUD (org) | CRUD (org) | CRUD (org) | CRUD (org) | — |
+| `milestones` | CRUD (org) | CRUD (org) | CRUD (org) | CRUD (org) | CRUD (org) | — |
+| `work_packages` | CRUD (org) | CRUD (org) | CRUD (org) | CRUD (org) | CRUD (org) | SELECT (own project) |
+
+"CRUD" in this section means SELECT, INSERT, UPDATE for staff -- none of these
+nine tables has a DELETE policy for anyone but `project_members`. Soft delete
+(`deleted_at`) is the removal path everywhere else; `on delete restrict`
+foreign keys throughout this wave mean a hard delete fails loudly rather than
+cascading through project history.
+
+### What is deliberately absent
+
+**No table in this wave lets a project role write anything.** Every INSERT and
+UPDATE policy here is staff-only. A mandor's own progress reporting is
+Fase 4 (field-reporting) territory and does not exist yet -- there is
+nothing for a project role to write to in Fase 1.
+
+**`contracts` and `milestones` have no project-role SELECT at all**, unlike
+`projects`, `zones`, and `work_packages`. Both carry a money figure
+(`contract_amount`, `amount`) that ARCHITECTURE.md 2.6 keeps away from
+client-facing reads. The client portal (Fase 6) will read a purpose-built
+`vw_client_*` view instead of these tables directly, the same pattern
+`audit_logs` already established in Wave 1.
+
+**`project_members` gives a project role only their own row, not the project
+roster.** `project_members_select_self` scopes strictly to `user_id =
+auth.uid()` -- a mandor can confirm their own membership but cannot enumerate
+who else is on the project. Staff see the full roster.
+
+### The kernel piece this wave completes
+
+`fn_has_project_role()` was a Wave 0 placeholder that always returned false --
+correct at the time, since `project_members` did not exist yet to check
+against, and a placeholder that denies fails closed rather than handing out
+access nobody had granted. Wave 4 (`20260721000200_wave4_projects.sql`)
+replaces it with the real check, in the same migration that creates the table
+it reads.
+
 ## Later waves
 
 Added as their tables land. A table may not reach main without a row here, its
