@@ -1,0 +1,26 @@
+node_modules/
+.pnpm-store/
+
+.next/
+out/
+build/
+dist/
+
+coverage/
+*.tsbuildinfo
+
+.env
+.env.local
+.env*.local
+
+# Supabase CLI local state. Migrations, seed and tests are tracked.
+supabase/.branches/
+supabase/.temp/
+
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+
+.DS_Store
+*.log
