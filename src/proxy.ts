@@ -7,10 +7,14 @@ import { supabaseAnonKey, supabaseUrl } from '@/core/db/env';
  * Refreshes the Supabase session cookie on every request and gates
  * unauthenticated access.
  *
- * This has to run in middleware, not in a layout. A Supabase auth token
- * expires in an hour; without this, a server component reading a stale cookie
- * would see the user as signed out mid-session, which looks like a random
- * logout bug rather than what it actually is.
+ * Named `proxy.ts`, not `middleware.ts` -- Next.js 16 renamed the convention
+ * (the old file still works but logs a deprecation warning on every dev
+ * server start, and the exported function must be named `proxy` to match).
+ *
+ * This has to run here, not in a layout. A Supabase auth token expires in an
+ * hour; without this, a server component reading a stale cookie would see the
+ * user as signed out mid-session, which looks like a random logout bug rather
+ * than what it actually is.
  *
  * Route protection here is convenience, not the security boundary --
  * ARCHITECTURE.md 0.2 puts that in RLS. This exists so an unauthenticated
@@ -24,7 +28,7 @@ function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient<Database>(supabaseUrl(), supabaseAnonKey(), {
