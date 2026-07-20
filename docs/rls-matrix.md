@@ -69,6 +69,15 @@ are enforced by triggers instead:
 | A user can never be moved between organisations at all, owner or not | `trg_users_guard_privileged_columns` |
 | A notification recipient may only mark it read, not rewrite its content | `trg_notifications_guard_recipient_edits` |
 
+`trg_users_guard_privileged_columns` exempts `current_user in ('postgres',
+'service_role')` -- migrations and trusted backend code, not the
+application-facing `anon`/`authenticated` roles this guard actually targets.
+This is deliberately **not** `security definer`: that property makes
+`current_user` reflect the function's owner rather than the caller, which
+silently disabled the whole guard the first time it was tried
+(`20260720000300` → `20260720000400`, found by `pnpm test:db` against the real
+database, not by review).
+
 ### The failure mode this is built around
 
 `fn_current_org_id()` returns NULL when the signer is unauthenticated,

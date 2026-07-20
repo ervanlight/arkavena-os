@@ -45,8 +45,15 @@ const RESOURCE_TABLES: Record<Resource, string> = {
 const ACTION_COMMANDS: Record<string, 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE'> = {
   view: 'SELECT',
   update: 'UPDATE',
-  invite: 'INSERT',
   mark_read: 'UPDATE',
+  // change_role and invite are deliberately absent. Neither has, or should
+  // ever have, a matching RLS policy: change_role is enforced by
+  // fn_users_guard_privileged_columns (a trigger, not a policy), and invite
+  // is enforced by there being no INSERT policy on `users` for anyone --
+  // provisioning happens through the service-role client, which bypasses RLS
+  // by design (Wave 1 migration comment: "a signed-in user must not be able
+  // to mint another user"). Mapping either to an expected policy would make
+  // this script fail against a database that is correctly configured.
 };
 
 type Policy = { tablename: string; policyname: string; cmd: string; qual: string | null; withCheck: string | null };
