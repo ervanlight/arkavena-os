@@ -39,6 +39,14 @@ const RESOURCE_TABLES: Record<Resource, string> = {
   role: 'roles',
   audit_log: 'audit_logs',
   notification: 'notifications',
+  client: 'clients',
+  site: 'sites',
+  project: 'projects',
+  project_member: 'project_members',
+  zone: 'zones',
+  contract: 'contracts',
+  milestone: 'milestones',
+  work_package: 'work_packages',
 };
 
 /** Matrix actions that map onto a SQL command the policy list should cover. */
@@ -46,6 +54,9 @@ const ACTION_COMMANDS: Record<string, 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE'>
   view: 'SELECT',
   update: 'UPDATE',
   mark_read: 'UPDATE',
+  create: 'INSERT',
+  add: 'INSERT',
+  remove: 'DELETE',
   // change_role and invite are deliberately absent. Neither has, or should
   // ever have, a matching RLS policy: change_role is enforced by
   // fn_users_guard_privileged_columns (a trigger, not a policy), and invite

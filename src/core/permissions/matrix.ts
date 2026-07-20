@@ -14,9 +14,19 @@
  * Adding a role means editing this file and running gen:rls-check, not hunting
  * for `if (role === ...)` across forty components.
  *
- * Only Wave 1 resources are listed. Later phases add their own entries as their
- * tables arrive; declaring permissions for tables that do not exist would be
- * building ahead of the sequence (CLAUDE.md law 7).
+ * Wave 1 and Fase 1 (ARCHITECTURE.md 7) resources are listed. Later phases add
+ * their own entries as their tables arrive; declaring permissions for tables
+ * that do not exist would be building ahead of the sequence (CLAUDE.md law 7).
+ *
+ * Fase 1's project-scoped resources (project, project_member, zone,
+ * work_package) list PROJECT_ROLES alongside ORG_ROLES for `view`, but that is
+ * only ever "this role type is in the right ballpark" -- roleCan() has no
+ * project id to check against, so it cannot and does not decide whether a
+ * given mandor may see a given project. That instance-level decision is
+ * fn_has_project_role()'s alone, enforced in the database. This matrix's
+ * `view` entry existing at all is what lets the UI show a "Projects" nav item
+ * to a project role without every entry point special-casing it -- cosmetic,
+ * same as every other UI use of this matrix.
  */
 
 import type { Enums } from '@/core/db/database.types';
@@ -95,6 +105,74 @@ export const PERMISSIONS = {
     /** Everyone reads their own; the RLS policy scopes it to the recipient. */
     view: [...ORG_ROLES, ...PROJECT_ROLES],
     mark_read: [...ORG_ROLES, ...PROJECT_ROLES],
+  },
+
+  // -------------------------------------------------------------------------
+  // Fase 1 (modules/crm, modules/projects)
+  // -------------------------------------------------------------------------
+
+  client: {
+    /** Any staff role -- clients_{select,insert,update}_staff make no further distinction. */
+    view: [...ORG_ROLES],
+    create: [...ORG_ROLES],
+    update: [...ORG_ROLES],
+  },
+
+  site: {
+    view: [...ORG_ROLES],
+    create: [...ORG_ROLES],
+    update: [...ORG_ROLES],
+  },
+
+  project: {
+    /** Staff see every project in their organisation; a project role sees only their own (fn_has_project_role). */
+    view: [...ORG_ROLES, ...PROJECT_ROLES],
+    create: [...ORG_ROLES],
+    update: [...ORG_ROLES],
+  },
+
+  project_member: {
+    view: [...ORG_ROLES, ...PROJECT_ROLES],
+    /**
+     * Named `add`, not `invite` -- this assigns an existing user a role on a
+     * project, unlike user.invite (provisioning a brand new person into the
+     * organisation), and the two need different ACTION_COMMANDS treatment in
+     * gen:rls-check: user.invite deliberately has no policy, this one does.
+     */
+    add: [...ORG_ROLES],
+    update: [...ORG_ROLES],
+    remove: [...ORG_ROLES],
+  },
+
+  zone: {
+    view: [...ORG_ROLES, ...PROJECT_ROLES],
+    create: [...ORG_ROLES],
+    update: [...ORG_ROLES],
+  },
+
+  contract: {
+    /**
+     * Staff only -- no project-role entry. contract_amount is money
+     * ARCHITECTURE.md 2.6 keeps away from client-facing reads; the client
+     * portal (Fase 6) reads a vw_client_* view, never this table.
+     */
+    view: [...ORG_ROLES],
+    create: [...ORG_ROLES],
+    update: [...ORG_ROLES],
+  },
+
+  milestone: {
+    /** Same reasoning as contract: amount is money, staff only. */
+    view: [...ORG_ROLES],
+    create: [...ORG_ROLES],
+    update: [...ORG_ROLES],
+  },
+
+  work_package: {
+    /** No money figure here, unlike contract/milestone -- a project role reading their own assignment is safe. */
+    view: [...ORG_ROLES, ...PROJECT_ROLES],
+    create: [...ORG_ROLES],
+    update: [...ORG_ROLES],
   },
 } as const satisfies PermissionMatrix;
 
