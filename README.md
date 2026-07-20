@@ -26,28 +26,41 @@ CI.
 
 ## Setup
 
+Development targets the shared Supabase Cloud dev project
+(`buildtrust-os-dev`) directly — **not** a local Docker stack (see
+[ADR 0006](docs/decisions/0006-cloud-dev-database-instead-of-local.md)). CI is
+unaffected and still runs its own ephemeral local Supabase inside the GitHub
+Actions runner.
+
 ```
 corepack enable
 pnpm install
-supabase start          # needs a running Docker daemon
-pnpm db:reset           # migrate + seed
+cp .env.example .env.local   # fill in from the Supabase dashboard
+pnpm db:link                 # one-time: supabase link --project-ref ...
+pnpm db:push                 # apply migrations to the dev project
 pnpm dev
 ```
+
+The dev project is shared, mutable state, not a fresh database per run — there
+is no local reset to fall back on. `test:db` cleans up what it creates, but
+treat the project as disposable, not as a source of truth for anything that
+matters.
 
 ## Commands
 
 ```
 pnpm dev            # Next.js dev server
-pnpm db:types       # regenerate core/db/database.types.ts from the schema
-pnpm db:migrate     # apply migrations locally
-pnpm db:reset       # reset + migrate + seed
-pnpm gen:rls-check  # verify matrix.ts and pg_policies agree
-pnpm test           # unit tests (Vitest)
-pnpm test:db        # integration + RLS tests
+pnpm db:link        # one-time: link the CLI to the cloud dev project
+pnpm db:push        # apply pending migrations to the linked project
+pnpm db:types       # regenerate core/db/database.types.ts from the linked project
+pnpm gen:rls-check  # verify matrix.ts and pg_policies agree (needs SUPABASE_DB_URL)
+pnpm test           # unit tests (Vitest) -- no database needed
+pnpm test:db        # integration + RLS tests, against SUPABASE_DB_URL
 pnpm test:e2e       # Playwright
 pnpm lint           # ESLint, including import boundaries
 pnpm typecheck      # tsc --noEmit
 ```
 
 CI runs lint, typecheck, the `db:types` diff check, `gen:rls-check`, `test`, and
-`test:db`. All must be green before merge.
+`test:db` — all against its own ephemeral local Supabase, unrelated to the
+shared dev project above. All must be green before merge.

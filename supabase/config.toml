@@ -91,15 +91,25 @@ allowed_cidrs_v6 = ["::/0"]
 # [db.ssl_enforcement]
 # enabled = true
 
+# Services below are disabled until the phase that needs them.
+#
+# This is not only about disk. Running a service nothing uses means its
+# behaviour is untested and its failures are noise, and it invites someone to
+# start depending on it ahead of the build sequence (CLAUDE.md law 7). Each one
+# is re-enabled by the phase that introduces its first real use.
+#
+# Nothing in Fase 0-3 subscribes to changes.
 [realtime]
-enabled = true
+enabled = false
 # Bind realtime via either IPv4 or IPv6. (default: IPv4)
 # ip_version = "IPv6"
 # The maximum length in bytes of HTTP request headers. (default: 4096)
 # max_header_length = 4096
 
+# Convenient, but a browser UI is not part of any test or exit criterion, and it
+# is one of the larger images. Re-enable locally whenever it is useful.
 [studio]
-enabled = true
+enabled = false
 # Port to use for Supabase Studio.
 port = 54323
 # External URL of the API server that frontend connects to.
@@ -119,8 +129,10 @@ port = 54324
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
+# Photo upload arrives in Fase 4 (field reporting). Turn this on there, together
+# with the storage-usage monitoring owner decision D2 requires.
 [storage]
-enabled = true
+enabled = false
 # The maximum file size allowed (e.g. "5MB", "500KB").
 file_size_limit = "50MiB"
 
@@ -388,8 +400,10 @@ authorization_url_path = "/oauth/consent"
 # Allow dynamic client registration
 allow_dynamic_registration = false
 
+# This system runs its server code in Next.js, not in Supabase Edge Functions.
+# No phase in the build sequence introduces one.
 [edge_runtime]
-enabled = true
+enabled = false
 # Supported request policies: `oneshot`, `per_worker`.
 # `per_worker` (default) — enables hot reload during local development.
 # `oneshot` — fallback mode if hot reload causes issues (e.g. in large repos or with symlinks).
@@ -402,8 +416,10 @@ deno_version = 2
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
+# Log analytics is a hosted-dashboard feature; locally it is a large image doing
+# nothing. Structured logs go to stdout via core/logging.
 [analytics]
-enabled = true
+enabled = false
 port = 54327
 # Configure one of the supported backends: `postgres`, `bigquery`.
 backend = "postgres"

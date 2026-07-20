@@ -1,8 +1,14 @@
 # ADR 0004 — Toolchain pins and two clarifications to the import rules
 
-**Status:** Proposed
+**Status:** Accepted — owner approved §2 on 2026-07-20
 **Date:** 2026-07-20
-**Needs owner confirmation:** **yes** — for §2 only. Everything else is routine.
+**Needs owner confirmation:** no (was: yes, for §2)
+
+> **Owner's approval, 2026-07-20.** Both clarifications in §2 are approved:
+> `lib/` may be imported from anywhere provided `lib` imports only `lib`, and
+> `app/` may import `app/` for Next.js layout, page, and error files. The
+> owner's stated priority: **`domain/` stays sealed** — that is the boundary
+> these clarifications must never be read as loosening.
 
 ## Context
 
@@ -22,11 +28,16 @@ means giving up type-aware linting, which is what enforces our import boundaries
 The boundaries matter more than the compiler speed. Revisit once
 `typescript-eslint` supports TS 7.
 
-**Colima + QEMU as the local container runtime**, not Docker Desktop. Supabase's
-local stack needs a Docker daemon. Colima installs from Homebrew with no GUI, no
-licence, and no manual download step, so the environment is reproducible from a
-command rather than from instructions. This is a developer-machine choice only —
-it has no bearing on what runs in production or CI.
+**Any Docker-compatible daemon for local development.** Supabase's local stack
+needs one; which one is a developer-machine choice with no bearing on production
+or CI, where the Supabase CLI action provides its own.
+
+Colima was proposed first, because it installs from Homebrew with no GUI step.
+On this machine that turned out to be expensive: macOS 12 on Intel cannot use
+the `vz` backend, so Colima needs QEMU, and Homebrew no longer ships a bottle
+for macOS 12 — QEMU builds from source through OpenSSL, Python, and GLib, well
+over an hour. The owner already had Docker Desktop installed, so that is what we
+use. Recorded because the next person on an older Mac will hit the same wall.
 
 **Vitest is split into two projects, `unit` and `db`.** `pnpm test` runs only the
 unit project. This keeps the domain-logic feedback loop fast, and — more

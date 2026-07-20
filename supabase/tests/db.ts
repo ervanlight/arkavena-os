@@ -8,8 +8,22 @@ import { Client, Pool } from 'pg';
  * is the one that holds when the application is bypassed. Testing only the
  * TypeScript would leave the actual last line of defence unverified.
  *
- * Connection details come from `supabase start`, which prints fixed local
- * values. They are development-only credentials for a database on this machine.
+ * Connection string comes from SUPABASE_DB_URL. Two contexts use this file, and
+ * each sets that variable differently (ADR 0006):
+ *
+ *   - CI runs `supabase start` inside the GitHub Actions runner and never sets
+ *     the variable, so it falls back to the fixed local values that command
+ *     prints. That runner's disk is unrelated to any developer's machine.
+ *   - Local development has no local stack at all -- the owner's disk could
+ *     not fit one -- and points SUPABASE_DB_URL at the shared cloud dev
+ *     project's **direct** connection (port 5432, never the port 6543
+ *     transaction pooler: session state such as `set_config` below must
+ *     survive across statements on one physical connection, which the pooler
+ *     does not guarantee).
+ *
+ * Because the dev project is shared, mutable state rather than a fresh
+ * database per run, every suite must clean up what it creates
+ * (`cleanupOrganizations`) -- there is no `supabase db reset` to fall back on.
  */
 const CONNECTION_STRING =
   process.env.SUPABASE_DB_URL ?? 'postgresql://postgres:postgres@127.0.0.1:54322/postgres';

@@ -1,8 +1,14 @@
 # ADR 0005 — How org scope is resolved, and the one table exempt from it
 
-**Status:** Proposed
+**Status:** Accepted — owner approved on 2026-07-20
 **Date:** 2026-07-20
-**Needs owner confirmation:** **yes** — this touches permissions.
+**Needs owner confirmation:** no (was: yes)
+
+> **Owner's approval, 2026-07-20.** Both decisions approved. On question 1 the
+> owner's reasoning was explicit: security outweighs a small performance gain,
+> and the stale-token scenario — a user moved between organisations keeping
+> access for the life of their token — is the deciding argument. On question 2,
+> the `roles` exemption is approved as scoped.
 
 ## Context
 

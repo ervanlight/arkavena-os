@@ -111,19 +111,23 @@ safeAction(schema, permission, async (input, ctx) => {
 
 ## 10. Perintah pnpm (referensi)
 
+> Sejak [ADR 0006](docs/decisions/0006-cloud-dev-database-instead-of-local.md), development lokal menyasar project Supabase Cloud (`buildtrust-os-dev`) langsung — bukan `supabase start`. CI tidak terpengaruh: tetap pakai Supabase lokal ephemeral di GitHub Actions runner.
+
 ```
 pnpm dev            # Next.js dev
-pnpm db:types       # generate database.types.ts dari schema
-pnpm db:migrate     # jalankan migrations (lokal)
-pnpm db:reset       # reset + migrate + seed (dev)
-pnpm gen:rls-check  # verifikasi matrix.ts ↔ RLS policies
-pnpm test           # unit (Vitest)
-pnpm test:db        # integration + RLS test
+pnpm db:link        # sekali saja: supabase link ke project cloud
+pnpm db:push        # terapkan migration ke project yang sudah di-link
+pnpm db:types       # generate database.types.ts dari project yang di-link
+pnpm gen:rls-check  # verifikasi matrix.ts ↔ RLS policies (butuh SUPABASE_DB_URL)
+pnpm test           # unit (Vitest), tanpa database
+pnpm test:db        # integration + RLS test, terhadap SUPABASE_DB_URL
 pnpm test:e2e       # Playwright
 pnpm lint           # ESLint termasuk import boundaries
 pnpm typecheck      # tsc --noEmit
 ```
-CI menjalankan: lint + typecheck + db:types diff + gen:rls-check + test + test:db. Semua harus hijau sebelum merge.
+CI menjalankan: lint + typecheck + db:types diff + gen:rls-check + test + test:db, semua terhadap Supabase lokal ephemeral milik runner — bukan project cloud dev. Semua harus hijau sebelum merge.
+
+**Project dev bersifat shared, mutable state, bukan database segar per run.** Anggap disposable (boleh di-reset/truncate), tapi tidak ada "reset lokal" untuk kembali ke kondisi bersih — `test:db` membersihkan data yang ia buat sendiri lewat `cleanupOrganizations`.
 
 ## 11. Kalau ragu
 
