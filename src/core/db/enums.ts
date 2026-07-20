@@ -72,3 +72,33 @@ export const NOTIFICATION_STATUS = {
   READ: 'read',
   FAILED: 'failed',
 } satisfies Record<string, Enums<'notification_status'>>;
+
+// ---------------------------------------------------------------------------
+// Fase 1 (modules/crm, modules/projects)
+// ---------------------------------------------------------------------------
+
+export const PROJECT_STATUS = {
+  PLANNING: 'planning',
+  IN_PROGRESS: 'in_progress',
+  ON_HOLD: 'on_hold',
+  COMPLETED: 'completed',
+  CANCELLED: 'cancelled',
+} satisfies Record<string, Enums<'project_status'>>;
+
+export const CONTRACT_STATUS = {
+  DRAFT: 'draft',
+  ACTIVE: 'active',
+  COMPLETED: 'completed',
+  TERMINATED: 'terminated',
+} satisfies Record<string, Enums<'contract_status'>>;
+
+export const MILESTONE_STATUS = {
+  PENDING: 'pending',
+  COMPLETED: 'completed',
+} satisfies Record<string, Enums<'milestone_status'>>;
+
+export const WORK_PACKAGE_STATUS = {
+  NOT_STARTED: 'not_started',
+  IN_PROGRESS: 'in_progress',
+  COMPLETED: 'completed',
+} satisfies Record<string, Enums<'work_package_status'>>;
