@@ -283,6 +283,34 @@ export function deserialiseRp(value: string): Rupiah {
   return toRupiah(value);
 }
 
+/**
+ * Read a money column back from Supabase.
+ *
+ * PostgREST serialises Postgres `bigint` as a bare JSON number, which loses
+ * precision above 2^53 -- silently, before this function or `toRupiah` ever
+ * sees the value (verified directly against the real database; see ADR 0008).
+ * This is safe specifically *because* every money column carries a `CHECK
+ * (... <= 999_999_999_999_999)` constraint keeping it under that boundary --
+ * not because JS numbers are trusted for money in general. A money column
+ * without that constraint must not use this function.
+ */
+export function rupiahFromColumn(value: number): Rupiah {
+  return toRupiah(value);
+}
+
+/**
+ * Write a money column back to Supabase.
+ *
+ * The generated Insert/Update types spell every money column as `number`
+ * because that is what PostgREST's request body expects. Safe for the same
+ * reason `rupiahFromColumn` is: the value already satisfies the column's
+ * safe-integer CHECK constraint (ADR 0008) before it gets here, whether that
+ * value came from this application or was just read back from the database.
+ */
+export function rupiahToColumn(value: Rupiah): number {
+  return Number(value);
+}
+
 function requireInteger(value: number, label: string): number {
   if (!Number.isInteger(value)) {
     throw new TypeError(`${label} must be a whole number, got ${value}`);
