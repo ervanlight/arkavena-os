@@ -1,0 +1,93 @@
+name: CI
+
+# Every check CLAUDE.md section 10 requires, in one workflow. All of them must
+# be green before merge -- that is what makes the architecture enforceable
+# rather than aspirational.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '22'
+
+jobs:
+  # Static checks. No database, so they start immediately and give the fastest
+  # signal on the most common mistakes.
+  static:
+    name: Lint, types, unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Lint (includes import boundaries)
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Prove the import boundaries still reject violations
+        # A boundary rule nobody has watched reject anything is not a proven
+        # boundary. This writes deliberate violations and asserts each is
+        # caught, so an accidentally loosened config fails here rather than
+        # letting the architecture erode unnoticed.
+        run: pnpm verify:boundaries
+
+      - name: Unit tests
+        run: pnpm test
+
+  # Database checks. These are the ones that prove the second enforcement layer
+  # -- triggers, constraints, RLS -- actually holds (ARCHITECTURE.md 0.2).
+  database:
+    name: Migrations, RLS, audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start local Supabase
+        # Applies every migration from scratch, so a migration that only works
+        # against an already-populated database fails here.
+        run: supabase start
+
+      - name: Seed reference and demo data
+        run: supabase db reset --local
+
+      - name: Check generated types match the schema
+        run: pnpm db:types:check
+
+      - name: Check the permission matrix matches the RLS policies
+        run: pnpm gen:rls-check
+
+      - name: Database tests (schema guardrails, audit trail, RLS)
+        run: pnpm test:db
+
+      - name: Show Supabase logs on failure
+        if: failure()
+        run: supabase status || true
