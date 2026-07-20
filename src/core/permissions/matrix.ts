@@ -19,8 +19,25 @@
  * building ahead of the sequence (CLAUDE.md law 7).
  */
 
-/** Internal staff roles, held on users.org_role. Mirrors the org_role enum. */
-export const ORG_ROLES = ['owner', 'technical_director', 'finance', 'qs', 'procurement'] as const;
+import type { Enums } from '@/core/db/database.types';
+
+/**
+ * Internal staff roles, held on users.org_role. `satisfies readonly
+ * Enums<'org_role'>[]` is what ARCHITECTURE.md 3.2 means by deriving from the
+ * generated type rather than duplicating it: a role renamed in the enum
+ * migration makes this a compile error rather than a role that silently stops
+ * matching anything in the database. `satisfies` catches a wrong or
+ * misspelled value here; it cannot catch a value missing from this list
+ * entirely -- that direction is asserted at the database level, by the seed
+ * test that checks these keys against the enum in both directions.
+ */
+export const ORG_ROLES = [
+  'owner',
+  'technical_director',
+  'finance',
+  'qs',
+  'procurement',
+] as const satisfies readonly Enums<'org_role'>[];
 export type OrgRole = (typeof ORG_ROLES)[number];
 
 /** Per-project roles, held in project_members from Wave 4. Mirrors project_role. */
@@ -31,7 +48,7 @@ export const PROJECT_ROLES = [
   'client_viewer',
   'supplier',
   'subcontractor',
-] as const;
+] as const satisfies readonly Enums<'project_role'>[];
 export type ProjectRole = (typeof PROJECT_ROLES)[number];
 
 export type Role = OrgRole | ProjectRole;
