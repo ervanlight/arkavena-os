@@ -919,6 +919,27 @@ export type Database = {
         Args: { p_table: string }
         Returns: undefined
       }
+      fn_override_and_open_work_package: {
+        Args: { p_reason: string; p_work_package_id: string }
+        Returns: {
+          created_at: string
+          deleted_at: string | null
+          id: string
+          milestone_id: string | null
+          name: string
+          organization_id: string
+          project_id: string
+          status: Database["public"]["Enums"]["work_package_status"]
+          updated_at: string
+          zone_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "work_packages"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       fn_record_audit: {
         Args: {
           p_action: Database["public"]["Enums"]["audit_action"]
