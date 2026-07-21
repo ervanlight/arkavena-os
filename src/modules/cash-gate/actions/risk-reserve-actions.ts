@@ -1,14 +1,28 @@
 'use server';
 
-import { toRupiah } from '@/core/money/rupiah';
+import { z } from 'zod';
+import { toRupiah, type Rupiah } from '@/core/money/rupiah';
 import { recordAudit } from '@/core/audit/audit';
 import { createAuditGateway } from '@/core/audit/gateway.server';
 import { getActionContext } from '@/core/auth/session';
 import { safeAction } from '@/core/actions/safe-action';
 import { createServerSupabase } from '@/core/db/client.server';
-import { getProjectRiskReserveRow, upsertProjectRiskReserve } from '../data/project-risk-reserves-repository';
+import { getProjectRiskReserve, getProjectRiskReserveRow, upsertProjectRiskReserve } from '../data/project-risk-reserves-repository';
 import { setRiskReserveSchema } from '../schemas';
 import type { ProjectRiskReserve } from '../types';
+
+export const getRiskReserveAction = safeAction(
+  {
+    schema: z.string().uuid(),
+    permission: { resource: 'project_risk_reserve', action: 'view' },
+    loadContext: getActionContext,
+    name: 'cashGate.getRiskReserve',
+  },
+  async (projectId): Promise<Rupiah> => {
+    const supabase = await createServerSupabase();
+    return getProjectRiskReserve(supabase, projectId);
+  },
+);
 
 /** Owner/Finance configuring the Cash Gate's risk buffer for a project (ADR 0009 decision 4, ADR 0011). */
 export const setRiskReserveAction = safeAction(

@@ -44,4 +44,4 @@ export {
   markFundingReceiptClearedAction,
 } from './actions/funding-receipt-actions';
 export { getGateStateAction, listOverridesForProjectAction, overrideOpenWorkPackageAction } from './actions/gate-actions';
-export { setRiskReserveAction } from './actions/risk-reserve-actions';
+export { getRiskReserveAction, setRiskReserveAction } from './actions/risk-reserve-actions';

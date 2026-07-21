@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
 import { getProjectAction, listZonesForProjectAction, ZoneMap } from '@/modules/projects';
 import { AddZoneForm } from './add-zone-form';
 
@@ -32,7 +33,15 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   return (
     <div className="space-y-8">
       <div className="rounded-lg bg-white p-6 shadow-sm">
-        <h1 className="text-lg font-semibold text-slate-900">{project.name}</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-lg font-semibold text-slate-900">{project.name}</h1>
+          <Link
+            href={`/cc/projects/${project.id}/cash-gate`}
+            className="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800"
+          >
+            Cash Gate
+          </Link>
+        </div>
         <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
           <dt className="text-slate-500">Status</dt>
           <dd className="text-slate-900">{STATUS_LABEL_ID[project.status] ?? project.status}</dd>
