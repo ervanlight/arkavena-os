@@ -70,16 +70,59 @@ describe('the permissions that matter most', () => {
     }
   });
 
-  it('denies everything to a user with no organisation role', () => {
-    // External users hold project roles instead; those are checked separately
-    // from Wave 4. Here they must get nothing by default.
+  it('denies a user with no organisation role on a staff-only resource', () => {
+    // organization/audit_log list no project role at all, so a project-role-
+    // only user (orgRole null) has nothing here to defer to RLS about.
     expect(roleCan(null, 'organization', 'view')).toBe(false);
     expect(roleCan(undefined, 'audit_log', 'view')).toBe(false);
+    expect(roleCan(null, 'contract', 'view')).toBe(false);
+    expect(roleCan(null, 'milestone', 'view')).toBe(false);
+    expect(roleCan(null, 'funding_receipt', 'view')).toBe(false);
   });
 
   it('denies an unknown action rather than defaulting to allow', () => {
     // @ts-expect-error -- 'demolish' is not an action on organization.
     expect(roleCan('owner', 'organization', 'demolish')).toBe(false);
+  });
+});
+
+describe('roleCan(null, ...) on project-scoped resources -- ADR 0013', () => {
+  // ActionContext.orgRole is always null for a project-role-only user
+  // (mandor, site_coordinator, client_approver, client_viewer, supplier,
+  // subcontractor -- core/auth/session.ts, users.org_role). Before ADR 0013,
+  // roleCan(null, ...) denied unconditionally, which meant every project-
+  // scoped Fase 1 server action (listWorkPackagesForProjectAction and
+  // friends) silently failed for these six roles regardless of what this
+  // matrix listed for them, even though RLS (fn_has_project_role) already
+  // scoped their access correctly at the database layer.
+
+  it('defers to RLS for every resource/action this matrix lists a project role for', () => {
+    for (const [resource, actions] of Object.entries(PERMISSIONS)) {
+      for (const [action, roles] of Object.entries(actions)) {
+        const list = roles as readonly string[];
+        const listsAProjectRole = list.some((role) => (PROJECT_ROLES as readonly string[]).includes(role));
+
+        expect(
+          roleCan(null, resource as never, action as never),
+          `${resource}.${action}: roleCan(null, ...) should be ${listsAProjectRole} given allowed=[${list.join(', ')}]`,
+        ).toBe(listsAProjectRole);
+      }
+    }
+  });
+
+  it('still denies a resource/action that names zero project roles, e.g. contract.create', () => {
+    // create/update on money resources stay org-only; the defer branch only
+    // ever fires when the matrix itself lists a project role.
+    expect(roleCan(null, 'contract', 'create')).toBe(false);
+    expect(roleCan(null, 'work_package', 'create')).toBe(false);
+    expect(roleCan(null, 'project_member', 'add')).toBe(false);
+  });
+
+  it('lets a project role through on the Fase 1 reads it is actually meant to have', () => {
+    expect(roleCan(null, 'project', 'view')).toBe(true);
+    expect(roleCan(null, 'project_member', 'view')).toBe(true);
+    expect(roleCan(null, 'zone', 'view')).toBe(true);
+    expect(roleCan(null, 'work_package', 'view')).toBe(true);
   });
 });
 

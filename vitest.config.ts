@@ -1,4 +1,19 @@
+import { URL, fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
+
+/**
+ * `server-only` (imported at the top of every repository/action/session file,
+ * per ARCHITECTURE.md's server/client boundary) resolves to a module that
+ * unconditionally throws unless the `react-server` export condition is set --
+ * Next's own webpack build sets it, Vitest's plain Node resolution does not.
+ * Aliasing straight to the package's own `empty.js` (the same file that
+ * condition would have picked) is the minimal fix: it does not touch how any
+ * other package resolves, unlike flipping resolve.conditions globally, which
+ * would also repoint React itself at its very different react-server build.
+ */
+const serverOnlyStub = fileURLToPath(
+  new URL('./node_modules/server-only/empty.js', import.meta.url),
+);
 
 /**
  * Two projects, deliberately separated:
@@ -17,7 +32,7 @@ export default defineConfig({
   test: {
     projects: [
       {
-        resolve: { tsconfigPaths: true },
+        resolve: { tsconfigPaths: true, alias: { 'server-only': serverOnlyStub } },
         test: {
           name: 'unit',
           environment: 'node',

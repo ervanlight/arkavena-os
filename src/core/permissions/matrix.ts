@@ -27,6 +27,21 @@
  * `view` entry existing at all is what lets the UI show a "Projects" nav item
  * to a project role without every entry point special-casing it -- cosmetic,
  * same as every other UI use of this matrix.
+ *
+ * That paragraph describes the intent; roleCan() below is what actually
+ * carries it out. ActionContext.orgRole (core/auth/session.ts) is sourced
+ * from users.org_role and is NULL for every external/project-role-only user
+ * (mandor, site_coordinator, client_approver, client_viewer, supplier,
+ * subcontractor) -- they hold no org role at all, only rows in
+ * project_members. When roleCan() sees a null role, it does not have a
+ * project id to decide the instance-level question with, so it defers to
+ * whatever this matrix says about project roles in general: if ANY project
+ * role is listed for the resource/action, that is this matrix's own
+ * statement that project roles are "in the right ballpark" for it, and
+ * roleCan() returns true and leaves the real per-project answer to RLS
+ * (fn_has_project_role(), enforcer 1). If NO project role is listed --
+ * contract, milestone, audit_log, and the other staff-only resources -- a
+ * null role is still denied outright, same as before. See ADR 0013.
  */
 
 import type { Enums } from '@/core/db/database.types';
@@ -213,6 +228,33 @@ export const PERMISSIONS = {
     view: [...ORG_ROLES],
     update: [...ORG_ROLES],
   },
+
+  // -------------------------------------------------------------------------
+  // Fase 3 (modules/scope-variation)
+  // -------------------------------------------------------------------------
+
+  /**
+   * `client_approve`/`client_reject` are reachable by a `client_approver`,
+   * who holds no org_role -- roleCan()'s null-role deferral (ADR 0013) is
+   * what makes requirePermission() actually pass for them here, rather than
+   * this module needing its own bypass. RLS
+   * (change_orders_select_client_approver /
+   * change_orders_update_client_approver) and transition()'s own role guard
+   * are still what decide the real per-project, per-event question.
+   */
+  change_order: {
+    view: [...ORG_ROLES, 'client_approver'],
+    create: [...ORG_ROLES],
+    /** setChangeOrderImpactAction -- filling in the cost/schedule estimate. */
+    update: [...ORG_ROLES],
+    submit_review: [...ORG_ROLES],
+    /** send_to_client and the staff-side reject -- ARCHITECTURE.md 6.2's own example name. */
+    review: ['owner', 'technical_director', 'qs'],
+    mark_funded: ['owner', 'finance'],
+    complete: ['owner', 'technical_director', 'qs', 'procurement'],
+    client_approve: ['client_approver'],
+    client_reject: ['client_approver'],
+  },
 } as const satisfies PermissionMatrix;
 
 // ---------------------------------------------------------------------------
@@ -230,20 +272,33 @@ export type ActionFor<TResource extends Resource> = keyof (typeof PERMISSIONS)[T
  * Pure and synchronous, so both the server guard and the UI hook ask the same
  * function rather than each re-deriving the answer.
  *
- * A role of `null` -- an external user with no organisation role -- is denied
- * everything here. That is correct: their access comes from project membership,
- * which arrives in Wave 4 and is checked separately.
+ * A role of `null` -- a project-role-only user, who holds no org role --
+ * cannot be checked against `allowed` directly, because `allowed` names
+ * *specific* roles and this function has no project id to know which one, if
+ * any, this caller holds on the project actually being touched. Two cases:
+ *
+ *   - No project role appears in `allowed` at all (contract, milestone,
+ *     audit_log, ...): nothing here is ever reachable by a project role, so
+ *     null is denied outright, same as before this deferred branch existed.
+ *   - At least one project role appears in `allowed` (project, work_package,
+ *     change_order, ...): this matrix has already said project roles belong
+ *     in the right ballpark for this resource/action, so roleCan() returns
+ *     true and steps back. The actual per-project answer -- does *this* user
+ *     hold *that* role on *that* project -- is fn_has_project_role()'s alone,
+ *     enforced by RLS underneath. See the file-level comment and ADR 0013.
  */
 export function roleCan<TResource extends Resource>(
   role: Role | null | undefined,
   resource: TResource,
   action: ActionFor<TResource>,
 ): boolean {
-  if (role === null || role === undefined) return false;
-
   const actions = PERMISSIONS[resource] as Record<string, readonly Role[]>;
   const allowed = actions[action as string];
   if (allowed === undefined) return false;
+
+  if (role === null || role === undefined) {
+    return allowed.some((candidate) => isProjectRole(candidate));
+  }
 
   return allowed.includes(role);
 }
