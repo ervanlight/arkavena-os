@@ -146,17 +146,25 @@ it reads.
 
 ## Fase 2 — cash-gate (Wave 7)
 
-All three tables are money or a fact about a money decision (ADR 0009, ADR
-0010), so the pattern matches `contracts`/`milestones`: staff only, no
-project-role row at all. `projects.risk_reserve_amount` (a new column, not a
-new table) follows the existing `projects` policies below it — no separate
-row here.
+All four tables are money or a fact about a money decision (ADR 0009, ADR
+0010, ADR 0011), so the pattern matches `contracts`/`milestones`: staff only,
+no project-role row at all.
+
+`project_risk_reserves` did not start this way. ADR 0009 decision 4
+originally put `risk_reserve_amount` directly on `projects`, reusing that
+table's existing policies below it — which turned out to be the bug ADR
+0011 fixes: `projects` also carries `projects_select_member` (Fase 1),
+granting every project role, including the external client-facing ones,
+full-row SELECT. RLS cannot express "this column, but not that one" on a
+single table, so the fix is the same one already used twice in this phase: a
+dedicated table with no project-role policy at all.
 
 | Table | Owner | Technical Director | Finance | QS | Procurement | External (project member) |
 | --- | --- | --- | --- | --- | --- | --- |
 | `funding_receipts` | SELECT, INSERT, UPDATE (org) | SELECT, INSERT, UPDATE (org) | SELECT, INSERT, UPDATE (org) | SELECT, INSERT, UPDATE (org) | SELECT, INSERT, UPDATE (org) | — |
 | `cash_forecasts` | SELECT, INSERT, UPDATE (org) | SELECT, INSERT, UPDATE (org) | SELECT, INSERT, UPDATE (org) | SELECT, INSERT, UPDATE (org) | SELECT, INSERT, UPDATE (org) | — |
 | `cash_gate_overrides` | SELECT, INSERT (org) | SELECT, INSERT (org) | SELECT, INSERT (org) | SELECT, INSERT (org) | SELECT, INSERT (org) | — |
+| `project_risk_reserves` | SELECT, INSERT, UPDATE (org) | SELECT, INSERT, UPDATE (org) | SELECT, INSERT, UPDATE (org) | SELECT, INSERT, UPDATE (org) | SELECT, INSERT, UPDATE (org) | — |
 
 ### What is deliberately absent
 
@@ -167,9 +175,12 @@ insertable directly by staff (not only through a `SECURITY DEFINER`
 function): the row-level policy is deliberately the coarse half of a
 two-layer check, not the whole one (see below).
 
-**`funding_receipts` and `cash_forecasts` have no project-role SELECT at
-all**, same reasoning as `contracts`/`milestones` in Fase 1: both carry a
-money figure kept away from client-facing reads.
+**`funding_receipts`, `cash_forecasts`, and `project_risk_reserves` have no
+project-role SELECT at all**, same reasoning as `contracts`/`milestones` in
+Fase 1: all three carry a money figure kept away from client-facing reads.
+`projects` itself is not in this list — its risk reserve moved out (ADR
+0011) precisely because `projects` cannot make that same promise once
+`projects_select_member` exists.
 
 ### Column-level and cross-row rules RLS cannot express
 

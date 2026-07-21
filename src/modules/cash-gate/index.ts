@@ -1,10 +1,11 @@
 /**
  * Public API of modules/cash-gate. The only door other modules and app/ may
- * use to reach funding_receipts, cash_forecasts, or cash_gate_overrides
- * (ARCHITECTURE.md 1.2) -- this module owns all three tables (ARCHITECTURE.md
- * 1.1). The Cash Gate's own risk buffer (`projects.risk_reserve_amount`) is
- * not among them: that column belongs to modules/projects, which is why
- * `setRiskReserveAction` lives in that module's public API, not this one.
+ * use to reach funding_receipts, cash_forecasts, cash_gate_overrides, or
+ * project_risk_reserves (ARCHITECTURE.md 1.2) -- this module owns all four
+ * tables (ARCHITECTURE.md 1.1). risk_reserve_amount moved here from
+ * modules/projects by ADR 0011, closing a leak where a table `projects`
+ * already let every project role read (including client-facing ones) was
+ * carrying a money figure it should never have exposed to them.
  */
 
 export type {
@@ -20,6 +21,7 @@ export type {
   NewCashForecast,
   NewCashGateOverride,
   NewFundingReceipt,
+  ProjectRiskReserve,
 } from './types';
 
 export {
@@ -27,10 +29,12 @@ export {
   createFundingReceiptSchema,
   markFundingReceiptClearedSchema,
   overrideOpenWorkPackageSchema,
+  setRiskReserveSchema,
   type CreateCashForecastInput,
   type CreateFundingReceiptInput,
   type MarkFundingReceiptClearedInput,
   type OverrideOpenWorkPackageInput,
+  type SetRiskReserveInput,
 } from './schemas';
 
 export { createCashForecastAction, listCashForecastsForProjectAction } from './actions/cash-forecast-actions';
@@ -40,3 +44,4 @@ export {
   markFundingReceiptClearedAction,
 } from './actions/funding-receipt-actions';
 export { getGateStateAction, listOverridesForProjectAction, overrideOpenWorkPackageAction } from './actions/gate-actions';
+export { setRiskReserveAction } from './actions/risk-reserve-actions';

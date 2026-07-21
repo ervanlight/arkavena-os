@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       audit_logs: {
@@ -583,6 +608,51 @@ export type Database = {
           },
         ]
       }
+      project_risk_reserves: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          id: string
+          organization_id: string
+          project_id: string
+          risk_reserve_amount: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          organization_id: string
+          project_id: string
+          risk_reserve_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          organization_id?: string
+          project_id?: string
+          risk_reserve_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_risk_reserves_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_risk_reserves_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           actual_end_date: string | null
@@ -592,7 +662,6 @@ export type Database = {
           id: string
           name: string
           organization_id: string
-          risk_reserve_amount: number
           site_id: string
           start_date: string | null
           status: Database["public"]["Enums"]["project_status"]
@@ -607,7 +676,6 @@ export type Database = {
           id?: string
           name: string
           organization_id: string
-          risk_reserve_amount?: number
           site_id: string
           start_date?: string | null
           status?: Database["public"]["Enums"]["project_status"]
@@ -622,7 +690,6 @@ export type Database = {
           id?: string
           name?: string
           organization_id?: string
-          risk_reserve_amount?: number
           site_id?: string
           start_date?: string | null
           status?: Database["public"]["Enums"]["project_status"]
@@ -1124,6 +1191,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       audit_action: [

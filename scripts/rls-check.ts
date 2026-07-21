@@ -50,6 +50,7 @@ const RESOURCE_TABLES: Record<Resource, string> = {
   funding_receipt: 'funding_receipts',
   cash_forecast: 'cash_forecasts',
   cash_gate_override: 'cash_gate_overrides',
+  project_risk_reserve: 'project_risk_reserves',
 };
 
 /** Matrix actions that map onto a SQL command the policy list should cover. */

@@ -33,10 +33,16 @@ export const createCashForecastSchema = z.object({
 });
 export type CreateCashForecastInput = z.infer<typeof createCashForecastSchema>;
 
-// setRiskReserveSchema deliberately lives in modules/projects, not here:
-// risk_reserve_amount is a column on `projects`, which modules/projects owns
-// exclusively (ARCHITECTURE.md 1.2) -- even though the concept belongs to
-// Cash Gate.
+/**
+ * Owner/Finance sets this manually per project; there is no computed default
+ * beyond the table's own `0`. Lives here, not modules/projects, since ADR
+ * 0011 moved risk_reserve_amount to its own table owned by modules/cash-gate.
+ */
+export const setRiskReserveSchema = z.object({
+  projectId: z.string().uuid(),
+  riskReserveAmount: moneyString,
+});
+export type SetRiskReserveInput = z.infer<typeof setRiskReserveSchema>;
 
 export const overrideOpenWorkPackageSchema = z.object({
   workPackageId: z.string().uuid(),

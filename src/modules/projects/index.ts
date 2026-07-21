@@ -34,7 +34,6 @@ export {
   createWorkPackageSchema,
   createZoneSchema,
   removeProjectMemberSchema,
-  setRiskReserveSchema,
   updateContractSchema,
   updateMilestoneSchema,
   updateProjectSchema,
@@ -47,7 +46,6 @@ export {
   type CreateWorkPackageInput,
   type CreateZoneInput,
   type RemoveProjectMemberInput,
-  type SetRiskReserveInput,
   type UpdateContractInput,
   type UpdateMilestoneInput,
   type UpdateProjectInput,
@@ -55,14 +53,7 @@ export {
   type UpdateZoneInput,
 } from './schemas';
 
-export {
-  createProjectAction,
-  getProjectAction,
-  listProjectsAction,
-  setRiskReserveAction,
-  updateProjectAction,
-} from './actions/project-actions';
-export { getProjectRiskReserve } from './data/projects-repository';
+export { createProjectAction, getProjectAction, listProjectsAction, updateProjectAction } from './actions/project-actions';
 export { getWorkPackage } from './data/work-packages-repository';
 export {
   addProjectMemberAction,

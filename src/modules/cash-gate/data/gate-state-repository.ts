@@ -2,7 +2,7 @@ import 'server-only';
 import { rupiahFromColumn, sumRp, toRupiah } from '@/core/money/rupiah';
 import type { ServerSupabase } from '@/core/db/client.server';
 import { InfraError } from '@/core/errors/app-error';
-import { getProjectRiskReserve } from '@/modules/projects';
+import { getProjectRiskReserve } from './project-risk-reserves-repository';
 import { computeFundingCoverage, determineGateStatus, OVERDUE_GRACE_DAYS } from '../domain/funding-coverage';
 import type { GateState } from '../domain/types';
 
@@ -45,9 +45,8 @@ export async function loadGateState(supabase: ServerSupabase, projectId: string)
       .is('deleted_at', null)
       .gte('needed_by_date', isoDate(0))
       .lte('needed_by_date', isoDate(14)),
-    // risk_reserve_amount lives on `projects`, a table modules/projects owns
-    // exclusively (ARCHITECTURE.md 1.2) -- read through its public API, never
-    // `supabase.from('projects')` directly from this module.
+    // project_risk_reserves is owned by this module outright (ADR 0011) --
+    // no cross-module call needed anymore.
     getProjectRiskReserve(supabase, projectId),
     supabase
       .from('funding_receipts')

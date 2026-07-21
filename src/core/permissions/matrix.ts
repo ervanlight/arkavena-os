@@ -207,6 +207,12 @@ export const PERMISSIONS = {
      */
     create: ['owner'],
   },
+
+  /** Moved off `projects` by ADR 0011 -- see that ADR for why it could not stay a `projects` column. */
+  project_risk_reserve: {
+    view: [...ORG_ROLES],
+    update: [...ORG_ROLES],
+  },
 } as const satisfies PermissionMatrix;
 
 // ---------------------------------------------------------------------------

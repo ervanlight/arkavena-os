@@ -19,4 +19,9 @@ export type NewCashForecast = Omit<TablesInsert<'cash_forecasts'>, 'needed_amoun
 export type CashGateOverrideRow = Tables<'cash_gate_overrides'>;
 export type NewCashGateOverride = TablesInsert<'cash_gate_overrides'>;
 
+/** Moved off `projects` by ADR 0011 -- one row per project, staff-only RLS. */
+export type ProjectRiskReserve = Omit<Tables<'project_risk_reserves'>, 'risk_reserve_amount'> & {
+  risk_reserve_amount: Rupiah;
+};
+
 export type WorkPackage = Tables<'work_packages'>;
