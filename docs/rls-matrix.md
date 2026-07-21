@@ -204,6 +204,64 @@ application layer, `core/permissions/matrix.ts`'s `cash_gate_override.create
 first, the same trigger as the real authority underneath either way
 (CLAUDE.md law 0.3's two independent layers).
 
+## Fase 3 — scope-variation (Wave 7)
+
+`change_orders` is the one table so far that a project role reads *and*
+writes despite carrying money (`cost_impact_amount`) — every earlier
+money-bearing table (`contracts`, `milestones`, `funding_receipts`,
+`cash_forecasts`, `project_risk_reserves`) picked "staff only, no project
+role at all" instead. This is deliberate, not a relaxation of that rule:
+`client_approver` is specifically the role a variation is *for* — the whole
+point of ARCHITECTURE.md 4.3's client-approval step is that a client sees
+the cost/schedule impact and decides. RLS is row-level, so it cannot hide
+`cost_impact_amount` from a `client_approver` while showing them everything
+else on the row (the ADR 0011 lesson) — the column-level protection here is
+instead about what a `client_approver` may *write*, not read.
+
+| Table | Owner | Technical Director | Finance | QS | Procurement | External (client_approver) | External (other project roles) |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `change_orders` | CRUD\* (org) | CRUD\* (org) | CRUD\* (org) | CRUD\* (org) | CRUD\* (org) | SELECT + UPDATE† (own project, non-draft) | — |
+
+\* "CRUD" here means SELECT/INSERT/UPDATE — no DELETE policy exists for
+anyone, same as every other table in this document; soft delete
+(`deleted_at`) is the removal path.
+
+† A `client_approver`'s UPDATE is real (needed so they can record their own
+decision) but is narrowed to the `status` + `client_approved_*`/`rejected_*`
+columns by `trg_change_orders_guard_client_columns`, not by this policy —
+RLS cannot express "this column but not that one" on one row, so a trigger
+does the part RLS structurally cannot.
+
+### What is deliberately absent
+
+**`client_approver` cannot see a `draft` or `under_review` change order at
+all.** `change_orders_select_client_approver`'s policy excludes both
+statuses explicitly — internal estimation and review is not something a
+client is shown mid-process, only once officially sent to them
+(`awaiting_client_approval` onward).
+
+**No project role other than `client_approver` can read `change_orders` at
+all** — `mandor`, `site_coordinator`, `client_viewer`, `supplier`, and
+`subcontractor` get nothing, the same reasoning as `contracts`/`milestones`:
+this is money, and only the one role a variation is actually *for* gets to
+see it.
+
+### Column-level and cross-row rules RLS cannot express
+
+| Rule | Enforced by |
+| --- | --- |
+| A `change_orders.status` transition must be a legal edge in the Variation state machine (ARCHITECTURE.md 4.3) — applies to staff and `client_approver` alike | `trg_change_orders_guard_transition` |
+| A `client_approver`'s UPDATE may only touch `status` and their own decision columns, never `cost_impact_amount`, `title`, or any other field | `trg_change_orders_guard_client_columns` |
+| A `work_package` cannot get a non-null `change_order_id` unless that change order is `approved_funded` (ARCHITECTURE.md 4.3's literal rule) | `trg_work_packages_guard_change_order_funded` |
+
+`requirePermission()` for `change_order.client_approve`/`client_reject` now
+passes for a `client_approver` (`roleCan()`'s null-role deferral to RLS, ADR
+0013) — before that fix, every project-role-only user was denied by the
+application layer regardless of what this matrix listed, a gap found while
+building this exact feature. The two triggers above are what actually
+enforce the fine-grained rules either way, matching CLAUDE.md law 0.3's two
+independent layers.
+
 ## Later waves
 
 Added as their tables land. A table may not reach main without a row here, its

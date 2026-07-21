@@ -51,6 +51,7 @@ const RESOURCE_TABLES: Record<Resource, string> = {
   cash_forecast: 'cash_forecasts',
   cash_gate_override: 'cash_gate_overrides',
   project_risk_reserve: 'project_risk_reserves',
+  change_order: 'change_orders',
 };
 
 /** Matrix actions that map onto a SQL command the policy list should cover. */
@@ -61,6 +62,17 @@ const ACTION_COMMANDS: Record<string, 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE'>
   create: 'INSERT',
   add: 'INSERT',
   remove: 'DELETE',
+  // change_orders' lifecycle events are all, mechanically, an UPDATE of
+  // status (+ tracking columns) -- change_orders_update_staff and
+  // change_orders_update_client_approver are the policies backing every one
+  // of these, with trg_change_orders_guard_transition as the precise check
+  // (ADR 0012).
+  submit_review: 'UPDATE',
+  review: 'UPDATE',
+  mark_funded: 'UPDATE',
+  complete: 'UPDATE',
+  client_approve: 'UPDATE',
+  client_reject: 'UPDATE',
   // change_role and invite are deliberately absent. Neither has, or should
   // ever have, a matching RLS policy: change_role is enforced by
   // fn_users_guard_privileged_columns (a trigger, not a policy), and invite
