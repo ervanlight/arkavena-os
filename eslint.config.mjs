@@ -181,6 +181,16 @@ export default tseslint.config(
               from: el('module-domain'),
               allow: { to: { module: { source: 'zod' } } },
             },
+            // vitest is the other: a domain *test* file (funding-coverage.test.ts
+            // next to funding-coverage.ts) legitimately imports a test framework
+            // to exercise pure logic -- categorically different from the source
+            // file importing infrastructure, which this whole block still blocks.
+            // Nothing but a .test.ts file ever imports vitest, so this can't
+            // widen what a domain *source* file is allowed to reach.
+            {
+              from: el('module-domain'),
+              allow: { to: { module: { source: 'vitest' } } },
+            },
           ],
         },
       ],

@@ -40,7 +40,8 @@ export default defineConfig({
     ],
     coverage: {
       provider: 'v8',
-      include: ['src/core/**', 'src/modules/*/domain/**'],
+      include: ['src/core/**/*.ts', 'src/modules/*/domain/**/*.ts'],
+      exclude: ['**/*.test.ts', '**/*.test.tsx'],
       reporter: ['text', 'lcov'],
     },
   },
