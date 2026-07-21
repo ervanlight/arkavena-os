@@ -102,3 +102,24 @@ export const WORK_PACKAGE_STATUS = {
   IN_PROGRESS: 'in_progress',
   COMPLETED: 'completed',
 } satisfies Record<string, Enums<'work_package_status'>>;
+
+// ---------------------------------------------------------------------------
+// Fase 2 (modules/cash-gate)
+// ---------------------------------------------------------------------------
+
+/** Mirrors fn_cash_gate_status's return type exactly -- see ADR 0009. */
+export const CASH_GATE_STATUS = {
+  GREEN: 'green',
+  YELLOW: 'yellow',
+  RED: 'red',
+  OVERDUE: 'overdue',
+} satisfies Record<string, Enums<'cash_gate_status'>>;
+
+/** Mirrors evaluateGateAction's action union (ARCHITECTURE.md 4.2). */
+export const CASH_GATE_ACTION = {
+  ISSUE_PO: 'issue_po',
+  OPEN_WORK_PACKAGE: 'open_work_package',
+  MOBILIZE_SUB: 'mobilize_sub',
+  START_VARIATION: 'start_variation',
+  ORDER_MATERIAL: 'order_material',
+} satisfies Record<string, Enums<'cash_gate_action'>>;

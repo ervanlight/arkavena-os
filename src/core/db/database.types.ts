@@ -77,6 +77,116 @@ export type Database = {
           },
         ]
       }
+      cash_forecasts: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          id: string
+          needed_amount: number
+          needed_by_date: string
+          organization_id: string
+          project_id: string
+          updated_at: string
+          work_package_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          needed_amount: number
+          needed_by_date: string
+          organization_id: string
+          project_id: string
+          updated_at?: string
+          work_package_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          needed_amount?: number
+          needed_by_date?: string
+          organization_id?: string
+          project_id?: string
+          updated_at?: string
+          work_package_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cash_forecasts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_forecasts_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_forecasts_work_package_id_fkey"
+            columns: ["work_package_id"]
+            isOneToOne: false
+            referencedRelation: "work_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cash_gate_overrides: {
+        Row: {
+          action: Database["public"]["Enums"]["cash_gate_action"]
+          created_at: string
+          id: string
+          organization_id: string
+          overridden_by: string
+          project_id: string
+          reason: string
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["cash_gate_action"]
+          created_at?: string
+          id?: string
+          organization_id: string
+          overridden_by: string
+          project_id: string
+          reason: string
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["cash_gate_action"]
+          created_at?: string
+          id?: string
+          organization_id?: string
+          overridden_by?: string
+          project_id?: string
+          reason?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cash_gate_overrides_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_gate_overrides_overridden_by_fkey"
+            columns: ["overridden_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_gate_overrides_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_users: {
         Row: {
           client_id: string
@@ -213,6 +323,70 @@ export type Database = {
           },
           {
             foreignKeyName: "contracts_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      funding_receipts: {
+        Row: {
+          amount: number
+          cleared_at: string | null
+          created_at: string
+          deleted_at: string | null
+          expected_date: string
+          id: string
+          milestone_id: string | null
+          organization_id: string
+          project_id: string
+          proof_path: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          cleared_at?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          expected_date: string
+          id?: string
+          milestone_id?: string | null
+          organization_id: string
+          project_id: string
+          proof_path?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          cleared_at?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          expected_date?: string
+          id?: string
+          milestone_id?: string | null
+          organization_id?: string
+          project_id?: string
+          proof_path?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funding_receipts_milestone_id_fkey"
+            columns: ["milestone_id"]
+            isOneToOne: false
+            referencedRelation: "milestones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funding_receipts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funding_receipts_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
@@ -418,6 +592,7 @@ export type Database = {
           id: string
           name: string
           organization_id: string
+          risk_reserve_amount: number
           site_id: string
           start_date: string | null
           status: Database["public"]["Enums"]["project_status"]
@@ -432,6 +607,7 @@ export type Database = {
           id?: string
           name: string
           organization_id: string
+          risk_reserve_amount?: number
           site_id: string
           start_date?: string | null
           status?: Database["public"]["Enums"]["project_status"]
@@ -446,6 +622,7 @@ export type Database = {
           id?: string
           name?: string
           organization_id?: string
+          risk_reserve_amount?: number
           site_id?: string
           start_date?: string | null
           status?: Database["public"]["Enums"]["project_status"]
@@ -725,6 +902,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      fn_cash_gate_status: {
+        Args: { p_project_id: string }
+        Returns: Database["public"]["Enums"]["cash_gate_status"]
+      }
       fn_current_org_id: { Args: never; Returns: string }
       fn_current_org_role: {
         Args: never
@@ -763,6 +944,13 @@ export type Database = {
         | "override"
         | "login"
       audit_source: "app" | "trigger" | "system"
+      cash_gate_action:
+        | "issue_po"
+        | "open_work_package"
+        | "mobilize_sub"
+        | "start_variation"
+        | "order_material"
+      cash_gate_status: "green" | "yellow" | "red" | "overdue"
       contract_status: "draft" | "active" | "completed" | "terminated"
       milestone_status: "pending" | "completed"
       notification_channel: "in_app" | "email"
@@ -928,6 +1116,14 @@ export const Constants = {
         "login",
       ],
       audit_source: ["app", "trigger", "system"],
+      cash_gate_action: [
+        "issue_po",
+        "open_work_package",
+        "mobilize_sub",
+        "start_variation",
+        "order_material",
+      ],
+      cash_gate_status: ["green", "yellow", "red", "overdue"],
       contract_status: ["draft", "active", "completed", "terminated"],
       milestone_status: ["pending", "completed"],
       notification_channel: ["in_app", "email"],
