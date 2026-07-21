@@ -35,6 +35,15 @@ const anyOf = (...types) => types.map((type) => ({ element: { type } }));
 /** Another module, reachable only through its public index.ts. */
 const PUBLIC_API = { element: { type: 'module', fileInternalPath: 'index.ts' } };
 
+/**
+ * A module's server-to-server API (server.ts), for narrow reads another
+ * module's own server-side code needs (ARCHITECTURE.md 1.2's own example,
+ * e.g. `projects.getMilestoneFunding(projectId)`) but that must never reach
+ * a 'use client' file: unlike index.ts, nothing in app/ may import this --
+ * see the 'app' policy below, which allows PUBLIC_API but not this.
+ */
+const SERVER_API = { element: { type: 'module', fileInternalPath: 'server.ts' } };
+
 /** Any file inside the importing file's own module. */
 const OWN_MODULE = {
   element: { type: 'module', captured: { module: '{{ from.element.captured.module }}' } },
@@ -151,13 +160,14 @@ export default tseslint.config(
             },
 
             // A module may use core, lib, anything inside itself, and other
-            // modules only through their public index.ts. Another module's
-            // internals match no allow entry, so they are rejected by default.
+            // modules only through their public index.ts or server.ts.
+            // Another module's internals match no allow entry, so they are
+            // rejected by default.
             {
               from: el('module'),
-              allow: [...anyOf(...CORE_ANY, 'lib'), PUBLIC_API, OWN_MODULE, OWN_DOMAIN],
+              allow: [...anyOf(...CORE_ANY, 'lib'), PUBLIC_API, SERVER_API, OWN_MODULE, OWN_DOMAIN],
               message:
-                "A module may only reach another module through its public index.ts. See ARCHITECTURE.md 1.2.",
+                "A module may only reach another module through its public index.ts (or server.ts, for a server-only read). See ARCHITECTURE.md 1.2.",
             },
 
             // Routing is thin: core, lib, and module public APIs only.

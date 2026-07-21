@@ -8,7 +8,7 @@ import { getActionContext } from '@/core/auth/session';
 import { safeAction } from '@/core/actions/safe-action';
 import { createServerSupabase, type ServerSupabase } from '@/core/db/client.server';
 import type { ActionContext } from '@/core/permissions/guard';
-import { getMyProjectRole } from '@/modules/projects';
+import { getMyProjectRole } from '@/modules/projects/server';
 import { transition } from '../domain/transition';
 import type { TransitionBlocked } from '../domain/types';
 import { getChangeOrder, updateChangeOrder } from '../data/change-orders-repository';

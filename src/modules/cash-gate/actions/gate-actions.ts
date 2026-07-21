@@ -6,7 +6,7 @@ import { createAuditGateway } from '@/core/audit/gateway.server';
 import { getActionContext } from '@/core/auth/session';
 import { safeAction } from '@/core/actions/safe-action';
 import { createServerSupabase } from '@/core/db/client.server';
-import { getWorkPackage } from '@/modules/projects';
+import { getWorkPackage } from '@/modules/projects/server';
 import { loadGateState } from '../data/gate-state-repository';
 import { listOverridesForProject, overrideAndOpenWorkPackage } from '../data/cash-gate-overrides-repository';
 import { overrideOpenWorkPackageSchema } from '../schemas';

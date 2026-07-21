@@ -54,8 +54,6 @@ export {
 } from './schemas';
 
 export { createProjectAction, getProjectAction, listProjectsAction, updateProjectAction } from './actions/project-actions';
-export { getWorkPackage } from './data/work-packages-repository';
-export { getMyProjectRole } from './data/project-members-repository';
 export {
   addProjectMemberAction,
   listProjectMembersAction,
