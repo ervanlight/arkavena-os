@@ -97,6 +97,8 @@ export const createWorkPackageSchema = z.object({
   projectId: z.string().uuid(),
   zoneId: z.string().uuid().optional(),
   milestoneId: z.string().uuid().optional(),
+  /** Set only when this work package is a variation's resulting field work -- trg_work_packages_guard_change_order_funded (ADR 0012) requires that change order to already be approved_funded. */
+  changeOrderId: z.string().uuid().optional(),
   name: z.string().trim().min(1, 'Nama paket kerja wajib diisi').max(200),
 });
 export type CreateWorkPackageInput = z.infer<typeof createWorkPackageSchema>;

@@ -30,6 +30,7 @@ export const createWorkPackageAction = safeAction(
       name: input.name,
       zone_id: input.zoneId ?? null,
       milestone_id: input.milestoneId ?? null,
+      change_order_id: input.changeOrderId ?? null,
     });
 
     await recordAudit(createAuditGateway(supabase), {
