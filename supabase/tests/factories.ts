@@ -218,6 +218,13 @@ export async function cleanupOrganizations(orgIds: readonly string[]): Promise<v
             or actor_user_id in (select id from users where organization_id = any($1::uuid[]))`,
         [orgIds],
       );
+      // Fase 2 (modules/cash-gate): funding_receipts references milestones,
+      // so it must go before them; the other three only reference
+      // organizations/projects, already ordered below.
+      await run('delete from cash_gate_overrides where organization_id = any($1::uuid[])', [orgIds]);
+      await run('delete from funding_receipts where organization_id = any($1::uuid[])', [orgIds]);
+      await run('delete from cash_forecasts where organization_id = any($1::uuid[])', [orgIds]);
+      await run('delete from project_risk_reserves where organization_id = any($1::uuid[])', [orgIds]);
       // Fase 1 (modules/crm, modules/projects): children before parents, even
       // though replica mode suspends the FK checks that would otherwise force
       // this order -- keeping it anyway is cheap and reads as documentation.
