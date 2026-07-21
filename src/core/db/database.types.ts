@@ -187,6 +187,154 @@ export type Database = {
           },
         ]
       }
+      change_orders: {
+        Row: {
+          client_approved_at: string | null
+          client_approved_by: string | null
+          client_approved_reason: string | null
+          completed_at: string | null
+          completed_by: string | null
+          cost_impact_amount: number | null
+          created_at: string
+          deleted_at: string | null
+          description: string | null
+          funded_at: string | null
+          funded_by: string | null
+          id: string
+          organization_id: string
+          project_id: string
+          rejected_at: string | null
+          rejected_by: string | null
+          rejected_reason: string | null
+          requested_by: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          schedule_impact_days: number | null
+          status: Database["public"]["Enums"]["change_order_status"]
+          title: string
+          updated_at: string
+          zone_id: string | null
+        }
+        Insert: {
+          client_approved_at?: string | null
+          client_approved_by?: string | null
+          client_approved_reason?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          cost_impact_amount?: number | null
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          funded_at?: string | null
+          funded_by?: string | null
+          id?: string
+          organization_id: string
+          project_id: string
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejected_reason?: string | null
+          requested_by: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          schedule_impact_days?: number | null
+          status?: Database["public"]["Enums"]["change_order_status"]
+          title: string
+          updated_at?: string
+          zone_id?: string | null
+        }
+        Update: {
+          client_approved_at?: string | null
+          client_approved_by?: string | null
+          client_approved_reason?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          cost_impact_amount?: number | null
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          funded_at?: string | null
+          funded_by?: string | null
+          id?: string
+          organization_id?: string
+          project_id?: string
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejected_reason?: string | null
+          requested_by?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          schedule_impact_days?: number | null
+          status?: Database["public"]["Enums"]["change_order_status"]
+          title?: string
+          updated_at?: string
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "change_orders_client_approved_by_fkey"
+            columns: ["client_approved_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "change_orders_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "change_orders_funded_by_fkey"
+            columns: ["funded_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "change_orders_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "change_orders_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "change_orders_rejected_by_fkey"
+            columns: ["rejected_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "change_orders_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "change_orders_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "change_orders_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_users: {
         Row: {
           client_id: string
@@ -825,6 +973,7 @@ export type Database = {
       }
       work_packages: {
         Row: {
+          change_order_id: string | null
           created_at: string
           deleted_at: string | null
           id: string
@@ -837,6 +986,7 @@ export type Database = {
           zone_id: string | null
         }
         Insert: {
+          change_order_id?: string | null
           created_at?: string
           deleted_at?: string | null
           id?: string
@@ -849,6 +999,7 @@ export type Database = {
           zone_id?: string | null
         }
         Update: {
+          change_order_id?: string | null
           created_at?: string
           deleted_at?: string | null
           id?: string
@@ -861,6 +1012,13 @@ export type Database = {
           zone_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "work_packages_change_order_id_fkey"
+            columns: ["change_order_id"]
+            isOneToOne: false
+            referencedRelation: "change_orders"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "work_packages_milestone_id_fkey"
             columns: ["milestone_id"]
@@ -964,6 +1122,7 @@ export type Database = {
       fn_override_and_open_work_package: {
         Args: { p_reason: string; p_work_package_id: string }
         Returns: {
+          change_order_id: string | null
           created_at: string
           deleted_at: string | null
           id: string
@@ -1014,6 +1173,14 @@ export type Database = {
         | "start_variation"
         | "order_material"
       cash_gate_status: "green" | "yellow" | "red" | "overdue"
+      change_order_status:
+        | "draft"
+        | "under_review"
+        | "awaiting_client_approval"
+        | "approved_unpaid"
+        | "approved_funded"
+        | "rejected"
+        | "completed"
       contract_status: "draft" | "active" | "completed" | "terminated"
       milestone_status: "pending" | "completed"
       notification_channel: "in_app" | "email"
@@ -1187,6 +1354,15 @@ export const Constants = {
         "order_material",
       ],
       cash_gate_status: ["green", "yellow", "red", "overdue"],
+      change_order_status: [
+        "draft",
+        "under_review",
+        "awaiting_client_approval",
+        "approved_unpaid",
+        "approved_funded",
+        "rejected",
+        "completed",
+      ],
       contract_status: ["draft", "active", "completed", "terminated"],
       milestone_status: ["pending", "completed"],
       notification_channel: ["in_app", "email"],

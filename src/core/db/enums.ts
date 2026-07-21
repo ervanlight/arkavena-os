@@ -123,3 +123,18 @@ export const CASH_GATE_ACTION = {
   START_VARIATION: 'start_variation',
   ORDER_MATERIAL: 'order_material',
 } satisfies Record<string, Enums<'cash_gate_action'>>;
+
+// ---------------------------------------------------------------------------
+// Fase 3 (modules/scope-variation)
+// ---------------------------------------------------------------------------
+
+/** Mirrors the TRANSITIONS graph in modules/scope-variation/domain/transition.ts (ARCHITECTURE.md 4.3, ADR 0012). */
+export const CHANGE_ORDER_STATUS = {
+  DRAFT: 'draft',
+  UNDER_REVIEW: 'under_review',
+  AWAITING_CLIENT_APPROVAL: 'awaiting_client_approval',
+  APPROVED_UNPAID: 'approved_unpaid',
+  APPROVED_FUNDED: 'approved_funded',
+  REJECTED: 'rejected',
+  COMPLETED: 'completed',
+} satisfies Record<string, Enums<'change_order_status'>>;

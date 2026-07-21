@@ -19,6 +19,8 @@ free-form string cannot be counted, searched, or translated.
 | `NOT_FOUND` | 404 | Data yang Anda cari tidak ditemukan. | The row does not exist, or RLS hides it |
 | `CONFLICT` | 409 | Data ini baru saja diubah orang lain. Muat ulang halaman lalu coba lagi. | Unique or FK violation, or an optimistic-lock miss |
 | `AUDIT_REASON_REQUIRED` | 422 | Alasan wajib diisi untuk tindakan persetujuan atau override. | An override or approval reached the audit layer with no reason |
+| `VARIATION_INVALID_TRANSITION` | 422 | Perubahan status untuk variation ini tidak diperbolehkan saat ini. | A change_orders transition was attempted that either doesn't exist in the state graph for the current status, or failed a guard (wrong actor role, or client_approve before cost/schedule impact were filled in) |
+| `VARIATION_NOT_FUNDED` | 422 | Variation ini belum berstatus "dana masuk" -- pekerjaan belum bisa dibuka. | A work package tried to attach to a change order that isn't `approved_funded` yet |
 | `INFRA_UNAVAILABLE` | 503 | Sistem sedang tidak dapat diakses. Coba beberapa saat lagi. | Supabase, storage, or the network failed |
 | `RATE_LIMITED` | 429 | Terlalu banyak percobaan. Tunggu sebentar sebelum mencoba lagi. | Too many magic link requests |
 | `INTERNAL_ERROR` | 500 | Terjadi kesalahan pada sistem. Tim kami sudah dicatat kejadiannya. | Anything uncategorised. An unexpected one in the logs is a bug, not a category |
@@ -51,14 +53,26 @@ and `safe-action.test.ts` asserts it with that exact scenario.
 
 ## Domain codes
 
-Each phase adds its own as its rules are built:
+Each phase adds its own as its rules are built. Declaring a code for a rule
+that does not exist yet would be building ahead of the sequence (CLAUDE.md
+law 7), and an unused code in a catalogue is indistinguishable from a rule
+someone forgot to implement -- so this table only lists what a phase actually
+added, not a roadmap.
 
-| Phase | Codes it will add |
-| --- | --- |
-| Fase 2 — Cash Gate | `CASH_GATE_RED`, `CASH_GATE_OVERDUE`, `CASH_GATE_OVERRIDE_REQUIRES_REASON` |
-| Fase 3 — Scope & Variation | `VARIATION_INVALID_TRANSITION`, `VARIATION_NOT_FUNDED` |
-| Fase 5 — Quality Gate | `HOLD_POINT_PENDING`, `HOLD_POINT_OVERRIDE_DENIED` |
+**Fase 2 — Cash Gate** did not end up needing its own codes: the
+override/block path goes through the database trigger and `InfraError`
+rather than a domain-level `Result` the action layer translates (see ADR
+0012's note on this gap). `evaluateGateAction` exists and is unit-tested, but
+nothing in `modules/cash-gate/actions` calls it yet.
 
-They are not defined yet. Declaring codes for rules that do not exist would be
-building ahead of the sequence (CLAUDE.md law 7), and an unused code in a
-catalogue is indistinguishable from a rule someone forgot to implement.
+**Fase 3 — Scope & Variation** added `VARIATION_INVALID_TRANSITION` and
+`VARIATION_NOT_FUNDED` above -- both wired into `modules/scope-variation`'s
+domain `transition()` and consumed by its actions, following ARCHITECTURE.md
+4.1's intended flow (`decision = domain.transition(...)`, mapped to an
+`ActionResult` **before** any database write is attempted, rather than
+letting the DB trigger's raised exception be the first thing the user sees).
+
+Still pending their own phases: `CASH_GATE_RED`/`CASH_GATE_OVERDUE`/
+`CASH_GATE_OVERRIDE_REQUIRES_REASON` (would need Fase 2's action layer
+revisited to actually use them), `HOLD_POINT_PENDING`/
+`HOLD_POINT_OVERRIDE_DENIED` (Fase 5).

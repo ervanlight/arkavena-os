@@ -7,9 +7,10 @@
  * thrown at a call site, because a free-form string cannot be counted,
  * translated, or searched for.
  *
- * Only kernel codes live here today. Domain codes (CASH_GATE_RED,
- * VARIATION_INVALID_TRANSITION, HOLD_POINT_PENDING) arrive with their phases;
- * defining them now would be building ahead of the build sequence.
+ * Domain codes arrive with their phases -- defining them earlier would be
+ * building ahead of the build sequence (CLAUDE.md law 7). CASH_GATE_RED and
+ * HOLD_POINT_PENDING are still pending their own phases; VARIATION_INVALID_
+ * TRANSITION arrived with Fase 3 (ADR 0012).
  *
  * Keep this file in step with docs/error-codes.md, which is the version an
  * auditor reads.
@@ -45,6 +46,22 @@ export const ERROR_CODES = {
    */
   AUDIT_REASON_REQUIRED: 'AUDIT_REASON_REQUIRED',
 
+  /**
+   * A Variation (change order) transition was refused -- either the event
+   * does not exist for the current status, or a guard failed (wrong actor
+   * role for the event, or client_approve attempted before cost/schedule
+   * impact were filled in). ADR 0012.
+   */
+  VARIATION_INVALID_TRANSITION: 'VARIATION_INVALID_TRANSITION',
+
+  /**
+   * A work package tried to attach to a change order that is not
+   * `approved_funded` yet (ARCHITECTURE.md 4.3). Distinct from
+   * VARIATION_INVALID_TRANSITION because the remedy is different: waiting
+   * for funding confirmation, not retrying a different action.
+   */
+  VARIATION_NOT_FUNDED: 'VARIATION_NOT_FUNDED',
+
   /** Supabase, storage, or another dependency failed. Never shown verbatim to a client. */
   INFRA_UNAVAILABLE: 'INFRA_UNAVAILABLE',
 
@@ -74,6 +91,8 @@ export const ERROR_MESSAGES_ID: Record<ErrorCode, string> = {
   NOT_FOUND: 'Data yang Anda cari tidak ditemukan.',
   CONFLICT: 'Data ini baru saja diubah orang lain. Muat ulang halaman lalu coba lagi.',
   AUDIT_REASON_REQUIRED: 'Alasan wajib diisi untuk tindakan persetujuan atau override.',
+  VARIATION_INVALID_TRANSITION: 'Perubahan status untuk variation ini tidak diperbolehkan saat ini.',
+  VARIATION_NOT_FUNDED: 'Variation ini belum berstatus "dana masuk" -- pekerjaan belum bisa dibuka.',
   INFRA_UNAVAILABLE: 'Sistem sedang tidak dapat diakses. Coba beberapa saat lagi.',
   RATE_LIMITED: 'Terlalu banyak percobaan. Tunggu sebentar sebelum mencoba lagi.',
   INTERNAL_ERROR: 'Terjadi kesalahan pada sistem. Tim kami sudah dicatat kejadiannya.',
@@ -88,6 +107,8 @@ export const ERROR_HTTP_STATUS: Record<ErrorCode, number> = {
   NOT_FOUND: 404,
   CONFLICT: 409,
   AUDIT_REASON_REQUIRED: 422,
+  VARIATION_INVALID_TRANSITION: 422,
+  VARIATION_NOT_FUNDED: 422,
   INFRA_UNAVAILABLE: 503,
   RATE_LIMITED: 429,
   INTERNAL_ERROR: 500,
