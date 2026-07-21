@@ -86,3 +86,16 @@ export const listProjectsAction = safeAction(
     return listProjects(supabase);
   },
 );
+
+export const getProjectAction = safeAction(
+  {
+    schema: z.string().uuid(),
+    permission: { resource: 'project', action: 'view' },
+    loadContext: getActionContext,
+    name: 'projects.getProject',
+  },
+  async (id): Promise<Project> => {
+    const supabase = await createServerSupabase();
+    return getProject(supabase, id);
+  },
+);

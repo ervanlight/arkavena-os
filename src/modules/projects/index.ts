@@ -53,7 +53,7 @@ export {
   type UpdateZoneInput,
 } from './schemas';
 
-export { createProjectAction, listProjectsAction, updateProjectAction } from './actions/project-actions';
+export { createProjectAction, getProjectAction, listProjectsAction, updateProjectAction } from './actions/project-actions';
 export {
   addProjectMemberAction,
   listProjectMembersAction,
@@ -75,3 +75,5 @@ export {
   listWorkPackagesForProjectAction,
   updateWorkPackageAction,
 } from './actions/work-package-actions';
+
+export { ZoneMap } from './components/zone-map';
