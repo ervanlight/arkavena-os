@@ -1,13 +1,14 @@
 'use server';
 
 import { z } from 'zod';
+import { rupiahToColumn, toRupiah } from '@/core/money/rupiah';
 import { recordAudit } from '@/core/audit/audit';
 import { createAuditGateway } from '@/core/audit/gateway.server';
 import { getActionContext } from '@/core/auth/session';
 import { safeAction } from '@/core/actions/safe-action';
 import { createServerSupabase } from '@/core/db/client.server';
 import { getProject, insertProject, listProjects, updateProject } from '../data/projects-repository';
-import { createProjectSchema, updateProjectSchema } from '../schemas';
+import { createProjectSchema, setRiskReserveSchema, updateProjectSchema } from '../schemas';
 import type { Project } from '../types';
 
 export const createProjectAction = safeAction(
@@ -97,5 +98,40 @@ export const getProjectAction = safeAction(
   async (id): Promise<Project> => {
     const supabase = await createServerSupabase();
     return getProject(supabase, id);
+  },
+);
+
+/**
+ * Sets the Cash Gate risk buffer (ADR 0009 decision 4). Lives here, not in
+ * modules/cash-gate, because risk_reserve_amount is a column on `projects` --
+ * table ownership is exclusive (ARCHITECTURE.md 1.2) regardless of which
+ * module the *concept* belongs to.
+ */
+export const setRiskReserveAction = safeAction(
+  {
+    schema: setRiskReserveSchema,
+    permission: { resource: 'project', action: 'update' },
+    loadContext: getActionContext,
+    name: 'projects.setRiskReserve',
+  },
+  async (input, ctx): Promise<Project> => {
+    const supabase = await createServerSupabase();
+    const before = await getProject(supabase, input.projectId);
+
+    const after = await updateProject(supabase, input.projectId, {
+      risk_reserve_amount: rupiahToColumn(toRupiah(input.riskReserveAmount)),
+    });
+
+    await recordAudit(createAuditGateway(supabase), {
+      entityTable: 'projects',
+      entityId: after.id,
+      action: 'update',
+      previousValue: { risk_reserve_amount: before.risk_reserve_amount },
+      newValue: { risk_reserve_amount: after.risk_reserve_amount },
+      projectId: after.id,
+      requestId: ctx.requestId,
+    });
+
+    return after;
   },
 );

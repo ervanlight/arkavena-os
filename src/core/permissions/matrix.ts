@@ -174,6 +174,39 @@ export const PERMISSIONS = {
     create: [...ORG_ROLES],
     update: [...ORG_ROLES],
   },
+
+  // -------------------------------------------------------------------------
+  // Fase 2 (modules/cash-gate)
+  // -------------------------------------------------------------------------
+
+  funding_receipt: {
+    /** Same reasoning as contract/milestone: money, staff only. */
+    view: [...ORG_ROLES],
+    create: [...ORG_ROLES],
+    /** Finance marking a receipt cleared (owner decision D5) is an update. */
+    update: [...ORG_ROLES],
+  },
+
+  cash_forecast: {
+    view: [...ORG_ROLES],
+    create: [...ORG_ROLES],
+  },
+
+  cash_gate_override: {
+    /** Any staff may read the override history -- see the RLS policy comment. */
+    view: [...ORG_ROLES],
+    /**
+     * RLS lets any staff member's insert attempt through; the real
+     * restriction is trg_cash_gate_overrides_guard_owner_only, which raises
+     * unless the caller is an owner (ADR 0010). Listing only 'owner' here is
+     * what lets requirePermission() give a friendly Indonesian refusal instead
+     * of a bare Postgres exception -- the trigger stays the actual authority
+     * either way (CLAUDE.md 0.3's two layers), so this is not a case of the
+     * matrix and the policy disagreeing about who is *allowed*, only about
+     * which layer produces the error first.
+     */
+    create: ['owner'],
+  },
 } as const satisfies PermissionMatrix;
 
 // ---------------------------------------------------------------------------

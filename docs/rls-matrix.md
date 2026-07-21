@@ -144,6 +144,55 @@ access nobody had granted. Wave 4 (`20260721000200_wave4_projects.sql`)
 replaces it with the real check, in the same migration that creates the table
 it reads.
 
+## Fase 2 — cash-gate (Wave 7)
+
+All three tables are money or a fact about a money decision (ADR 0009, ADR
+0010), so the pattern matches `contracts`/`milestones`: staff only, no
+project-role row at all. `projects.risk_reserve_amount` (a new column, not a
+new table) follows the existing `projects` policies below it — no separate
+row here.
+
+| Table | Owner | Technical Director | Finance | QS | Procurement | External (project member) |
+| --- | --- | --- | --- | --- | --- | --- |
+| `funding_receipts` | SELECT, INSERT, UPDATE (org) | SELECT, INSERT, UPDATE (org) | SELECT, INSERT, UPDATE (org) | SELECT, INSERT, UPDATE (org) | SELECT, INSERT, UPDATE (org) | — |
+| `cash_forecasts` | SELECT, INSERT, UPDATE (org) | SELECT, INSERT, UPDATE (org) | SELECT, INSERT, UPDATE (org) | SELECT, INSERT, UPDATE (org) | SELECT, INSERT, UPDATE (org) | — |
+| `cash_gate_overrides` | SELECT, INSERT (org) | SELECT, INSERT (org) | SELECT, INSERT (org) | SELECT, INSERT (org) | SELECT, INSERT (org) | — |
+
+### What is deliberately absent
+
+**No UPDATE or DELETE policy on `cash_gate_overrides`, for anyone.** An
+override is a fact about what happened, at the moment it happened — the same
+append-only reasoning as `audit_logs`. Unlike `audit_logs`, this one *is*
+insertable directly by staff (not only through a `SECURITY DEFINER`
+function): the row-level policy is deliberately the coarse half of a
+two-layer check, not the whole one (see below).
+
+**`funding_receipts` and `cash_forecasts` have no project-role SELECT at
+all**, same reasoning as `contracts`/`milestones` in Fase 1: both carry a
+money figure kept away from client-facing reads.
+
+### Column-level and cross-row rules RLS cannot express
+
+| Rule | Enforced by |
+| --- | --- |
+| Only an `owner` may insert a `cash_gate_overrides` row — RLS above lets any staff member's INSERT through; this is the precise check underneath | `trg_cash_gate_overrides_guard_owner_only` |
+| A `work_package` cannot move into `in_progress` while its project's Cash Gate is red or overdue, unless a matching override exists and is still within its 5-minute validity window (`OVERRIDE_VALIDITY_MINUTES`) | `trg_work_packages_guard_cash_gate` (`fn_work_packages_guard_cash_gate`, reading `fn_cash_gate_status`) |
+
+Both triggers fire on the table whose row is actually changing
+(`cash_gate_overrides`, `work_packages`), not on a table owned by another
+module — `fn_cash_gate_status` is a plain (non-`security definer`) `stable`
+function so it evaluates under the calling user's own row visibility, the
+same lesson `trg_users_guard_privileged_columns` established in Wave 1: a
+`security definer` function would make `current_user`/session checks reflect
+the function owner, not the caller.
+
+`requirePermission()` in `cashGate.overrideOpenWorkPackageAction` (the
+application layer, `core/permissions/matrix.ts`'s `cash_gate_override.create
+-> ['owner']`) rejects a non-owner before the request ever reaches
+`trg_cash_gate_overrides_guard_owner_only` — a friendlier Indonesian message
+first, the same trigger as the real authority underneath either way
+(CLAUDE.md law 0.3's two independent layers).
+
 ## Later waves
 
 Added as their tables land. A table may not reach main without a row here, its

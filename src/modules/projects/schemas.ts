@@ -33,6 +33,18 @@ export const updateProjectSchema = z.object({
 });
 export type UpdateProjectInput = z.infer<typeof updateProjectSchema>;
 
+/**
+ * Separate from updateProjectSchema because risk_reserve_amount is money
+ * (ADR 0009 decision 4) and needs moneyString's validation, not a plain
+ * optional string. Owner/Finance sets this manually per project; there is no
+ * computed default beyond the column's own `0`.
+ */
+export const setRiskReserveSchema = z.object({
+  projectId: z.string().uuid(),
+  riskReserveAmount: moneyString,
+});
+export type SetRiskReserveInput = z.infer<typeof setRiskReserveSchema>;
+
 export const addProjectMemberSchema = z.object({
   projectId: z.string().uuid(),
   userId: z.string().uuid(),

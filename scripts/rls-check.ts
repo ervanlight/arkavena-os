@@ -47,6 +47,9 @@ const RESOURCE_TABLES: Record<Resource, string> = {
   contract: 'contracts',
   milestone: 'milestones',
   work_package: 'work_packages',
+  funding_receipt: 'funding_receipts',
+  cash_forecast: 'cash_forecasts',
+  cash_gate_override: 'cash_gate_overrides',
 };
 
 /** Matrix actions that map onto a SQL command the policy list should cover. */
