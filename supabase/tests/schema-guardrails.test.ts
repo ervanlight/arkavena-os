@@ -36,6 +36,12 @@ const ORG_ID_EXEMPT = new Set([
   // Nullable rather than absent: audit rows for global tables such as roles
   // legitimately have no organisation. Checked separately below.
   'audit_logs',
+  // Pure join tables (Fase 1): scoped through their parent's organization_id
+  // via RLS policy (client_users -> clients.organization_id, project_members
+  // -> projects.organization_id) rather than a denormalised copy of a column
+  // that could drift from the parent's.
+  'client_users',
+  'project_members',
 ]);
 
 /** Tables exempt from carrying the generic audit trigger. */
@@ -219,9 +225,16 @@ describe('foreign keys are explicit about deletion', () => {
        where n.nspname = 'public' and con.contype = 'f' and con.confdeltype = 'c'`,
     );
 
-    // No Wave 0-1 table has a pure-child relationship yet. When one arrives
-    // (estimate_items belonging to estimates, for instance), add it here with a
-    // note rather than loosening the check.
-    expect(rows.map((r) => `${r.table_name}.${r.conname}`)).toEqual([]);
+    // Fase 1's two pure-child relationships: a client_users row means nothing
+    // without the client it links (client_id cascades; user_id stays RESTRICT,
+    // matching every other FK to users.id in this schema), and a
+    // project_members row means nothing without the project it is membership
+    // *in* (project_id cascades; user_id likewise stays RESTRICT). Add the
+    // next one here with a note rather than loosening the check.
+    const CASCADE_EXEMPT = new Set([
+      'client_users.client_users_client_id_fkey',
+      'project_members.project_members_project_id_fkey',
+    ]);
+    expect(rows.map((r) => `${r.table_name}.${r.conname}`).filter((key) => !CASCADE_EXEMPT.has(key))).toEqual([]);
   });
 });

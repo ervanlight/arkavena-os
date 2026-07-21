@@ -106,6 +106,79 @@ export async function createOrgWithStaff(): Promise<{
   };
 }
 
+export type SeedClient = { id: string; organizationId: string; name: string };
+export type SeedSite = { id: string; organizationId: string; clientId: string; name: string };
+export type SeedProject = { id: string; organizationId: string; clientId: string; siteId: string; name: string };
+
+export async function createClient(
+  organizationId: string,
+  overrides: Partial<{ name: string }> = {},
+): Promise<SeedClient> {
+  const id = randomUUID();
+  const name = overrides.name ?? `Client ${id.slice(0, 8)}`;
+  await sql('insert into clients (id, organization_id, name) values ($1, $2, $3)', [id, organizationId, name]);
+  return { id, organizationId, name };
+}
+
+export async function createSite(
+  organizationId: string,
+  clientId: string,
+  overrides: Partial<{ name: string }> = {},
+): Promise<SeedSite> {
+  const id = randomUUID();
+  const name = overrides.name ?? `Site ${id.slice(0, 8)}`;
+  await sql('insert into sites (id, organization_id, client_id, name) values ($1, $2, $3, $4)', [
+    id,
+    organizationId,
+    clientId,
+    name,
+  ]);
+  return { id, organizationId, clientId, name };
+}
+
+export async function createProject(
+  organizationId: string,
+  clientId: string,
+  siteId: string,
+  overrides: Partial<{ name: string }> = {},
+): Promise<SeedProject> {
+  const id = randomUUID();
+  const name = overrides.name ?? `Project ${id.slice(0, 8)}`;
+  await sql('insert into projects (id, organization_id, client_id, site_id, name) values ($1, $2, $3, $4, $5)', [
+    id,
+    organizationId,
+    clientId,
+    siteId,
+    name,
+  ]);
+  return { id, organizationId, clientId, siteId, name };
+}
+
+/** A project plus its client and site, in one call -- the common case for tests that just need "a project". */
+export async function createProjectWithClientAndSite(organizationId: string): Promise<
+  SeedProject & { clientRow: SeedClient; siteRow: SeedSite }
+> {
+  const clientRow = await createClient(organizationId);
+  const siteRow = await createSite(organizationId, clientRow.id);
+  const project = await createProject(organizationId, clientRow.id, siteRow.id);
+  return { ...project, clientRow, siteRow };
+}
+
+export async function addProjectMember(
+  projectId: string,
+  userId: string,
+  projectRole: string,
+): Promise<{ id: string }> {
+  const id = randomUUID();
+  await sql('insert into project_members (id, project_id, user_id, project_role) values ($1, $2, $3, $4::project_role)', [
+    id,
+    projectId,
+    userId,
+    projectRole,
+  ]);
+  return { id };
+}
+
 /**
  * Remove everything a suite created, leaving the reference seed intact.
  *
@@ -145,6 +218,26 @@ export async function cleanupOrganizations(orgIds: readonly string[]): Promise<v
             or actor_user_id in (select id from users where organization_id = any($1::uuid[]))`,
         [orgIds],
       );
+      // Fase 1 (modules/crm, modules/projects): children before parents, even
+      // though replica mode suspends the FK checks that would otherwise force
+      // this order -- keeping it anyway is cheap and reads as documentation.
+      await run('delete from work_packages where organization_id = any($1::uuid[])', [orgIds]);
+      await run('delete from milestones where organization_id = any($1::uuid[])', [orgIds]);
+      await run('delete from contracts where organization_id = any($1::uuid[])', [orgIds]);
+      await run(
+        `delete from project_members
+         where project_id in (select id from projects where organization_id = any($1::uuid[]))`,
+        [orgIds],
+      );
+      await run('delete from zones where organization_id = any($1::uuid[])', [orgIds]);
+      await run('delete from projects where organization_id = any($1::uuid[])', [orgIds]);
+      await run('delete from sites where organization_id = any($1::uuid[])', [orgIds]);
+      await run(
+        `delete from client_users
+         where client_id in (select id from clients where organization_id = any($1::uuid[]))`,
+        [orgIds],
+      );
+      await run('delete from clients where organization_id = any($1::uuid[])', [orgIds]);
       // Profile first: public.users.id references auth.users with RESTRICT.
       await run('delete from users where organization_id = any($1::uuid[])', [orgIds]);
       await run(
