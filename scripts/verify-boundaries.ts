@@ -111,6 +111,12 @@ const fixtures: Fixture[] = [
     content: `export function bad(contractAmount: bigint): number {\n  return Number(contractAmount);\n}\n`,
     expect: 'no-restricted-syntax',
   },
+  {
+    name: 'a money-named identifier may not go through Math.round/floor/ceil',
+    path: `${MODULE_A}/data/round-money.ts`,
+    content: `export function bad(contractAmount: number): number {\n  return Math.round(contractAmount * 1.1);\n}\n`,
+    expect: 'no-restricted-syntax',
+  },
 
   // --- Positive control: the allowed path must stay allowed. ---
   {
@@ -125,6 +131,16 @@ const fixtures: Fixture[] = [
     // A genuine value import, not a type-only one -- consistent-type-imports
     // would flag a type-only import and be mistaken for a boundaries failure.
     content: `import { bPublic } from '@/modules/zz-fixture-b';\nexport default function P() {\n  console.log(bPublic);\n  return null;\n}\n`,
+    expect: null,
+  },
+  {
+    name: 'control: Math.round/floor/ceil on a non-money value stays allowed',
+    // Found while building Fase 4's photo compression (image pixel
+    // dimensions) and storage thresholds (byte counts): the original
+    // selector had no money-identifier scoping at all and blocked these
+    // unconditionally, contradicting its own message ("if this is money").
+    path: `${MODULE_A}/data/round-pixels.ts`,
+    content: `export function fit(width: number, scale: number): number {\n  return Math.round(width * scale);\n}\n`,
     expect: null,
   },
 ];

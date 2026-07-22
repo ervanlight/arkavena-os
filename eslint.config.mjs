@@ -250,8 +250,17 @@ export default tseslint.config(
             'Never widen a rupiah amount to Number -- it silently loses precision above 2^53. Use core/money. See CLAUDE.md 0.1.',
         },
         {
+          // Scoped to a money-suggestive identifier appearing anywhere in
+          // the call, the same heuristic the Number-widening rule above
+          // already uses -- not a blanket ban on Math.round/floor/ceil
+          // everywhere. Found while writing Fase 4's photo-compression
+          // (image pixel dimensions) and storage-threshold (byte counts)
+          // code: neither has anything to do with Rupiah, and the original
+          // unscoped selector blocked them anyway, contradicting its own
+          // message ("if this is money"). A real money case --
+          // `Math.round(contractAmount)` -- still matches.
           selector:
-            "CallExpression[callee.object.name='Math'][callee.property.name=/^(round|floor|ceil)$/]",
+            "CallExpression[callee.object.name='Math'][callee.property.name=/^(round|floor|ceil)$/]:has(Identifier[name=/([aA]mount|Rp)$/])",
           message:
             'Math.round/floor/ceil implies float arithmetic. If this is money, use the integer helpers in core/money. See CLAUDE.md 0.1.',
         },
