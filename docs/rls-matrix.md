@@ -262,6 +262,69 @@ building this exact feature. The two triggers above are what actually
 enforce the fine-grained rules either way, matching CLAUDE.md law 0.3's two
 independent layers.
 
+## Fase 4 — field-reporting (Wave 7-8)
+
+The first tables scoped to **only** `site_coordinator`/`mandor` among project
+roles, not the full six (CLAUDE.md 7: "Role eksternal tidak pernah akses tabel
+internal"). Every earlier project-scoped table (`project`, `zone`,
+`work_package`) grants some form of read access to the whole `PROJECT_ROLES`
+set; these five do not; `client_approver`, `client_viewer`, `supplier`, and
+`subcontractor` get nothing at all, on any of the five tables below —
+correctly, since this is internal field operations data, not something any
+client or partner is shown.
+
+| Table | Owner/TD/Finance/QS/Procurement | site_coordinator / mandor (own project) | External (all six) |
+| --- | --- | --- | --- |
+| `daily_logs` | CRUD\* (org) | SELECT, INSERT, UPDATE | — |
+| `progress_entries` | CRUD\* (org) | SELECT, INSERT, UPDATE | — |
+| `photos` (table) | CRUD\* (org) | SELECT, INSERT, UPDATE | — |
+| `material_requests` | CRUD\* (org) | SELECT, INSERT, UPDATE | — |
+| `issues` | CRUD\* (org) | SELECT, INSERT, UPDATE | — |
+
+\* "CRUD" here means SELECT/INSERT/UPDATE — no DELETE policy exists for
+anyone, same as every other table in this document; soft delete
+(`deleted_at`) is the removal path.
+
+### Storage, not just the table
+
+`photos.storage_path`/`thumbnail_path` point into the `photos` Storage
+bucket (private, 5MB limit), which has its **own** RLS on `storage.objects`
+— separate policies from the ones above, since Storage objects are a
+different resource than table rows. `storage.foldername(name)` parses the
+`{orgId}/{projectId}/{zoneId}/{date}/{photoId}.jpg` path convention
+(`core/storage/paths.ts`) to apply the identical staff-org-wide /
+site_coordinator-mandor-per-project split. No UPDATE or DELETE policy on
+`storage.objects` at all — photos are immutable once uploaded; removing one
+is the `photos` table's own soft delete, not a Storage mutation.
+
+### What is deliberately absent
+
+**No project role beyond `site_coordinator`/`mandor` can read any of these
+five tables.** Unlike `change_orders` (Fase 3), where `client_approver` is
+specifically who a variation is *for*, nothing here is information any
+client, supplier, or subcontractor role should see — daily field operations,
+not something the client-facing side of the business (Fase 6) will ever
+surface even indirectly.
+
+**`material_requests`/`issues` have no free-form UPDATE action in the
+permission matrix** — only `update_status` (`requested` → `fulfilled`/
+`cancelled`) and `resolve` (`open` → `resolved`, stamping
+`resolved_by`/`resolved_at`). The RLS UPDATE policy itself is not narrowed to
+just those columns (unlike `change_orders`' client-column trigger guard) —
+the application layer simply never exposes a path to edit anything else,
+since an already-submitted request or reported issue's own content is not
+expected to change, only its status.
+
+### Column-level and cross-row rules RLS cannot express
+
+| Rule | Enforced by |
+| --- | --- |
+| `progress_percent` must be 0-100 | `ck_progress_entries_percent_range` |
+| `quantity` on a material request must be positive | `ck_material_requests_quantity_positive` |
+| `file_size_bytes` on a photo must be positive | `ck_photos_file_size_positive` |
+| One `daily_logs` row per project per day | `uq_daily_logs_project_id_log_date` |
+| A photo is always tied to a `project_id` **and** a `zone_id` (both `NOT NULL`) — the literal Fase 4 exit criterion | column constraints, not a trigger |
+
 ## Later waves
 
 Added as their tables land. A table may not reach main without a row here, its

@@ -255,6 +255,54 @@ export const PERMISSIONS = {
     client_approve: ['client_approver'],
     client_reject: ['client_approver'],
   },
+
+  // -------------------------------------------------------------------------
+  // Fase 4 (modules/field-reporting)
+  //
+  // Only site_coordinator/mandor among project roles ever pass RLS on these
+  // five tables (CLAUDE.md 7: "Role eksternal tidak pernah akses tabel
+  // internal") -- client_approver, client_viewer, supplier, and
+  // subcontractor see nothing here. That is why only the two field roles
+  // are named below, not the full PROJECT_ROLES spread every Fase 1
+  // resource above uses. roleCan()'s null-role deferral (ADR 0013) still
+  // lets any project-role-only caller through the *matrix* layer
+  // regardless of which specific roles are named here -- naming just these
+  // two does not tighten what requirePermission() actually allows, only
+  // what this file documents as the intended grant. The real per-role
+  // filtering is RLS's alone, same as everywhere else in this matrix.
+  // -------------------------------------------------------------------------
+
+  daily_log: {
+    view: [...ORG_ROLES, 'site_coordinator', 'mandor'],
+    create: [...ORG_ROLES, 'site_coordinator', 'mandor'],
+    update: [...ORG_ROLES, 'site_coordinator', 'mandor'],
+  },
+
+  progress_entry: {
+    view: [...ORG_ROLES, 'site_coordinator', 'mandor'],
+    create: [...ORG_ROLES, 'site_coordinator', 'mandor'],
+    update: [...ORG_ROLES, 'site_coordinator', 'mandor'],
+  },
+
+  photo: {
+    view: [...ORG_ROLES, 'site_coordinator', 'mandor'],
+    create: [...ORG_ROLES, 'site_coordinator', 'mandor'],
+    update: [...ORG_ROLES, 'site_coordinator', 'mandor'],
+  },
+
+  material_request: {
+    view: [...ORG_ROLES, 'site_coordinator', 'mandor'],
+    create: [...ORG_ROLES, 'site_coordinator', 'mandor'],
+    /** requested -> fulfilled/cancelled. Named for the specific transition, not a free-form field update -- an already-submitted request's content does not change, only its status. */
+    update_status: [...ORG_ROLES, 'site_coordinator', 'mandor'],
+  },
+
+  issue: {
+    view: [...ORG_ROLES, 'site_coordinator', 'mandor'],
+    create: [...ORG_ROLES, 'site_coordinator', 'mandor'],
+    /** open -> resolved, stamping resolved_by/resolved_at. */
+    resolve: [...ORG_ROLES, 'site_coordinator', 'mandor'],
+  },
 } as const satisfies PermissionMatrix;
 
 // ---------------------------------------------------------------------------

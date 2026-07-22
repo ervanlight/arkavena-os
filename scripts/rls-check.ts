@@ -52,6 +52,11 @@ const RESOURCE_TABLES: Record<Resource, string> = {
   cash_gate_override: 'cash_gate_overrides',
   project_risk_reserve: 'project_risk_reserves',
   change_order: 'change_orders',
+  daily_log: 'daily_logs',
+  progress_entry: 'progress_entries',
+  photo: 'photos',
+  material_request: 'material_requests',
+  issue: 'issues',
 };
 
 /** Matrix actions that map onto a SQL command the policy list should cover. */
@@ -73,6 +78,12 @@ const ACTION_COMMANDS: Record<string, 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE'>
   complete: 'UPDATE',
   client_approve: 'UPDATE',
   client_reject: 'UPDATE',
+  // material_requests_update_* and issues_update_* both back a specific
+  // named transition (requested -> fulfilled/cancelled; open -> resolved),
+  // the same "still just an UPDATE policy underneath" pattern as
+  // change_orders' own named lifecycle actions above.
+  update_status: 'UPDATE',
+  resolve: 'UPDATE',
   // change_role and invite are deliberately absent. Neither has, or should
   // ever have, a matching RLS policy: change_role is enforced by
   // fn_users_guard_privileged_columns (a trigger, not a policy), and invite
