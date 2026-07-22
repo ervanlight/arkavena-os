@@ -1,3 +1,4 @@
+import type { Route } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getProjectAction, listWorkPackagesForProjectAction, listZonesForProjectAction, ZoneMap } from '@/modules/projects';
@@ -53,6 +54,18 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
               className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
             >
               Variation
+            </Link>
+            <Link
+              href={`/cc/projects/${project.id}/quality-gate`}
+              className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            >
+              Quality Gate
+            </Link>
+            <Link
+              href={`/cc/projects/${project.id}/invoices` as Route}
+              className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            >
+              Invoice
             </Link>
             <Link
               href={`/cc/projects/${project.id}/cash-gate`}

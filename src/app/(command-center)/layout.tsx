@@ -1,3 +1,4 @@
+import type { Route } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/core/auth/session';
@@ -31,6 +32,9 @@ export default async function CommandCenterLayout({ children }: { children: Reac
             </Link>
             <Link href="/cc/quality-gate" className="text-slate-600 hover:text-slate-900">
               Quality Gate
+            </Link>
+            <Link href={'/cc/billing' as Route} className="text-slate-600 hover:text-slate-900">
+              Billing
             </Link>
           </nav>
           <div className="flex items-center gap-4 text-sm">
