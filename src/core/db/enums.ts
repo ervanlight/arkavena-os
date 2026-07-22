@@ -169,3 +169,12 @@ export const INSPECTION_STATUS = {
   PASSED: 'passed',
   FAILED: 'failed',
 } satisfies Record<string, Enums<'inspection_status'>>;
+
+// ---------------------------------------------------------------------------
+// Fase 6 (modules/client-portal)
+// ---------------------------------------------------------------------------
+
+export const CLIENT_DECISION_OUTCOME = {
+  APPROVED: 'approved',
+  REJECTED: 'rejected',
+} satisfies Record<string, Enums<'client_decision_outcome'>>;

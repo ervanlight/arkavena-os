@@ -127,6 +127,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "cash_forecasts_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
             foreignKeyName: "cash_forecasts_work_package_id_fkey"
             columns: ["work_package_id"]
             isOneToOne: false
@@ -184,6 +191,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_gate_overrides_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -306,6 +320,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "change_orders_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
             foreignKeyName: "change_orders_rejected_by_fkey"
             columns: ["rejected_by"]
             isOneToOne: false
@@ -330,8 +351,89 @@ export type Database = {
             foreignKeyName: "change_orders_zone_id_fkey"
             columns: ["zone_id"]
             isOneToOne: false
+            referencedRelation: "vw_client_zone_progress"
+            referencedColumns: ["zone_id"]
+          },
+          {
+            foreignKeyName: "change_orders_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
             referencedRelation: "zones"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_decisions: {
+        Row: {
+          change_order_id: string | null
+          created_at: string
+          decided_at: string | null
+          decision:
+            | Database["public"]["Enums"]["client_decision_outcome"]
+            | null
+          deleted_at: string | null
+          id: string
+          organization_id: string
+          presented_at: string
+          project_id: string
+          updated_at: string
+        }
+        Insert: {
+          change_order_id?: string | null
+          created_at?: string
+          decided_at?: string | null
+          decision?:
+            | Database["public"]["Enums"]["client_decision_outcome"]
+            | null
+          deleted_at?: string | null
+          id?: string
+          organization_id: string
+          presented_at?: string
+          project_id: string
+          updated_at?: string
+        }
+        Update: {
+          change_order_id?: string | null
+          created_at?: string
+          decided_at?: string | null
+          decision?:
+            | Database["public"]["Enums"]["client_decision_outcome"]
+            | null
+          deleted_at?: string | null
+          id?: string
+          organization_id?: string
+          presented_at?: string
+          project_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_decisions_change_order_id_fkey"
+            columns: ["change_order_id"]
+            isOneToOne: false
+            referencedRelation: "change_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_decisions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_decisions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_decisions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -476,6 +578,13 @@ export type Database = {
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "contracts_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
+          },
         ]
       }
       daily_logs: {
@@ -532,6 +641,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "daily_logs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "daily_logs_reported_by_fkey"
@@ -603,6 +719,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funding_receipts_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -745,11 +868,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "inspections_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
             foreignKeyName: "inspections_work_package_id_fkey"
             columns: ["work_package_id"]
             isOneToOne: false
             referencedRelation: "work_packages"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inspections_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_zone_progress"
+            referencedColumns: ["zone_id"]
           },
           {
             foreignKeyName: "inspections_zone_id_fkey"
@@ -828,6 +965,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "issues_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
             foreignKeyName: "issues_reported_by_fkey"
             columns: ["reported_by"]
             isOneToOne: false
@@ -847,6 +991,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "work_packages"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "issues_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_zone_progress"
+            referencedColumns: ["zone_id"]
           },
           {
             foreignKeyName: "issues_zone_id_fkey"
@@ -925,6 +1076,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "material_requests_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
             foreignKeyName: "material_requests_requested_by_fkey"
             columns: ["requested_by"]
             isOneToOne: false
@@ -937,6 +1095,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "work_packages"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_requests_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_zone_progress"
+            referencedColumns: ["zone_id"]
           },
           {
             foreignKeyName: "material_requests_zone_id_fkey"
@@ -1227,6 +1392,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "photos_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
             foreignKeyName: "photos_uploaded_by_fkey"
             columns: ["uploaded_by"]
             isOneToOne: false
@@ -1239,6 +1411,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "work_packages"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "photos_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_zone_progress"
+            referencedColumns: ["zone_id"]
           },
           {
             foreignKeyName: "photos_zone_id_fkey"
@@ -1319,6 +1498,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "progress_entries_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
             foreignKeyName: "progress_entries_work_package_id_fkey"
             columns: ["work_package_id"]
             isOneToOne: false
@@ -1359,6 +1545,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_members_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "project_members_user_id_fkey"
@@ -1411,6 +1604,13 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_risk_reserves_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -1682,6 +1882,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "work_packages_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "work_packages_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_zone_progress"
+            referencedColumns: ["zone_id"]
+          },
+          {
             foreignKeyName: "work_packages_zone_id_fkey"
             columns: ["zone_id"]
             isOneToOne: false
@@ -1736,11 +1950,116 @@ export type Database = {
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "zones_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
+          },
         ]
       }
     }
     Views: {
-      [_ in never]: never
+      vw_client_progress_photo: {
+        Row: {
+          caption: string | null
+          created_at: string | null
+          photo_id: string | null
+          project_id: string | null
+          storage_path: string | null
+          thumbnail_path: string | null
+          uploaded_by_name: string | null
+          zone_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photos_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "photos_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "photos_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_zone_progress"
+            referencedColumns: ["zone_id"]
+          },
+          {
+            foreignKeyName: "photos_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vw_client_project_overview: {
+        Row: {
+          actual_end_date: string | null
+          contract_amount: number | null
+          contract_title: string | null
+          organization_id: string | null
+          project_id: string | null
+          project_name: string | null
+          start_date: string | null
+          status: Database["public"]["Enums"]["project_status"] | null
+          target_end_date: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vw_client_timeline_event: {
+        Row: {
+          event_at: string | null
+          event_type: string | null
+          project_id: string | null
+          source_id: string | null
+          status: string | null
+          title: string | null
+        }
+        Relationships: []
+      }
+      vw_client_zone_progress: {
+        Row: {
+          progress_percent: number | null
+          project_id: string | null
+          zone_id: string | null
+          zone_name: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zones_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zones_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
     }
     Functions: {
       fn_cash_gate_status: {
@@ -1823,6 +2142,7 @@ export type Database = {
         | "approved_funded"
         | "rejected"
         | "completed"
+      client_decision_outcome: "approved" | "rejected"
       contract_status: "draft" | "active" | "completed" | "terminated"
       inspection_status: "pending" | "passed" | "failed"
       issue_severity: "low" | "medium" | "high"
@@ -2009,6 +2329,7 @@ export const Constants = {
         "rejected",
         "completed",
       ],
+      client_decision_outcome: ["approved", "rejected"],
       contract_status: ["draft", "active", "completed", "terminated"],
       inspection_status: ["pending", "passed", "failed"],
       issue_severity: ["low", "medium", "high"],
