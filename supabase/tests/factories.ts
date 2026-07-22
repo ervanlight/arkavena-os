@@ -225,6 +225,13 @@ export async function cleanupOrganizations(orgIds: readonly string[]): Promise<v
       await run('delete from funding_receipts where organization_id = any($1::uuid[])', [orgIds]);
       await run('delete from cash_forecasts where organization_id = any($1::uuid[])', [orgIds]);
       await run('delete from project_risk_reserves where organization_id = any($1::uuid[])', [orgIds]);
+      // Fase 7 (modules/billing): payments references invoices, invoices
+      // references milestones and (nullably) change_orders -- both deleted
+      // after this point below, so payments/invoices must go here, after
+      // funding_receipts (which invoices.id is itself referenced by, via
+      // funding_receipts.invoice_id, already deleted just above).
+      await run('delete from payments where organization_id = any($1::uuid[])', [orgIds]);
+      await run('delete from invoices where organization_id = any($1::uuid[])', [orgIds]);
       // Fase 4 (modules/field-reporting): found missing while writing FR7's
       // own DB tests -- replica mode suspends FK checks, so leaving these
       // out did not fail loudly, it just left orphaned rows behind in the
