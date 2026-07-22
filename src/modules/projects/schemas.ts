@@ -100,6 +100,8 @@ export const createWorkPackageSchema = z.object({
   /** Set only when this work package is a variation's resulting field work -- trg_work_packages_guard_change_order_funded (ADR 0012) requires that change order to already be approved_funded. */
   changeOrderId: z.string().uuid().optional(),
   name: z.string().trim().min(1, 'Nama paket kerja wajib diisi').max(200),
+  /** Matched against modules/quality-gate's hold_point_templates.work_type (ADR 0014) -- optional, since not every work package has a hold-point requirement. */
+  workType: z.string().trim().min(1).max(100).optional(),
 });
 export type CreateWorkPackageInput = z.infer<typeof createWorkPackageSchema>;
 
@@ -109,5 +111,6 @@ export const updateWorkPackageSchema = z.object({
   status: z.enum(['not_started', 'in_progress', 'completed']).optional(),
   zoneId: z.string().uuid().optional(),
   milestoneId: z.string().uuid().optional(),
+  workType: z.string().trim().min(1).max(100).optional(),
 });
 export type UpdateWorkPackageInput = z.infer<typeof updateWorkPackageSchema>;

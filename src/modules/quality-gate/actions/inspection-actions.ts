@@ -14,11 +14,12 @@ import {
   getInspection,
   insertInspection,
   listHoldPointStatesForWorkPackage,
+  listHoldPointStatusForWorkPackage,
   listInspectionsForWorkPackage,
   updateInspection,
 } from '../data/inspections-repository';
 import { createInspectionSchema, overrideInspectionSchema, recordInspectionResultSchema } from '../schemas';
-import type { Inspection } from '../types';
+import type { HoldPointTemplate, Inspection } from '../types';
 import { err, type Result } from '@/core/errors/result';
 
 export const createInspectionAction = safeAction(
@@ -169,5 +170,24 @@ export const getWorkPackageProceedStatusAction = safeAction(
       holdPoints,
       cashGate: gateResult.data.status,
     });
+  },
+);
+
+/**
+ * Command Center's view of a work package's hold points: unlike
+ * getWorkPackageProceedStatusAction (a yes/no advisory), this exposes the
+ * actual Inspection row (or null) behind each template so the UI has an id
+ * to call recordInspectionResultAction/overrideInspectionAction on.
+ */
+export const listHoldPointStatusForWorkPackageAction = safeAction(
+  {
+    schema: z.string().uuid(),
+    permission: { resource: 'inspection', action: 'view' },
+    loadContext: getActionContext,
+    name: 'qualityGate.listHoldPointStatusForWorkPackage',
+  },
+  async (workPackageId): Promise<{ template: HoldPointTemplate; inspection: Inspection | null }[]> => {
+    const supabase = await createServerSupabase();
+    return listHoldPointStatusForWorkPackage(supabase, workPackageId);
   },
 );

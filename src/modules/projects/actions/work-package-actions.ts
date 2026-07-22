@@ -31,6 +31,7 @@ export const createWorkPackageAction = safeAction(
       zone_id: input.zoneId ?? null,
       milestone_id: input.milestoneId ?? null,
       change_order_id: input.changeOrderId ?? null,
+      work_type: input.workType ?? null,
     });
 
     await recordAudit(createAuditGateway(supabase), {
@@ -62,6 +63,7 @@ export const updateWorkPackageAction = safeAction(
       ...(input.status !== undefined ? { status: input.status } : {}),
       ...(input.zoneId !== undefined ? { zone_id: input.zoneId } : {}),
       ...(input.milestoneId !== undefined ? { milestone_id: input.milestoneId } : {}),
+      ...(input.workType !== undefined ? { work_type: input.workType } : {}),
     });
 
     await recordAudit(createAuditGateway(supabase), {

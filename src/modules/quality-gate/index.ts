@@ -46,6 +46,7 @@ export {
 export {
   createInspectionAction,
   getWorkPackageProceedStatusAction,
+  listHoldPointStatusForWorkPackageAction,
   listInspectionsForWorkPackageAction,
   overrideInspectionAction,
   recordInspectionResultAction,
