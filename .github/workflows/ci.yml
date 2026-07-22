@@ -91,3 +91,65 @@ jobs:
       - name: Show Supabase logs on failure
         if: failure()
         run: supabase status || true
+
+  # The 3 critical flows CLAUDE.md 8 names explicitly, driven through a real
+  # browser against local Supabase -- proof the app actually works end to
+  # end, not just that its pieces pass in isolation. Runs after `database`
+  # rather than in parallel: no value in spinning up a second local Supabase
+  # + browser just to fail faster on a migration that already failed there.
+  e2e:
+    name: E2E (Playwright)
+    needs: database
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start local Supabase
+        run: supabase start
+
+      - name: Seed reference and demo data
+        run: supabase db reset --local
+
+      - name: Export local Supabase credentials for the app and Playwright
+        # `supabase status -o env` is the CLI's own documented way to get
+        # these for CI -- not hardcoded, so a CLI version bump that changes
+        # the local demo keys can't silently go stale here.
+        run: |
+          eval "$(supabase status -o env | sed 's/^/export /')"
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL"
+            echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$ANON_KEY"
+            echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY"
+            echo "NEXT_PUBLIC_SITE_URL=http://localhost:3000"
+          } >> "$GITHUB_ENV"
+
+      - name: Install Playwright's browser
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: E2E tests
+        run: pnpm test:e2e
+
+      - name: Upload the Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Show Supabase logs on failure
+        if: failure()
+        run: supabase status || true

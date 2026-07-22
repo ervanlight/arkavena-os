@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getProjectAction, listWorkPackagesForProjectAction, listZonesForProjectAction, ZoneMap } from '@/modules/projects';
 import { AddZoneForm } from './add-zone-form';
+import { StartWorkPackageForm } from './start-work-package-form';
 
 const WORK_PACKAGE_STATUS_LABEL_ID: Record<string, string> = {
   not_started: 'Belum mulai',
@@ -90,6 +91,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                   <th className="px-4 py-2 font-medium">Nama</th>
                   <th className="px-4 py-2 font-medium">Status</th>
                   <th className="px-4 py-2 font-medium">Asal</th>
+                  <th className="px-4 py-2 font-medium" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -107,6 +109,9 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                       ) : (
                         '—'
                       )}
+                    </td>
+                    <td className="px-4 py-2">
+                      {wp.status === 'not_started' && <StartWorkPackageForm workPackageId={wp.id} />}
                     </td>
                   </tr>
                 ))}

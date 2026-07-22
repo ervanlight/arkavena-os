@@ -268,8 +268,11 @@ export default tseslint.config(
   },
 
   // Root config files: parsed as TypeScript but outside the type-aware project.
+  // `process` is declared explicitly rather than pulling in a `globals`
+  // dependency for one identifier -- vitest.config.ts never needed it (no
+  // process.env reference), playwright.config.ts is the first to.
   {
     files: ['*.ts', '*.mts'],
-    languageOptions: { parser: tseslint.parser },
+    languageOptions: { parser: tseslint.parser, globals: { process: 'readonly' } },
   },
 );
