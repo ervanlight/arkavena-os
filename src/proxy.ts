@@ -66,7 +66,12 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Everything except static assets and Next internals.
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    // Everything except static assets, Next internals, and the PWA files
+    // (manifest, service worker, offline fallback, icons) -- found while
+    // building Fase 4's PWA setup: these were being redirected to /login
+    // for a signed-out visitor, which breaks installability checks and the
+    // one case offline.html exists for (a session that's expired or never
+    // existed, shown the offline page instead of a login bounce).
+    '/((?!_next/static|_next/image|favicon.ico|manifest\\.json|sw\\.js|offline\\.html|icon-192\\.png|icon-512\\.png|apple-touch-icon\\.png).*)',
   ],
 };

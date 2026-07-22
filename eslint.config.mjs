@@ -67,6 +67,11 @@ export default tseslint.config(
       'test-results/**',
       'src/core/db/database.types.ts',
       'next-env.d.ts',
+      // Static assets Next.js serves as-is -- sw.js runs in the Service
+      // Worker global scope (self/caches/fetch as ambient globals), not
+      // this project's TS/module system, and was never meant to be linted
+      // as application source.
+      'public/**',
     ],
   },
 
