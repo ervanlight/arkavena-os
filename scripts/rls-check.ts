@@ -61,6 +61,8 @@ const RESOURCE_TABLES: Record<Resource, string> = {
   inspection: 'inspections',
   nonconformity: 'nonconformities',
   client_decision: 'client_decisions',
+  invoice: 'invoices',
+  payment: 'payments',
 };
 
 /** Matrix actions that map onto a SQL command the policy list should cover. */
@@ -92,6 +94,12 @@ const ACTION_COMMANDS: Record<string, 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE'>
   // UPDATE of inspections.overridden_by/override_reason/overridden_at,
   // guarded by fn_inspections_guard_td_only_override (ADR 0014).
   override: 'UPDATE',
+  // Fase 7: issuing and cancelling an invoice are both, mechanically, an
+  // UPDATE of status (+ tracking columns) -- invoices_update_staff is the
+  // policy underneath, with fn_invoices_guard_issuance as the precise check
+  // for `issue` (ADR 0017), same "coarse policy, precise trigger" split.
+  issue: 'UPDATE',
+  cancel: 'UPDATE',
   // change_role and invite are deliberately absent. Neither has, or should
   // ever have, a matching RLS policy: change_role is enforced by
   // fn_users_guard_privileged_columns (a trigger, not a policy), and invite

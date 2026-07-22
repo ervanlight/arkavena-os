@@ -355,6 +355,31 @@ export const PERMISSIONS = {
   client_decision: {
     view: [...ORG_ROLES, 'client_approver', 'client_viewer'],
   },
+
+  // -------------------------------------------------------------------------
+  // Fase 7 (modules/billing)
+  //
+  // ARCHITECTURE.md 6.2's own illustrative example for this resource lists
+  // `approve: ['owner']` -- written before Fase 7's real design existed.
+  // ADR 0017 requires Technical Director approval specifically (the exit
+  // criterion's literal "persetujuan TD"), mirroring
+  // fn_inspections_guard_td_only_override's shape (Fase 5) -- `issue` here
+  // is that approval and the status transition together, done by a TD in
+  // one action, so `issue` lists only `technical_director`, superseding the
+  // doc's placeholder rather than the other way around.
+  // -------------------------------------------------------------------------
+
+  invoice: {
+    view: [...ORG_ROLES, 'client_approver', 'client_viewer'],
+    create: ['owner', 'finance'],
+    issue: ['technical_director'],
+    cancel: ['owner', 'finance'],
+  },
+
+  payment: {
+    view: [...ORG_ROLES, 'client_approver', 'client_viewer'],
+    create: ['owner', 'finance'],
+  },
 } as const satisfies PermissionMatrix;
 
 // ---------------------------------------------------------------------------

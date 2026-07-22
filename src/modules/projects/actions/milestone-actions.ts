@@ -89,3 +89,17 @@ export const listMilestonesForContractAction = safeAction(
     return listMilestonesForContract(supabase, contractId);
   },
 );
+
+/** modules/billing (Fase 7) needs a single milestone's status to assemble its own issuance-eligibility check (ADR 0017). */
+export const getMilestoneAction = safeAction(
+  {
+    schema: z.string().uuid(),
+    permission: { resource: 'milestone', action: 'view' },
+    loadContext: getActionContext,
+    name: 'projects.getMilestone',
+  },
+  async (id): Promise<Milestone> => {
+    const supabase = await createServerSupabase();
+    return getMilestone(supabase, id);
+  },
+);

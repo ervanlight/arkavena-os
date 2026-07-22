@@ -404,6 +404,37 @@ user:
 | `client_decisions.decision` is set if and only if `decided_at` is set | `ck_client_decisions_decision_requires_decided_at` |
 | `client_decisions` stays in sync with `change_orders.status` without a second state machine | `fn_change_orders_sync_client_decision` |
 
+## Fase 7 — billing (Wave 8/9)
+
+| Table | Owner/Finance | Other org roles | `client_approver` / `client_viewer` |
+| --- | --- | --- | --- |
+| `invoices` | CRUD\* (org) | SELECT (org) | SELECT (own project, `status <> 'draft'` only) |
+| `payments` | SELECT/INSERT (org) | SELECT (org) | SELECT (via own project's non-draft invoices) |
+
+\* "CRUD" here means SELECT/INSERT/UPDATE — no DELETE policy exists for
+anyone, same as every other table in this document; soft delete
+(`deleted_at`) is the removal path. `payments` additionally has no UPDATE
+policy for anyone — a recorded payment is a fact, corrected (if ever
+needed) by a new row, not an edit.
+
+No margin/cost-breakdown columns exist on either table at all, so
+ARCHITECTURE.md 2.4's "tanpa kolom margin" requirement for the client-visible
+row is satisfied trivially, not by a separate view.
+
+### Column-level and cross-row rules RLS cannot express
+
+| Rule | Enforced by |
+| --- | --- |
+| An invoice may transition to `issued` only when its milestone is `completed`, every required hold point across the milestone's work packages has passed or been overridden, its linked variation (if any) is `approved_funded`, and it carries a Technical Director's approval | `fn_invoices_guard_issuance` |
+| `invoices.approved_by` must belong to a `technical_director` | `fn_invoices_guard_issuance` (checked the same way `fn_inspections_guard_td_only_override`, Fase 5, checks `overridden_by`) |
+| An issued invoice mirrors itself into `funding_receipts` (so an overdue unpaid invoice is simply an overdue uncleared funding receipt to the existing, unmodified Fase 2 Cash Gate) | `fn_invoices_sync_funding_receipt` |
+| Once payments against an invoice reach its full amount, the invoice is marked `paid` and its mirrored `funding_receipts` row is cleared | `fn_payments_sync_invoice_paid` |
+
+`requirePermission()` for `invoice.issue` lists only `technical_director` —
+the friendly Indonesian refusal for everyone else. `fn_invoices_guard_issuance`
+is what actually holds regardless of what the application layer decided
+(CLAUDE.md law 0.3's two independent layers).
+
 ## Later waves
 
 Added as their tables land. A table may not reach main without a row here, its

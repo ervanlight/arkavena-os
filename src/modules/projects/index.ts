@@ -70,6 +70,7 @@ export {
 } from './actions/contract-actions';
 export {
   createMilestoneAction,
+  getMilestoneAction,
   listMilestonesForContractAction,
   updateMilestoneAction,
 } from './actions/milestone-actions';
