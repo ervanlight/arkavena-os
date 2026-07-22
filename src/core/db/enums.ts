@@ -138,3 +138,24 @@ export const CHANGE_ORDER_STATUS = {
   REJECTED: 'rejected',
   COMPLETED: 'completed',
 } satisfies Record<string, Enums<'change_order_status'>>;
+
+// ---------------------------------------------------------------------------
+// Fase 4 (modules/field-reporting)
+// ---------------------------------------------------------------------------
+
+export const MATERIAL_REQUEST_STATUS = {
+  REQUESTED: 'requested',
+  FULFILLED: 'fulfilled',
+  CANCELLED: 'cancelled',
+} satisfies Record<string, Enums<'material_request_status'>>;
+
+export const ISSUE_SEVERITY = {
+  LOW: 'low',
+  MEDIUM: 'medium',
+  HIGH: 'high',
+} satisfies Record<string, Enums<'issue_severity'>>;
+
+export const ISSUE_STATUS = {
+  OPEN: 'open',
+  RESOLVED: 'resolved',
+} satisfies Record<string, Enums<'issue_status'>>;

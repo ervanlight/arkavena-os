@@ -478,6 +478,70 @@ export type Database = {
           },
         ]
       }
+      daily_logs: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          id: string
+          log_date: string
+          manpower_count: number | null
+          notes: string | null
+          organization_id: string
+          project_id: string
+          reported_by: string
+          updated_at: string
+          weather: string | null
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          log_date: string
+          manpower_count?: number | null
+          notes?: string | null
+          organization_id: string
+          project_id: string
+          reported_by: string
+          updated_at?: string
+          weather?: string | null
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          log_date?: string
+          manpower_count?: number | null
+          notes?: string | null
+          organization_id?: string
+          project_id?: string
+          reported_by?: string
+          updated_at?: string
+          weather?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "daily_logs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "daily_logs_reported_by_fkey"
+            columns: ["reported_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       funding_receipts: {
         Row: {
           amount: number
@@ -538,6 +602,193 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      issues: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          description: string | null
+          id: string
+          organization_id: string
+          project_id: string
+          reported_by: string
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: Database["public"]["Enums"]["issue_severity"]
+          status: Database["public"]["Enums"]["issue_status"]
+          title: string
+          updated_at: string
+          work_package_id: string | null
+          zone_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          id?: string
+          organization_id: string
+          project_id: string
+          reported_by: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: Database["public"]["Enums"]["issue_severity"]
+          status?: Database["public"]["Enums"]["issue_status"]
+          title: string
+          updated_at?: string
+          work_package_id?: string | null
+          zone_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          id?: string
+          organization_id?: string
+          project_id?: string
+          reported_by?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: Database["public"]["Enums"]["issue_severity"]
+          status?: Database["public"]["Enums"]["issue_status"]
+          title?: string
+          updated_at?: string
+          work_package_id?: string | null
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "issues_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "issues_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "issues_reported_by_fkey"
+            columns: ["reported_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "issues_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "issues_work_package_id_fkey"
+            columns: ["work_package_id"]
+            isOneToOne: false
+            referencedRelation: "work_packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "issues_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      material_requests: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          id: string
+          item_description: string
+          needed_by_date: string | null
+          notes: string | null
+          organization_id: string
+          project_id: string
+          quantity: number
+          requested_by: string
+          status: Database["public"]["Enums"]["material_request_status"]
+          unit: string
+          updated_at: string
+          work_package_id: string | null
+          zone_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          item_description: string
+          needed_by_date?: string | null
+          notes?: string | null
+          organization_id: string
+          project_id: string
+          quantity: number
+          requested_by: string
+          status?: Database["public"]["Enums"]["material_request_status"]
+          unit: string
+          updated_at?: string
+          work_package_id?: string | null
+          zone_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          item_description?: string
+          needed_by_date?: string | null
+          notes?: string | null
+          organization_id?: string
+          project_id?: string
+          quantity?: number
+          requested_by?: string
+          status?: Database["public"]["Enums"]["material_request_status"]
+          unit?: string
+          updated_at?: string
+          work_package_id?: string | null
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_requests_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_requests_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_requests_work_package_id_fkey"
+            columns: ["work_package_id"]
+            isOneToOne: false
+            referencedRelation: "work_packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_requests_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
             referencedColumns: ["id"]
           },
         ]
@@ -688,6 +939,178 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      photos: {
+        Row: {
+          caption: string | null
+          created_at: string
+          daily_log_id: string | null
+          deleted_at: string | null
+          file_size_bytes: number
+          id: string
+          organization_id: string
+          project_id: string
+          storage_path: string
+          thumbnail_path: string
+          updated_at: string
+          uploaded_by: string
+          work_package_id: string | null
+          zone_id: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          daily_log_id?: string | null
+          deleted_at?: string | null
+          file_size_bytes: number
+          id?: string
+          organization_id: string
+          project_id: string
+          storage_path: string
+          thumbnail_path: string
+          updated_at?: string
+          uploaded_by: string
+          work_package_id?: string | null
+          zone_id: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          daily_log_id?: string | null
+          deleted_at?: string | null
+          file_size_bytes?: number
+          id?: string
+          organization_id?: string
+          project_id?: string
+          storage_path?: string
+          thumbnail_path?: string
+          updated_at?: string
+          uploaded_by?: string
+          work_package_id?: string | null
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photos_daily_log_id_fkey"
+            columns: ["daily_log_id"]
+            isOneToOne: false
+            referencedRelation: "daily_logs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "photos_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "photos_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "photos_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "photos_work_package_id_fkey"
+            columns: ["work_package_id"]
+            isOneToOne: false
+            referencedRelation: "work_packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "photos_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      progress_entries: {
+        Row: {
+          created_at: string
+          created_by: string
+          daily_log_id: string
+          deleted_at: string | null
+          id: string
+          notes: string | null
+          organization_id: string
+          progress_percent: number
+          project_id: string
+          updated_at: string
+          work_package_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          daily_log_id: string
+          deleted_at?: string | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          progress_percent: number
+          project_id: string
+          updated_at?: string
+          work_package_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          daily_log_id?: string
+          deleted_at?: string | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          progress_percent?: number
+          project_id?: string
+          updated_at?: string
+          work_package_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "progress_entries_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "progress_entries_daily_log_id_fkey"
+            columns: ["daily_log_id"]
+            isOneToOne: false
+            referencedRelation: "daily_logs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "progress_entries_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "progress_entries_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "progress_entries_work_package_id_fkey"
+            columns: ["work_package_id"]
+            isOneToOne: false
+            referencedRelation: "work_packages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       project_members: {
         Row: {
@@ -1182,6 +1605,9 @@ export type Database = {
         | "rejected"
         | "completed"
       contract_status: "draft" | "active" | "completed" | "terminated"
+      issue_severity: "low" | "medium" | "high"
+      issue_status: "open" | "resolved"
+      material_request_status: "requested" | "fulfilled" | "cancelled"
       milestone_status: "pending" | "completed"
       notification_channel: "in_app" | "email"
       notification_status: "pending" | "sent" | "read" | "failed"
@@ -1364,6 +1790,9 @@ export const Constants = {
         "completed",
       ],
       contract_status: ["draft", "active", "completed", "terminated"],
+      issue_severity: ["low", "medium", "high"],
+      issue_status: ["open", "resolved"],
+      material_request_status: ["requested", "fulfilled", "cancelled"],
       milestone_status: ["pending", "completed"],
       notification_channel: ["in_app", "email"],
       notification_status: ["pending", "sent", "read", "failed"],
