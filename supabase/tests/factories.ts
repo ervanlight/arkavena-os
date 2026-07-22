@@ -242,6 +242,13 @@ export async function cleanupOrganizations(orgIds: readonly string[]): Promise<v
       await run('delete from nonconformities where organization_id = any($1::uuid[])', [orgIds]);
       await run('delete from inspections where organization_id = any($1::uuid[])', [orgIds]);
       await run('delete from hold_point_templates where organization_id = any($1::uuid[])', [orgIds]);
+      // Fase 6 (modules/client-portal) and change_orders (Fase 3, modules/
+      // scope-variation) -- neither was ever cleaned up here, the exact same
+      // silent-leak shape as Fase 4/5's own gaps above, just not caught until
+      // client-portal.test.ts (CP8) started asserting cleanliness.
+      // client_decisions references change_orders, so it goes first.
+      await run('delete from client_decisions where organization_id = any($1::uuid[])', [orgIds]);
+      await run('delete from change_orders where organization_id = any($1::uuid[])', [orgIds]);
       // Fase 1 (modules/crm, modules/projects): children before parents, even
       // though replica mode suspends the FK checks that would otherwise force
       // this order -- keeping it anyway is cheap and reads as documentation.
