@@ -10,6 +10,7 @@ import {
   deleteProjectMember,
   getProjectMember,
   insertProjectMember,
+  listMyFieldProjects,
   listProjectMembers,
   listMyProjectRoles,
 } from '../data/project-members-repository';
@@ -86,6 +87,19 @@ export const getMyProjectRolesAction = safeAction(
   async (_input, ctx): Promise<Enums<'project_role'>[]> => {
     const supabase = await createServerSupabase();
     return listMyProjectRoles(supabase, ctx.userId);
+  },
+);
+
+/** Same "available to any signed-in user" case as getMyProjectRolesAction -- SiteFlow's home page uses this to decide whether a project picker is needed at all. */
+export const listMyFieldProjectsAction = safeAction(
+  {
+    schema: z.void(),
+    loadContext: getActionContext,
+    name: 'projects.listMyFieldProjects',
+  },
+  async (_input, ctx): Promise<{ id: string; name: string }[]> => {
+    const supabase = await createServerSupabase();
+    return listMyFieldProjects(supabase, ctx.userId);
   },
 );
 

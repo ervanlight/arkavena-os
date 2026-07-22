@@ -6,8 +6,7 @@
  * means it fails at startup, with the name of the variable that is missing.
  */
 
-function required(name: string): string {
-  const value = process.env[name];
+function required(name: string, value: string | undefined): string {
   if (value === undefined || value === '') {
     throw new Error(
       `Missing environment variable ${name}. Copy .env.example to .env.local and fill it in; ` +
@@ -17,12 +16,24 @@ function required(name: string): string {
   return value;
 }
 
+/**
+ * `NEXT_PUBLIC_*` vars must appear as a literal `process.env.NEXT_PUBLIC_X`
+ * expression for Next.js to inline them into the client bundle -- a browser
+ * has no real `process.env` at runtime, so this replacement happens at build
+ * time, and only for expressions its bundler can statically find. Routing
+ * the name through a variable (`process.env[name]`) defeats that: it reads
+ * fine on the server (a real, full process.env), but silently resolves to
+ * undefined in any client bundle, no matter what name is passed. Found while
+ * wiring the first client-side Supabase usage in this app (SiteFlow's photo
+ * upload, straight from the browser to Storage) -- every server action
+ * before this was server-only and never exposed the gap.
+ */
 export function supabaseUrl(): string {
-  return required('NEXT_PUBLIC_SUPABASE_URL');
+  return required('NEXT_PUBLIC_SUPABASE_URL', process.env.NEXT_PUBLIC_SUPABASE_URL);
 }
 
 export function supabaseAnonKey(): string {
-  return required('NEXT_PUBLIC_SUPABASE_ANON_KEY');
+  return required('NEXT_PUBLIC_SUPABASE_ANON_KEY', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 }
 
 /**
@@ -33,7 +44,7 @@ export function supabaseAnonKey(): string {
  * only way in.
  */
 export function supabaseServiceRoleKey(): string {
-  return required('SUPABASE_SERVICE_ROLE_KEY');
+  return required('SUPABASE_SERVICE_ROLE_KEY', process.env.SUPABASE_SERVICE_ROLE_KEY);
 }
 
 export function siteUrl(): string {

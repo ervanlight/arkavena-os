@@ -76,6 +76,31 @@ export async function listMyProjectRoles(supabase: ServerSupabase, userId: strin
   return data.map((row) => row.project_role);
 }
 
+/**
+ * The projects a site_coordinator/mandor actually works on, with names --
+ * SiteFlow's home page needs this to decide whether to show a project
+ * picker at all (D3 assumes one coordinator per site, but nothing stops a
+ * mandor from holding a role on more than one project) or go straight to
+ * the six-button menu for the single project they hold. RLS's own
+ * project_members_select_self policy scopes this to the caller's own rows,
+ * same as listMyProjectRoles.
+ */
+export async function listMyFieldProjects(
+  supabase: ServerSupabase,
+  userId: string,
+): Promise<{ id: string; name: string }[]> {
+  const { data, error } = await supabase
+    .from('project_members')
+    .select('project:projects(id, name)')
+    .eq('user_id', userId)
+    .in('project_role', ['site_coordinator', 'mandor']);
+
+  if (error !== null) {
+    throw new InfraError(`Failed to list field projects for user ${userId}: ${error.message}`);
+  }
+  return data.flatMap((row) => (row.project === null ? [] : [row.project]));
+}
+
 export async function insertProjectMember(
   supabase: ServerSupabase,
   input: NewProjectMember,

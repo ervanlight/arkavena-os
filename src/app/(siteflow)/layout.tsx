@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/core/auth/session';
 import { signOut } from '@/core/auth/magic-link';
 import { InstallBanner } from '@/core/pwa/install-banner';
+import { OutboxSync } from './outbox-sync';
 
 /**
  * Shared shell for every SiteFlow page (/site/*). Deliberately none of the
@@ -20,6 +21,7 @@ export default async function SiteFlowLayout({ children }: { children: React.Rea
 
   return (
     <div className="min-h-screen bg-slate-50">
+      <OutboxSync />
       <InstallBanner />
       <header className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3">
         <span className="text-base font-semibold text-slate-900">SiteFlow</span>
