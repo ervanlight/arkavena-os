@@ -225,6 +225,16 @@ export async function cleanupOrganizations(orgIds: readonly string[]): Promise<v
       await run('delete from funding_receipts where organization_id = any($1::uuid[])', [orgIds]);
       await run('delete from cash_forecasts where organization_id = any($1::uuid[])', [orgIds]);
       await run('delete from project_risk_reserves where organization_id = any($1::uuid[])', [orgIds]);
+      // Fase 4 (modules/field-reporting): found missing while writing FR7's
+      // own DB tests -- replica mode suspends FK checks, so leaving these
+      // out did not fail loudly, it just left orphaned rows behind in the
+      // shared dev project on every run. progress_entries/photos before
+      // daily_logs/work_packages/zones, the tables they reference.
+      await run('delete from progress_entries where organization_id = any($1::uuid[])', [orgIds]);
+      await run('delete from photos where organization_id = any($1::uuid[])', [orgIds]);
+      await run('delete from material_requests where organization_id = any($1::uuid[])', [orgIds]);
+      await run('delete from issues where organization_id = any($1::uuid[])', [orgIds]);
+      await run('delete from daily_logs where organization_id = any($1::uuid[])', [orgIds]);
       // Fase 1 (modules/crm, modules/projects): children before parents, even
       // though replica mode suspends the FK checks that would otherwise force
       // this order -- keeping it anyway is cheap and reads as documentation.
