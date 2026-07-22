@@ -4,6 +4,7 @@ import {
   InternalError,
   NotFoundError,
   PermissionError,
+  ValidationError,
   isAppError,
 } from './app-error';
 import type { AppError } from './app-error';
@@ -49,7 +50,7 @@ const PG_ERROR_MAP: Record<string, ErrorCode> = {
   P0001: ERROR_CODES.VALIDATION_FAILED, // raise_exception from one of our triggers
 };
 
-function isPostgrestLike(value: unknown): value is { code?: string; message?: string } {
+function isPostgrestLike(value: unknown): value is { code?: string; message?: string; hint?: string | null } {
   return typeof value === 'object' && value !== null && 'message' in value;
 }
 
@@ -107,6 +108,21 @@ export function asAppError(error: unknown, meta?: Record<string, unknown>): AppE
         return new ConflictError(message, options);
       case ERROR_CODES.NOT_FOUND:
         return new NotFoundError(message, options);
+      case ERROR_CODES.VALIDATION_FAILED: {
+        // Every `raise exception ... using errcode = 'check_violation'` this
+        // codebase's own migrations write also sets a `hint` pointing at the
+        // architecture doc/ADR it enforces -- deliberately, since the message
+        // itself is already user-safe Indonesian text (CLAUDE.md 5). A real
+        // Postgres-generated CHECK constraint violation never has a hint, and
+        // its message/details name real tables, columns and row contents
+        // (confirmed by hand: inserting a blank-name row surfaces "Failing
+        // row contains (...)" in `details`) that must never reach a user --
+        // so only the hinted case is safe to show verbatim.
+        if (typeof error.hint === 'string' && error.hint !== '') {
+          return new ValidationError(message, { meta: options.meta, userMessage: message });
+        }
+        return new InfraError(message, options);
+      }
       default:
         // A Postgres error we have no mapping for is still a database failure.
         return new InfraError(message, options);

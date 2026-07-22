@@ -235,6 +235,13 @@ export async function cleanupOrganizations(orgIds: readonly string[]): Promise<v
       await run('delete from material_requests where organization_id = any($1::uuid[])', [orgIds]);
       await run('delete from issues where organization_id = any($1::uuid[])', [orgIds]);
       await run('delete from daily_logs where organization_id = any($1::uuid[])', [orgIds]);
+      // Fase 5 (modules/quality-gate): same class of gap as Fase 4's --
+      // missing here would not fail loudly (replica mode again), just leave
+      // inspections/nonconformities/hold_point_templates behind. nonconformities
+      // before inspections, both before work_packages (deleted just below).
+      await run('delete from nonconformities where organization_id = any($1::uuid[])', [orgIds]);
+      await run('delete from inspections where organization_id = any($1::uuid[])', [orgIds]);
+      await run('delete from hold_point_templates where organization_id = any($1::uuid[])', [orgIds]);
       // Fase 1 (modules/crm, modules/projects): children before parents, even
       // though replica mode suspends the FK checks that would otherwise force
       // this order -- keeping it anyway is cheap and reads as documentation.
