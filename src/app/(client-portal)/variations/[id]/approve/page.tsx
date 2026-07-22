@@ -6,13 +6,16 @@ import { ClientDecisionForm } from './client-decision-form';
 export const metadata = { title: 'Persetujuan Variation — BuildTrust OS' };
 
 /**
- * The "link aman" ARCHITECTURE.md 7 asks for -- one purpose-built page, not
- * a navigable portal (Fase 6 is what builds that). Reuses the same
- * magic-link session every other role signs in with (owner decision D4);
- * proxy.ts already redirects an unauthenticated visitor to /login before
- * this page ever renders. RLS (change_orders_select_client_approver) is
- * what actually decides whether this specific signed-in person can see this
- * specific change order -- there is no separate token-based auth here.
+ * The "link aman" ARCHITECTURE.md 7 asks for -- reachable both as a
+ * standalone link (e.g. from a notification) and now from inside the
+ * navigable portal's own Keputusan page (ADR 0016, "approval variation
+ * pindah ke portal"), since it shares the (client-portal) layout. Reuses
+ * the same magic-link session every other role signs in with (owner
+ * decision D4); proxy.ts already redirects an unauthenticated visitor to
+ * /login before this page ever renders. RLS
+ * (change_orders_select_client_approver) is what actually decides whether
+ * this specific signed-in person can see this specific change order --
+ * there is no separate token-based auth here.
  */
 export default async function ApproveVariationPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -22,11 +25,9 @@ export default async function ApproveVariationPage({ params }: { params: Promise
   if (!result.ok) {
     if (result.error.code === 'NOT_FOUND') notFound();
     return (
-      <main className="mx-auto max-w-lg px-6 py-12">
-        <p role="alert" className="text-sm text-red-600">
-          {result.error.message}
-        </p>
-      </main>
+      <p role="alert" className="text-sm text-red-600">
+        {result.error.message}
+      </p>
     );
   }
 
@@ -34,11 +35,8 @@ export default async function ApproveVariationPage({ params }: { params: Promise
   const alreadyDecided = changeOrder.status !== 'awaiting_client_approval';
 
   return (
-    <main className="mx-auto max-w-lg space-y-6 px-6 py-12">
-      <div>
-        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">BuildTrust OS</p>
-        <h1 className="mt-1 text-xl font-semibold text-slate-900">{changeOrder.title}</h1>
-      </div>
+    <div className="mx-auto max-w-lg space-y-6">
+      <h1 className="text-xl font-semibold text-slate-900">{changeOrder.title}</h1>
 
       <div className="rounded-lg bg-white p-6 shadow-sm">
         <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
@@ -64,6 +62,6 @@ export default async function ApproveVariationPage({ params }: { params: Promise
           <ClientDecisionForm changeOrderId={changeOrder.id} />
         </div>
       )}
-    </main>
+    </div>
   );
 }

@@ -222,10 +222,10 @@ describe('vw_client_* views -- security_invoker, and never the internal-only col
     expect(columnNames).not.toContain('risk_reserve_amount');
 
     await asUser(clientViewerA.id, async (run) => {
-      const rows = await run<{ project_id: string; contract_amount: string }>(
+      const rows = (await run(
         'select project_id, contract_amount from vw_client_project_overview where project_id = $1',
         [projectA.id],
-      );
+      )) as { project_id: string; contract_amount: string }[];
       expect(rows).toHaveLength(1);
       // node-postgres returns bigint as a string, unlike PostgREST's wire
       // format (a JS number, ADR 0008) -- this test goes through the raw pg
