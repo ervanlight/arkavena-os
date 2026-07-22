@@ -56,6 +56,7 @@ export {
 export { createProjectAction, getProjectAction, listProjectsAction, updateProjectAction } from './actions/project-actions';
 export {
   addProjectMemberAction,
+  getMyProjectRolesAction,
   listProjectMembersAction,
   removeProjectMemberAction,
 } from './actions/project-member-actions';

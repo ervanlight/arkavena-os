@@ -59,6 +59,23 @@ export async function getMyProjectRole(
   return data?.project_role ?? null;
 }
 
+/**
+ * Every project_role the caller holds, across every project -- used to
+ * decide where a bare magic link (no explicit `next`) should land, since
+ * ActionContext.orgRole is null for every project-role-only user and there
+ * is otherwise no way to tell a site_coordinator/mandor apart from a
+ * client_approver at that point. RLS's project_members_select_self policy
+ * already scopes this to the caller's own rows.
+ */
+export async function listMyProjectRoles(supabase: ServerSupabase, userId: string): Promise<Enums<'project_role'>[]> {
+  const { data, error } = await supabase.from('project_members').select('project_role').eq('user_id', userId);
+
+  if (error !== null) {
+    throw new InfraError(`Failed to list project roles for user ${userId}: ${error.message}`);
+  }
+  return data.map((row) => row.project_role);
+}
+
 export async function insertProjectMember(
   supabase: ServerSupabase,
   input: NewProjectMember,

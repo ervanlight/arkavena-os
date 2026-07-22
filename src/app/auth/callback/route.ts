@@ -1,5 +1,8 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createServerSupabase } from '@/core/db/client.server';
+import { getCurrentUser } from '@/core/auth/session';
+import { decideDefaultLanding } from '@/core/auth/default-landing';
+import { getMyProjectRolesAction } from '@/modules/projects';
 import { logger } from '@/core/logging/logger';
 
 /**
@@ -10,7 +13,7 @@ import { logger } from '@/core/logging/logger';
  */
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const code = request.nextUrl.searchParams.get('code');
-  const next = request.nextUrl.searchParams.get('next') ?? '/cc';
+  const explicitNext = request.nextUrl.searchParams.get('next');
 
   if (code === null) {
     return NextResponse.redirect(new URL('/login?error=missing_code', request.url));
@@ -24,8 +27,24 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     return NextResponse.redirect(new URL('/login?error=invalid_link', request.url));
   }
 
+  const next = explicitNext ?? (await resolveDefaultLanding());
+
   // A relative path only. Trusting a redirect target that came from a query
   // string would turn this endpoint into an open redirector.
   const safeNext = next.startsWith('/') && !next.startsWith('//') ? next : '/cc';
   return NextResponse.redirect(new URL(safeNext, request.url));
+}
+
+/**
+ * Gathers the two facts the redirect depends on (org role, project roles)
+ * and hands them to `decideDefaultLanding` -- kept separate from that pure
+ * function specifically so the branching itself has a Vitest-level unit
+ * test that needs no request context.
+ */
+async function resolveDefaultLanding(): Promise<string> {
+  const user = await getCurrentUser();
+  if (user === null) return '/cc';
+
+  const roles = await getMyProjectRolesAction(undefined);
+  return decideDefaultLanding(user.orgRole, roles.ok ? roles.data : []);
 }

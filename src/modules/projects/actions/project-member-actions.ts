@@ -11,9 +11,11 @@ import {
   getProjectMember,
   insertProjectMember,
   listProjectMembers,
+  listMyProjectRoles,
 } from '../data/project-members-repository';
 import { addProjectMemberSchema, removeProjectMemberSchema } from '../schemas';
 import type { ProjectMember } from '../types';
+import type { Enums } from '@/core/db/database.types';
 
 export const addProjectMemberAction = safeAction(
   {
@@ -65,6 +67,25 @@ export const removeProjectMemberAction = safeAction(
     });
 
     return null;
+  },
+);
+
+/**
+ * No `permission` entry: this is the "available to any signed-in user" case
+ * safeAction's own doc comment calls out. It only ever returns the caller's
+ * own membership rows (RLS's project_members_select_self), so there is no
+ * resource to gate -- used by auth/callback to decide where a bare magic
+ * link (no explicit `next`) should land for a project-role-only user.
+ */
+export const getMyProjectRolesAction = safeAction(
+  {
+    schema: z.void(),
+    loadContext: getActionContext,
+    name: 'projects.getMyProjectRoles',
+  },
+  async (_input, ctx): Promise<Enums<'project_role'>[]> => {
+    const supabase = await createServerSupabase();
+    return listMyProjectRoles(supabase, ctx.userId);
   },
 );
 
