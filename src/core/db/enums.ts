@@ -178,3 +178,15 @@ export const CLIENT_DECISION_OUTCOME = {
   APPROVED: 'approved',
   REJECTED: 'rejected',
 } satisfies Record<string, Enums<'client_decision_outcome'>>;
+
+// ---------------------------------------------------------------------------
+// Fase 7 (modules/billing)
+// ---------------------------------------------------------------------------
+
+/** No "overdue" member -- computed at read time, not stored (ADR 0017 SS1). */
+export const INVOICE_STATUS = {
+  DRAFT: 'draft',
+  ISSUED: 'issued',
+  PAID: 'paid',
+  CANCELLED: 'cancelled',
+} satisfies Record<string, Enums<'invoice_status'>>;

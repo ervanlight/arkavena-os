@@ -666,6 +666,7 @@ export type Database = {
           deleted_at: string | null
           expected_date: string
           id: string
+          invoice_id: string | null
           milestone_id: string | null
           organization_id: string
           project_id: string
@@ -679,6 +680,7 @@ export type Database = {
           deleted_at?: string | null
           expected_date: string
           id?: string
+          invoice_id?: string | null
           milestone_id?: string | null
           organization_id: string
           project_id: string
@@ -692,6 +694,7 @@ export type Database = {
           deleted_at?: string | null
           expected_date?: string
           id?: string
+          invoice_id?: string | null
           milestone_id?: string | null
           organization_id?: string
           project_id?: string
@@ -699,6 +702,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "funding_receipts_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "funding_receipts_milestone_id_fkey"
             columns: ["milestone_id"]
@@ -894,6 +904,129 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "zones"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          amount: number
+          approved_at: string | null
+          approved_by: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          cancelled_reason: string | null
+          change_order_id: string | null
+          created_at: string
+          created_by: string
+          deleted_at: string | null
+          due_date: string
+          id: string
+          issued_at: string | null
+          milestone_id: string
+          organization_id: string
+          project_id: string
+          status: Database["public"]["Enums"]["invoice_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          approved_at?: string | null
+          approved_by?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          cancelled_reason?: string | null
+          change_order_id?: string | null
+          created_at?: string
+          created_by: string
+          deleted_at?: string | null
+          due_date: string
+          id?: string
+          issued_at?: string | null
+          milestone_id: string
+          organization_id: string
+          project_id: string
+          status?: Database["public"]["Enums"]["invoice_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          cancelled_reason?: string | null
+          change_order_id?: string | null
+          created_at?: string
+          created_by?: string
+          deleted_at?: string | null
+          due_date?: string
+          id?: string
+          issued_at?: string | null
+          milestone_id?: string
+          organization_id?: string
+          project_id?: string
+          status?: Database["public"]["Enums"]["invoice_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_cancelled_by_fkey"
+            columns: ["cancelled_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_change_order_id_fkey"
+            columns: ["change_order_id"]
+            isOneToOne: false
+            referencedRelation: "change_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_milestone_id_fkey"
+            columns: ["milestone_id"]
+            isOneToOne: false
+            referencedRelation: "milestones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -1319,6 +1452,67 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string
+          deleted_at: string | null
+          id: string
+          invoice_id: string
+          organization_id: string
+          paid_at: string
+          proof_path: string | null
+          recorded_by: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          invoice_id: string
+          organization_id: string
+          paid_at?: string
+          proof_path?: string | null
+          recorded_by: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          invoice_id?: string
+          organization_id?: string
+          paid_at?: string
+          proof_path?: string | null
+          recorded_by?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_recorded_by_fkey"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       photos: {
         Row: {
@@ -2145,6 +2339,7 @@ export type Database = {
       client_decision_outcome: "approved" | "rejected"
       contract_status: "draft" | "active" | "completed" | "terminated"
       inspection_status: "pending" | "passed" | "failed"
+      invoice_status: "draft" | "issued" | "paid" | "cancelled"
       issue_severity: "low" | "medium" | "high"
       issue_status: "open" | "resolved"
       material_request_status: "requested" | "fulfilled" | "cancelled"
@@ -2332,6 +2527,7 @@ export const Constants = {
       client_decision_outcome: ["approved", "rejected"],
       contract_status: ["draft", "active", "completed", "terminated"],
       inspection_status: ["pending", "passed", "failed"],
+      invoice_status: ["draft", "issued", "paid", "cancelled"],
       issue_severity: ["low", "medium", "high"],
       issue_status: ["open", "resolved"],
       material_request_status: ["requested", "fulfilled", "cancelled"],
