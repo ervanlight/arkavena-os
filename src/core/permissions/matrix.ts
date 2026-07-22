@@ -303,6 +303,41 @@ export const PERMISSIONS = {
     /** open -> resolved, stamping resolved_by/resolved_at. */
     resolve: [...ORG_ROLES, 'site_coordinator', 'mandor'],
   },
+
+  // -------------------------------------------------------------------------
+  // Fase 5 (modules/quality-gate)
+  //
+  // Staff-only, like contracts/milestones (Fase 1) -- no project role
+  // appears anywhere in this section. This is an internal QC mechanism
+  // QS/Technical Director operate, not something a field or client role
+  // ever reaches.
+  // -------------------------------------------------------------------------
+
+  hold_point_template: {
+    view: [...ORG_ROLES],
+    create: [...ORG_ROLES],
+    update: [...ORG_ROLES],
+  },
+
+  inspection: {
+    view: [...ORG_ROLES],
+    create: [...ORG_ROLES],
+    update: [...ORG_ROLES],
+    /**
+     * ARCHITECTURE.md 4.4: "Override teknis hanya oleh Technical Director".
+     * fn_inspections_guard_td_only_override (ADR 0014's migration) is the
+     * real, unbypassable check; this is only the friendly Indonesian
+     * refusal for everyone else, same two-layer split as
+     * cash_gate_override.create/owner.
+     */
+    override: ['technical_director'],
+  },
+
+  nonconformity: {
+    view: [...ORG_ROLES],
+    create: [...ORG_ROLES],
+    resolve: [...ORG_ROLES],
+  },
 } as const satisfies PermissionMatrix;
 
 // ---------------------------------------------------------------------------

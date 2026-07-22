@@ -57,6 +57,9 @@ const RESOURCE_TABLES: Record<Resource, string> = {
   photo: 'photos',
   material_request: 'material_requests',
   issue: 'issues',
+  hold_point_template: 'hold_point_templates',
+  inspection: 'inspections',
+  nonconformity: 'nonconformities',
 };
 
 /** Matrix actions that map onto a SQL command the policy list should cover. */
@@ -84,6 +87,10 @@ const ACTION_COMMANDS: Record<string, 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE'>
   // change_orders' own named lifecycle actions above.
   update_status: 'UPDATE',
   resolve: 'UPDATE',
+  // ARCHITECTURE.md 4.4's TD-only override -- mechanically still just an
+  // UPDATE of inspections.overridden_by/override_reason/overridden_at,
+  // guarded by fn_inspections_guard_td_only_override (ADR 0014).
+  override: 'UPDATE',
   // change_role and invite are deliberately absent. Neither has, or should
   // ever have, a matching RLS policy: change_role is enforced by
   // fn_users_guard_privileged_columns (a trigger, not a policy), and invite

@@ -325,6 +325,49 @@ expected to change, only its status.
 | One `daily_logs` row per project per day | `uq_daily_logs_project_id_log_date` |
 | A photo is always tied to a `project_id` **and** a `zone_id` (both `NOT NULL`) — the literal Fase 4 exit criterion | column constraints, not a trigger |
 
+## Fase 5 — quality-gate (Wave 8)
+
+Staff-only, like `contracts`/`milestones` (Fase 1) — no project role, field
+or client-facing, appears anywhere in this section at all. Unlike Fase 4's
+field-reporting tables (`site_coordinator`/`mandor` get real SELECT/INSERT/
+UPDATE access), inspections are something QS/Technical Director record
+about the field, not something the field records about itself.
+
+| Table | Owner/TD/Finance/QS/Procurement | Any project role |
+| --- | --- | --- |
+| `hold_point_templates` | CRUD\* (org) | — |
+| `inspections` | CRUD\* (org) | — |
+| `nonconformities` | CRUD\* (org) | — |
+
+\* "CRUD" here means SELECT/INSERT/UPDATE — no DELETE policy exists for
+anyone, same as every other table in this document; soft delete
+(`deleted_at`) is the removal path.
+
+### What is deliberately absent
+
+**No project role at all — not even `site_coordinator`/`mandor`.** ADR
+0014's own reasoning: recording whether a hold point passed is a QS
+judgment call about the field, not something the field reports about
+itself the way a daily log or a photo is. A mandor sees the *consequence*
+(a blocked work package, surfaced through `getWorkPackageProceedStatusAction`
+in the Command Center UI they'd need to ask about), never the `inspections`
+row directly.
+
+### Column-level and cross-row rules RLS cannot express
+
+| Rule | Enforced by |
+| --- | --- |
+| A required hold point must have a passing or overridden inspection before its own work package may move to `in_progress` | `trg_work_packages_guard_hold_point` |
+| That check is independent of Cash Gate's own — either can block the same transition on its own, and neither's passing opens the other | `trg_work_packages_guard_hold_point` + the pre-existing `trg_work_packages_guard_cash_gate` (Fase 2), two separate triggers on the same event |
+| `inspections.overridden_by` must belong to a `technical_director` | `fn_inspections_guard_td_only_override` |
+
+`requirePermission()` for `inspection.override` lists only
+`technical_director` — the friendly Indonesian refusal for everyone else.
+`fn_inspections_guard_td_only_override` is what actually holds regardless of
+what the application layer decided (CLAUDE.md law 0.3's two independent
+layers), the identical split ADR 0010 already established for
+`cash_gate_overrides`.
+
 ## Later waves
 
 Added as their tables land. A table may not reach main without a row here, its
