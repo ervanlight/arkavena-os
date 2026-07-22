@@ -60,6 +60,7 @@ const RESOURCE_TABLES: Record<Resource, string> = {
   hold_point_template: 'hold_point_templates',
   inspection: 'inspections',
   nonconformity: 'nonconformities',
+  client_decision: 'client_decisions',
 };
 
 /** Matrix actions that map onto a SQL command the policy list should cover. */

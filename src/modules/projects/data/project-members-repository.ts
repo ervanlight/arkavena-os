@@ -1,7 +1,7 @@
 import 'server-only';
 import type { ServerSupabase } from '@/core/db/client.server';
 import type { Enums } from '@/core/db/database.types';
-import { InfraError, NotFoundError } from '@/core/errors/app-error';
+import { NotFoundError } from '@/core/errors/app-error';
 import type { NewProjectMember, ProjectMember } from '../types';
 
 /** All direct `project_members` table access lives here (ARCHITECTURE.md 1.2). */
@@ -13,18 +13,14 @@ export async function listProjectMembers(supabase: ServerSupabase, projectId: st
     .eq('project_id', projectId)
     .order('created_at');
 
-  if (error !== null) {
-    throw new InfraError(`Failed to list members for project ${projectId}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   return data;
 }
 
 export async function getProjectMember(supabase: ServerSupabase, id: string): Promise<ProjectMember> {
   const { data, error } = await supabase.from('project_members').select('*').eq('id', id).maybeSingle();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to load project member ${id}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   if (data === null) {
     throw new NotFoundError(`Project member ${id} not found`, { meta: { projectMemberId: id } });
   }
@@ -53,9 +49,7 @@ export async function getMyProjectRole(
     .eq('user_id', userId)
     .maybeSingle();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to load project role for user ${userId} on project ${projectId}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   return data?.project_role ?? null;
 }
 
@@ -70,9 +64,7 @@ export async function getMyProjectRole(
 export async function listMyProjectRoles(supabase: ServerSupabase, userId: string): Promise<Enums<'project_role'>[]> {
   const { data, error } = await supabase.from('project_members').select('project_role').eq('user_id', userId);
 
-  if (error !== null) {
-    throw new InfraError(`Failed to list project roles for user ${userId}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   return data.map((row) => row.project_role);
 }
 
@@ -95,9 +87,27 @@ export async function listMyFieldProjects(
     .eq('user_id', userId)
     .in('project_role', ['site_coordinator', 'mandor']);
 
-  if (error !== null) {
-    throw new InfraError(`Failed to list field projects for user ${userId}: ${error.message}`);
-  }
+  if (error !== null) throw error;
+  return data.flatMap((row) => (row.project === null ? [] : [row.project]));
+}
+
+/**
+ * The projects a client_approver/client_viewer actually has access to, with
+ * names -- the client portal (Fase 6) needs this to build its project
+ * picker/nav the same way SiteFlow's home page uses listMyFieldProjects.
+ * Same RLS scoping (project_members_select_self), same shape.
+ */
+export async function listMyClientProjects(
+  supabase: ServerSupabase,
+  userId: string,
+): Promise<{ id: string; name: string }[]> {
+  const { data, error } = await supabase
+    .from('project_members')
+    .select('project:projects(id, name)')
+    .eq('user_id', userId)
+    .in('project_role', ['client_approver', 'client_viewer']);
+
+  if (error !== null) throw error;
   return data.flatMap((row) => (row.project === null ? [] : [row.project]));
 }
 
@@ -107,16 +117,12 @@ export async function insertProjectMember(
 ): Promise<ProjectMember> {
   const { data, error } = await supabase.from('project_members').insert(input).select().single();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to add project member: ${error.message}`);
-  }
+  if (error !== null) throw error;
   return data;
 }
 
 export async function deleteProjectMember(supabase: ServerSupabase, id: string): Promise<void> {
   const { error } = await supabase.from('project_members').delete().eq('id', id);
 
-  if (error !== null) {
-    throw new InfraError(`Failed to remove project member ${id}: ${error.message}`);
-  }
+  if (error !== null) throw error;
 }

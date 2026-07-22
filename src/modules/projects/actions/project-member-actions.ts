@@ -10,6 +10,7 @@ import {
   deleteProjectMember,
   getProjectMember,
   insertProjectMember,
+  listMyClientProjects,
   listMyFieldProjects,
   listProjectMembers,
   listMyProjectRoles,
@@ -100,6 +101,19 @@ export const listMyFieldProjectsAction = safeAction(
   async (_input, ctx): Promise<{ id: string; name: string }[]> => {
     const supabase = await createServerSupabase();
     return listMyFieldProjects(supabase, ctx.userId);
+  },
+);
+
+/** Same "available to any signed-in user" case as listMyFieldProjectsAction -- the client portal's project picker/nav uses this. */
+export const listMyClientProjectsAction = safeAction(
+  {
+    schema: z.void(),
+    loadContext: getActionContext,
+    name: 'projects.listMyClientProjects',
+  },
+  async (_input, ctx): Promise<{ id: string; name: string }[]> => {
+    const supabase = await createServerSupabase();
+    return listMyClientProjects(supabase, ctx.userId);
   },
 );
 

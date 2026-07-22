@@ -368,6 +368,42 @@ what the application layer decided (CLAUDE.md law 0.3's two independent
 layers), the identical split ADR 0010 already established for
 `cash_gate_overrides`.
 
+## Fase 6 — client-portal (Wave 8)
+
+`client_decisions` (ADR 0016) is the only table this module owns. Staff see
+every decision across their org; `client_approver`/`client_viewer` see only
+their own project's rows. No INSERT/UPDATE/DELETE policy exists for anyone —
+same "append-only, written only by a trigger" shape as `audit_logs`: the
+sole writer is `fn_change_orders_sync_client_decision`, which runs
+`security definer` on `change_orders` (owned by scope-variation).
+
+| Table | Owner/TD/Finance/QS/Procurement | `client_approver` / `client_viewer` |
+| --- | --- | --- |
+| `client_decisions` | SELECT (org) | SELECT (own project only) |
+
+### vw_client_* views
+
+The four views this module reads from (`vw_client_project_overview`,
+`vw_client_zone_progress`, `vw_client_timeline_event`,
+`vw_client_progress_photo`) have no RLS policies of their own — views
+cannot have policies. Each is declared `security_invoker = true`, so access
+is gated entirely by RLS on the tables underneath, checked as the calling
+user:
+
+| View | Gated by (underlying table policy) |
+| --- | --- |
+| `vw_client_project_overview` | `projects_select_member`, `contracts_select_client` (new this wave — `contracts` had no client-facing SELECT policy until Fase 6 needed the contract value) |
+| `vw_client_zone_progress` | `zones_select_member` (progress_entries/work_packages joined in are not filtered by role — the view only ever surfaces an aggregate number, never a raw row) |
+| `vw_client_timeline_event` | `milestones_select_client` (new this wave, same reason as `contracts_select_client`) + `client_decisions_select_client` |
+| `vw_client_progress_photo` | `photos_select_client` (new this wave — `photos` previously only had staff/field-role SELECT policies) |
+
+### Column-level and cross-row rules RLS cannot express
+
+| Rule | Enforced by |
+| --- | --- |
+| `client_decisions.decision` is set if and only if `decided_at` is set | `ck_client_decisions_decision_requires_decided_at` |
+| `client_decisions` stays in sync with `change_orders.status` without a second state machine | `fn_change_orders_sync_client_decision` |
+
 ## Later waves
 
 Added as their tables land. A table may not reach main without a row here, its

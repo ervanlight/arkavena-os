@@ -338,6 +338,23 @@ export const PERMISSIONS = {
     create: [...ORG_ROLES],
     resolve: [...ORG_ROLES],
   },
+
+  // -------------------------------------------------------------------------
+  // Fase 6 (modules/client-portal)
+  //
+  // client_decisions is the only table this module owns (ADR 0016) -- staff
+  // can see the full decision log, client_approver/client_viewer see their
+  // own project's rows (RLS: client_decisions_select_client). The four
+  // vw_client_* views the portal also reads have no resource entry here:
+  // they carry no permission-matrix-checkable action of their own (a plain
+  // SELECT with no create/update/delete), same "available to any signed-in
+  // user, RLS on the underlying tables is what actually gates it" shape as
+  // listMyFieldProjectsAction/getMyProjectRolesAction.
+  // -------------------------------------------------------------------------
+
+  client_decision: {
+    view: [...ORG_ROLES, 'client_approver', 'client_viewer'],
+  },
 } as const satisfies PermissionMatrix;
 
 // ---------------------------------------------------------------------------

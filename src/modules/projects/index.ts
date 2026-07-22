@@ -57,6 +57,7 @@ export { createProjectAction, getProjectAction, listProjectsAction, updateProjec
 export {
   addProjectMemberAction,
   getMyProjectRolesAction,
+  listMyClientProjectsAction,
   listMyFieldProjectsAction,
   listProjectMembersAction,
   removeProjectMemberAction,
