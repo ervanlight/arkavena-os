@@ -606,6 +606,160 @@ export type Database = {
           },
         ]
       }
+      hold_point_templates: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          organization_id: string
+          sort_order: number
+          updated_at: string
+          work_type: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          organization_id: string
+          sort_order?: number
+          updated_at?: string
+          work_type: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          organization_id?: string
+          sort_order?: number
+          updated_at?: string
+          work_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hold_point_templates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inspections: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          hold_point_template_id: string
+          id: string
+          inspected_at: string | null
+          inspected_by: string | null
+          notes: string | null
+          organization_id: string
+          overridden_at: string | null
+          overridden_by: string | null
+          override_reason: string | null
+          project_id: string
+          status: Database["public"]["Enums"]["inspection_status"]
+          updated_at: string
+          work_package_id: string
+          zone_id: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          hold_point_template_id: string
+          id?: string
+          inspected_at?: string | null
+          inspected_by?: string | null
+          notes?: string | null
+          organization_id: string
+          overridden_at?: string | null
+          overridden_by?: string | null
+          override_reason?: string | null
+          project_id: string
+          status?: Database["public"]["Enums"]["inspection_status"]
+          updated_at?: string
+          work_package_id: string
+          zone_id: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          hold_point_template_id?: string
+          id?: string
+          inspected_at?: string | null
+          inspected_by?: string | null
+          notes?: string | null
+          organization_id?: string
+          overridden_at?: string | null
+          overridden_by?: string | null
+          override_reason?: string | null
+          project_id?: string
+          status?: Database["public"]["Enums"]["inspection_status"]
+          updated_at?: string
+          work_package_id?: string
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inspections_hold_point_template_id_fkey"
+            columns: ["hold_point_template_id"]
+            isOneToOne: false
+            referencedRelation: "hold_point_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inspections_inspected_by_fkey"
+            columns: ["inspected_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inspections_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inspections_overridden_by_fkey"
+            columns: ["overridden_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inspections_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inspections_work_package_id_fkey"
+            columns: ["work_package_id"]
+            isOneToOne: false
+            referencedRelation: "work_packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inspections_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       issues: {
         Row: {
           created_at: string
@@ -843,6 +997,67 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nonconformities: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          description: string
+          id: string
+          inspection_id: string
+          organization_id: string
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: Database["public"]["Enums"]["issue_severity"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          description: string
+          id?: string
+          inspection_id: string
+          organization_id: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: Database["public"]["Enums"]["issue_severity"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          description?: string
+          id?: string
+          inspection_id?: string
+          organization_id?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: Database["public"]["Enums"]["issue_severity"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nonconformities_inspection_id_fkey"
+            columns: ["inspection_id"]
+            isOneToOne: false
+            referencedRelation: "inspections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nonconformities_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nonconformities_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -1406,6 +1621,7 @@ export type Database = {
           project_id: string
           status: Database["public"]["Enums"]["work_package_status"]
           updated_at: string
+          work_type: string | null
           zone_id: string | null
         }
         Insert: {
@@ -1419,6 +1635,7 @@ export type Database = {
           project_id: string
           status?: Database["public"]["Enums"]["work_package_status"]
           updated_at?: string
+          work_type?: string | null
           zone_id?: string | null
         }
         Update: {
@@ -1432,6 +1649,7 @@ export type Database = {
           project_id?: string
           status?: Database["public"]["Enums"]["work_package_status"]
           updated_at?: string
+          work_type?: string | null
           zone_id?: string | null
         }
         Relationships: [
@@ -1555,6 +1773,7 @@ export type Database = {
           project_id: string
           status: Database["public"]["Enums"]["work_package_status"]
           updated_at: string
+          work_type: string | null
           zone_id: string | null
         }
         SetofOptions: {
@@ -1605,6 +1824,7 @@ export type Database = {
         | "rejected"
         | "completed"
       contract_status: "draft" | "active" | "completed" | "terminated"
+      inspection_status: "pending" | "passed" | "failed"
       issue_severity: "low" | "medium" | "high"
       issue_status: "open" | "resolved"
       material_request_status: "requested" | "fulfilled" | "cancelled"
@@ -1790,6 +2010,7 @@ export const Constants = {
         "completed",
       ],
       contract_status: ["draft", "active", "completed", "terminated"],
+      inspection_status: ["pending", "passed", "failed"],
       issue_severity: ["low", "medium", "high"],
       issue_status: ["open", "resolved"],
       material_request_status: ["requested", "fulfilled", "cancelled"],

@@ -159,3 +159,13 @@ export const ISSUE_STATUS = {
   OPEN: 'open',
   RESOLVED: 'resolved',
 } satisfies Record<string, Enums<'issue_status'>>;
+
+// ---------------------------------------------------------------------------
+// Fase 5 (modules/quality-gate)
+// ---------------------------------------------------------------------------
+
+export const INSPECTION_STATUS = {
+  PENDING: 'pending',
+  PASSED: 'passed',
+  FAILED: 'failed',
+} satisfies Record<string, Enums<'inspection_status'>>;
