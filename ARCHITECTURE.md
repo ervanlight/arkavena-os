@@ -611,6 +611,17 @@ FASE 10 — AI Scribe & Intelligence                             [modules: ai-sc
   ── CHECKPOINT #5: review kualitas draft AI vs voice note nyata
      berbahasa campuran Indonesia/Jawa dari lapangan. ──
 
+  **Scope dikurangi 2026-07-23** (lihat [ADR 0021](decisions/0021-fase10-scope-reduction-voice-note-and-weekly-report-deferred.md))
+  — shipped: klasifikasi issue, deteksi keterlambatan, ringkasan quote, draft
+  assessment scope. Ditunda ke fase mendatang: voice note → draft daily
+  report (butuh keputusan vendor speech-to-text belum ada) dan CHECKPOINT #5
+  yang melekat padanya (tidak bisa lulus tanpa fitur itu ada), serta draft
+  weekly report (butuh desain jalur review staf sebelum konten AI boleh
+  sampai ke client-portal, belum ada sama sekali). Exit criterion di atas
+  dianggap terpenuhi untuk keempat fitur yang sudah dikirim; dua sisanya
+  bukan utang teknis fase ini, melainkan menunggu keputusan Owner lebih
+  lanjut per ADR 0021.
+
 FASE 11 — Partner Desk + polish                                (setelah internal stabil,
   supplier quotes/delivery/invoice terbatas; notifikasi WA API      sesuai dokumen)
   bila volume sudah tinggi.
