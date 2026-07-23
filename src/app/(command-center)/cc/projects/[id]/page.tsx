@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { getProjectAction, listWorkPackagesForProjectAction, listZonesForProjectAction, ZoneMap } from '@/modules/projects';
 import { AddZoneForm } from './add-zone-form';
 import { StartWorkPackageForm } from './start-work-package-form';
+import { DelayDetectionWidget } from './delay-detection-widget';
 
 const WORK_PACKAGE_STATUS_LABEL_ID: Record<string, string> = {
   not_started: 'Belum mulai',
@@ -102,6 +103,8 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
           <dd className="text-slate-900">{project.target_end_date ?? '—'}</dd>
         </dl>
       </div>
+
+      <DelayDetectionWidget projectId={project.id} />
 
       <div className="space-y-4">
         <h2 className="text-base font-semibold text-slate-900">Zona (ZoneMap)</h2>
