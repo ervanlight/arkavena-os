@@ -256,6 +256,15 @@ export async function cleanupOrganizations(orgIds: readonly string[]): Promise<v
       // client_decisions references change_orders, so it goes first.
       await run('delete from client_decisions where organization_id = any($1::uuid[])', [orgIds]);
       await run('delete from change_orders where organization_id = any($1::uuid[])', [orgIds]);
+      // Wave 5/6 (Fase 8, modules/estimating): same class of gap as Fase
+      // 4/5/6's own -- estimates/estimate_items/proposals all reference
+      // projects/organizations with ON DELETE RESTRICT, so leaving them out
+      // here does not fail loudly (replica mode again), it just blocks the
+      // `projects` delete below once a test actually creates one. proposals
+      // and estimate_items before estimates, all three before projects.
+      await run('delete from proposals where organization_id = any($1::uuid[])', [orgIds]);
+      await run('delete from estimate_items where organization_id = any($1::uuid[])', [orgIds]);
+      await run('delete from estimates where organization_id = any($1::uuid[])', [orgIds]);
       // Fase 1 (modules/crm, modules/projects): children before parents, even
       // though replica mode suspends the FK checks that would otherwise force
       // this order -- keeping it anyway is cheap and reads as documentation.
