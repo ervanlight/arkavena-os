@@ -63,6 +63,9 @@ const RESOURCE_TABLES: Record<Resource, string> = {
   client_decision: 'client_decisions',
   invoice: 'invoices',
   payment: 'payments',
+  lead: 'leads',
+  vendor: 'vendors',
+  cost_library: 'cost_library',
 };
 
 /** Matrix actions that map onto a SQL command the policy list should cover. */
@@ -100,6 +103,9 @@ const ACTION_COMMANDS: Record<string, 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE'>
   // for `issue` (ADR 0017), same "coarse policy, precise trigger" split.
   issue: 'UPDATE',
   cancel: 'UPDATE',
+  // Fase 8: converting a lead is, mechanically, an UPDATE of leads.project_id
+  // (+ status) -- leads_update_staff is the policy underneath.
+  convert: 'UPDATE',
   // change_role and invite are deliberately absent. Neither has, or should
   // ever have, a matching RLS policy: change_role is enforced by
   // fn_users_guard_privileged_columns (a trigger, not a policy), and invite

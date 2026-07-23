@@ -62,6 +62,14 @@ export const ERROR_CODES = {
    */
   VARIATION_NOT_FUNDED: 'VARIATION_NOT_FUNDED',
 
+  /**
+   * A lead was converted to a project before reaching 'qualified'
+   * (ARCHITECTURE.md 8, ADR 0018 SS2). Application-layer only, not a DB
+   * trigger -- this gates a workflow convenience action, not a money or
+   * approval rule (CLAUDE.md 0.3's two-layer requirement).
+   */
+  LEAD_NOT_QUALIFIED: 'LEAD_NOT_QUALIFIED',
+
   /** Supabase, storage, or another dependency failed. Never shown verbatim to a client. */
   INFRA_UNAVAILABLE: 'INFRA_UNAVAILABLE',
 
@@ -93,6 +101,7 @@ export const ERROR_MESSAGES_ID: Record<ErrorCode, string> = {
   AUDIT_REASON_REQUIRED: 'Alasan wajib diisi untuk tindakan persetujuan atau override.',
   VARIATION_INVALID_TRANSITION: 'Perubahan status untuk variation ini tidak diperbolehkan saat ini.',
   VARIATION_NOT_FUNDED: 'Variation ini belum berstatus "dana masuk" -- pekerjaan belum bisa dibuka.',
+  LEAD_NOT_QUALIFIED: 'Lead harus berstatus "qualified" sebelum bisa dikonversi menjadi proyek.',
   INFRA_UNAVAILABLE: 'Sistem sedang tidak dapat diakses. Coba beberapa saat lagi.',
   RATE_LIMITED: 'Terlalu banyak percobaan. Tunggu sebentar sebelum mencoba lagi.',
   INTERNAL_ERROR: 'Terjadi kesalahan pada sistem. Tim kami sudah dicatat kejadiannya.',
@@ -109,6 +118,7 @@ export const ERROR_HTTP_STATUS: Record<ErrorCode, number> = {
   AUDIT_REASON_REQUIRED: 422,
   VARIATION_INVALID_TRANSITION: 422,
   VARIATION_NOT_FUNDED: 422,
+  LEAD_NOT_QUALIFIED: 422,
   INFRA_UNAVAILABLE: 503,
   RATE_LIMITED: 429,
   INTERNAL_ERROR: 500,

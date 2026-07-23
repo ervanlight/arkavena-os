@@ -21,6 +21,7 @@ free-form string cannot be counted, searched, or translated.
 | `AUDIT_REASON_REQUIRED` | 422 | Alasan wajib diisi untuk tindakan persetujuan atau override. | An override or approval reached the audit layer with no reason |
 | `VARIATION_INVALID_TRANSITION` | 422 | Perubahan status untuk variation ini tidak diperbolehkan saat ini. | A change_orders transition was attempted that either doesn't exist in the state graph for the current status, or failed a guard (wrong actor role, or client_approve before cost/schedule impact were filled in) |
 | `VARIATION_NOT_FUNDED` | 422 | Variation ini belum berstatus "dana masuk" -- pekerjaan belum bisa dibuka. | A work package tried to attach to a change order that isn't `approved_funded` yet |
+| `LEAD_NOT_QUALIFIED` | 422 | Lead harus berstatus "qualified" sebelum bisa dikonversi menjadi proyek. | `convertLeadToProjectAction` called before the lead reached `qualified` |
 | `INFRA_UNAVAILABLE` | 503 | Sistem sedang tidak dapat diakses. Coba beberapa saat lagi. | Supabase, storage, or the network failed |
 | `RATE_LIMITED` | 429 | Terlalu banyak percobaan. Tunggu sebentar sebelum mencoba lagi. | Too many magic link requests |
 | `INTERNAL_ERROR` | 500 | Terjadi kesalahan pada sistem. Tim kami sudah dicatat kejadiannya. | Anything uncategorised. An unexpected one in the logs is a bug, not a category |
@@ -60,10 +61,11 @@ someone forgot to implement -- so this table only lists what a phase actually
 added, not a roadmap.
 
 **Fase 2 — Cash Gate** did not end up needing its own codes: the
-override/block path goes through the database trigger and `InfraError`
-rather than a domain-level `Result` the action layer translates (see ADR
-0012's note on this gap). `evaluateGateAction` exists and is unit-tested, but
-nothing in `modules/cash-gate/actions` calls it yet.
+override/block path goes through the database trigger's hinted
+`check_violation`, which `asAppError` classifies as `VALIDATION_FAILED` and
+surfaces verbatim (ADR 0015) — not a domain-level `Result` the action layer
+translates (see ADR 0012's note on this gap). `evaluateGateAction` exists and
+is unit-tested, but nothing in `modules/cash-gate/actions` calls it yet.
 
 **Fase 3 — Scope & Variation** added `VARIATION_INVALID_TRANSITION` and
 `VARIATION_NOT_FUNDED` above -- both wired into `modules/scope-variation`'s
@@ -76,3 +78,12 @@ Still pending their own phases: `CASH_GATE_RED`/`CASH_GATE_OVERDUE`/
 `CASH_GATE_OVERRIDE_REQUIRES_REASON` (would need Fase 2's action layer
 revisited to actually use them), `HOLD_POINT_PENDING`/
 `HOLD_POINT_OVERRIDE_DENIED` (Fase 5).
+
+**Fase 8 — CRM/Assessment/Estimating/Procurement** added `LEAD_NOT_QUALIFIED`
+above, thrown directly by `convertLeadToProjectAction` -- deliberately
+application-layer only, not a database trigger, since a lead's conversion
+readiness is a workflow convenience gate, not a money or approval rule
+(CLAUDE.md 0.3's two-layer requirement targets the latter). The margin-floor
+warning (ADR 0018 SS4) needed no code at all: it is a UI-only advisory
+number, never thrown, the same treatment Decision Clock (Fase 6) and the
+aging tiers (Fase 7) already got.

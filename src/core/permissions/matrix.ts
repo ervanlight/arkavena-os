@@ -380,6 +380,38 @@ export const PERMISSIONS = {
     view: [...ORG_ROLES, 'client_approver', 'client_viewer'],
     create: ['owner', 'finance'],
   },
+
+  // -------------------------------------------------------------------------
+  // Fase 8 (modules/crm, modules/assessment, modules/estimating, modules/procurement)
+  //
+  // Staff-only across the board, no project role appears anywhere in this
+  // section -- these are internal sales/estimating/procurement tools, the
+  // same shape quality-gate (Fase 5) already established for "an internal
+  // mechanism, not something a field or client role ever reaches."
+  // `lead.convert` lists the same roles as `project.create` deliberately
+  // (convertLeadToProjectAction calls createProjectAction, ADR 0018 SS2) --
+  // anyone who can convert a lead can also create the project it produces,
+  // so the nested action's own permission check never surprises the caller.
+  // -------------------------------------------------------------------------
+
+  lead: {
+    view: [...ORG_ROLES],
+    create: [...ORG_ROLES],
+    update: [...ORG_ROLES],
+    convert: [...ORG_ROLES],
+  },
+
+  vendor: {
+    view: [...ORG_ROLES],
+    create: [...ORG_ROLES],
+    update: [...ORG_ROLES],
+  },
+
+  cost_library: {
+    view: [...ORG_ROLES],
+    create: [...ORG_ROLES],
+    update: [...ORG_ROLES],
+  },
 } as const satisfies PermissionMatrix;
 
 // ---------------------------------------------------------------------------

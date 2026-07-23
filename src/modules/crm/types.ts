@@ -1,3 +1,4 @@
+import type { Rupiah } from '@/core/money/rupiah';
 import type { Tables, TablesInsert, TablesUpdate } from '@/core/db/database.types';
 
 /**
@@ -17,3 +18,8 @@ export type SiteUpdate = TablesUpdate<'sites'>;
 
 export type ClientUser = Tables<'client_users'>;
 export type NewClientUser = TablesInsert<'client_users'>;
+
+/** `estimated_value` overridden from the generated `number | null` to `Rupiah | null` (ARCHITECTURE.md 3.1's Omit-and-compose), same pattern as every other money column in this codebase. */
+export type Lead = Omit<Tables<'leads'>, 'estimated_value'> & { estimated_value: Rupiah | null };
+export type NewLead = Omit<TablesInsert<'leads'>, 'estimated_value'> & { estimated_value?: Rupiah | null };
+export type LeadUpdate = Omit<TablesUpdate<'leads'>, 'estimated_value'> & { estimated_value?: Rupiah | null };
