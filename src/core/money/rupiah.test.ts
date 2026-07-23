@@ -9,6 +9,7 @@ import {
   formatBp,
   formatRp,
   mulRp,
+  mulRpQuantity,
   ratioBp,
   serialiseRp,
   splitRp,
@@ -168,6 +169,42 @@ describe('applyBp -- rounding is always stated, never assumed', () => {
 
   it('is exact when the rate divides cleanly', () => {
     expect(applyBp(toRupiah('1000000000000000'), 1_100, 'floor')).toBe(110_000_000_000_000n);
+  });
+});
+
+describe('mulRpQuantity -- a fractional real-world quantity, rounding always stated', () => {
+  it('is exact when the product divides cleanly', () => {
+    expect(mulRpQuantity(toRupiah(150_000), 100, 'floor')).toBe(15_000_000n);
+  });
+
+  it('rounds each way as asked for a three-decimal quantity', () => {
+    // Rp 7/unit x 3.333 units = 23.331 -- not a whole rupiah either way.
+    const unitPrice = toRupiah(7);
+    const quantity = 3.333;
+
+    expect(mulRpQuantity(unitPrice, quantity, 'floor')).toBe(23n);
+    expect(mulRpQuantity(unitPrice, quantity, 'ceil')).toBe(24n);
+    expect(mulRpQuantity(unitPrice, quantity, 'half-up')).toBe(23n); // .331 rounds down
+  });
+
+  it('rounds half away from zero for half-up', () => {
+    expect(mulRpQuantity(toRupiah(3), 0.5, 'half-up')).toBe(2n); // 1.5 rounds up
+  });
+
+  it('rounds negative amounts away from zero rather than toward it', () => {
+    // bigint division truncates toward zero, which would make floor() of a
+    // negative value behave like ceil(). These assert the correction works.
+    expect(mulRpQuantity(toRupiah(-7), 3.333, 'floor')).toBe(-24n);
+    expect(mulRpQuantity(toRupiah(-7), 3.333, 'ceil')).toBe(-23n);
+  });
+
+  it('stays exact at a large unit price and a fractional quantity', () => {
+    expect(mulRpQuantity(toRupiah('1000000000000'), 2.5, 'floor')).toBe(2_500_000_000_000n);
+  });
+
+  it('rejects a non-finite quantity', () => {
+    expect(() => mulRpQuantity(toRupiah(1_000), Infinity, 'floor')).toThrow(TypeError);
+    expect(() => mulRpQuantity(toRupiah(1_000), NaN, 'floor')).toThrow(TypeError);
   });
 });
 

@@ -120,6 +120,46 @@ export function mulRp(amount: Rupiah, factor: bigint | number): Rupiah {
   return ((amount as bigint) * f) as Rupiah;
 }
 
+/** Three-decimal precision -- matches `estimate_items.quantity numeric(14,3)` exactly (ADR 0018 SS4). */
+export const QUANTITY_SCALE = 1_000;
+
+/**
+ * Multiply by a fractional real-world quantity (m2, m3, ...) at
+ * `QUANTITY_SCALE` precision, rounding mode stated at the call site --
+ * same reasoning as `applyBp`. Distinct from `mulRp` (a whole factor) and
+ * `applyBp` (a rate/percentage): a quantity is neither, but is still
+ * routinely fractional, which is exactly what a plain `mulRp` cannot
+ * accept. `quantity` arrives as a plain `number`, not `Rupiah` -- it is a
+ * count of units, never a money value itself.
+ */
+export function mulRpQuantity(amount: Rupiah, quantity: number, rounding: 'floor' | 'ceil' | 'half-up'): Rupiah {
+  if (!Number.isFinite(quantity)) {
+    throw new TypeError(`quantity must be a finite number, got ${quantity}`);
+  }
+
+  const scaledQuantity = BigInt(Math.round(quantity * QUANTITY_SCALE));
+  const product = (amount as bigint) * scaledQuantity;
+  const divisor = BigInt(QUANTITY_SCALE);
+  const quotient = product / divisor; // bigint division truncates toward zero
+  const remainder = product % divisor;
+
+  if (remainder === 0n) return quotient as Rupiah;
+
+  const negative = product < 0n;
+
+  switch (rounding) {
+    case 'floor':
+      return (negative ? quotient - 1n : quotient) as Rupiah;
+    case 'ceil':
+      return (negative ? quotient : quotient + 1n) as Rupiah;
+    case 'half-up': {
+      const twiceRemainder = (remainder < 0n ? -remainder : remainder) * 2n;
+      if (twiceRemainder < divisor) return quotient as Rupiah;
+      return (negative ? quotient - 1n : quotient + 1n) as Rupiah;
+    }
+  }
+}
+
 export function negateRp(amount: Rupiah): Rupiah {
   return -(amount as bigint) as Rupiah;
 }
