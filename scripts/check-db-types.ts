@@ -26,6 +26,26 @@ function generate(): string {
   );
 }
 
+/**
+ * `pnpm db:types` generates against Supabase Cloud dev (`--project-id`, ADR
+ * 0006); this script generates against the CI-local ephemeral stack
+ * (`--local`). The two code paths in the Supabase CLI are confirmed (by
+ * running both and diffing) to differ in exactly one place regardless of
+ * schema content: `--project-id` emits a two-line explanatory comment plus
+ * a `__InternalSupabase: { PostgrestVersion: "..." }` block right after
+ * `export type Database = {`; `--local` emits neither. Nothing in this
+ * codebase reads that field (it exists only to let `createClient<Database>`
+ * infer a PostgREST version), so the whole comment+block is stripped from
+ * both sides before comparing -- a real schema drift still fails this
+ * check; this specific, understood formatting difference no longer does.
+ */
+function stripInternalSupabaseBlock(source: string): string {
+  return source.replace(
+    /\n(\s*\/\/ Allows to automatically instantiate.*\n\s*\/\/ instead of createClient.*\n)?\s*__InternalSupabase:\s*\{[^}]*\}\n/,
+    '\n',
+  );
+}
+
 function main(): void {
   let committed: string;
   try {
@@ -39,9 +59,10 @@ function main(): void {
   }
 
   const fresh = generate();
+  const committedNormalised = stripInternalSupabaseBlock(committed).trimEnd();
+  const freshNormalised = stripInternalSupabaseBlock(fresh).trimEnd();
 
-  // Normalise trailing whitespace only; any real difference should fail.
-  if (fresh.trimEnd() === committed.trimEnd()) {
+  if (freshNormalised === committedNormalised) {
     process.stdout.write('database.types.ts is up to date with the schema.\n');
     return;
   }
@@ -53,8 +74,8 @@ function main(): void {
       '    pnpm db:types\n\n' +
       'and commit the result. Do not edit the file by hand -- it is generated,\n' +
       'and hand-edits are overwritten the next time anyone runs the command.\n\n' +
-      'First differing lines (committed vs freshly generated --local):\n\n' +
-      diffPreview(committed, fresh) +
+      'First differing lines (committed vs freshly generated --local, both with the __InternalSupabase header stripped):\n\n' +
+      diffPreview(committedNormalised, freshNormalised) +
       '\n',
   );
   process.exitCode = 1;
