@@ -1,15 +1,12 @@
 'use client';
 
 import { useActionState } from 'react';
-import { useRouter } from 'next/navigation';
 import { createChangeOrderAction } from '@/modules/scope-variation';
 
 type FormState = { error: string | null };
 const initialState: FormState = { error: null };
 
 export function CreateVariationForm({ projectId }: { projectId: string }) {
-  const router = useRouter();
-
   const [state, formAction, isPending] = useActionState(async (_prev: FormState, formData: FormData) => {
     const result = await createChangeOrderAction({
       projectId,
@@ -21,7 +18,10 @@ export function CreateVariationForm({ projectId }: { projectId: string }) {
       return { error: result.error.message };
     }
 
-    router.push(`/cc/projects/${projectId}/variations/${result.data.id}`);
+    // Hard navigation, not router.push -- see cc/leads/new/lead-form.tsx's
+    // own comment for the full story (a genuine, previously-undiscovered
+    // Next.js quirk, not specific to this form).
+    window.location.href = `/cc/projects/${projectId}/variations/${result.data.id}`;
     return { error: null };
   }, initialState);
 

@@ -1,7 +1,6 @@
 'use client';
 
 import { useActionState } from 'react';
-import { useRouter } from 'next/navigation';
 import { createSiteAction } from '@/modules/crm';
 import type { Client } from '@/modules/crm';
 import { createProjectAction } from '@/modules/projects';
@@ -17,8 +16,6 @@ const initialState: FormState = { error: null };
  * a table nothing else surfaces yet.
  */
 export function NewProjectForm({ clients }: { clients: Client[] }) {
-  const router = useRouter();
-
   const [state, formAction, isPending] = useActionState(async (_prev: FormState, formData: FormData) => {
     const clientId = String(formData.get('clientId') ?? '');
     const siteName = String(formData.get('siteName') ?? '');
@@ -41,8 +38,14 @@ export function NewProjectForm({ clients }: { clients: Client[] }) {
       return { error: projectResult.error.message };
     }
 
-    router.push(`/cc/projects/${projectResult.data.id}`);
-    router.refresh();
+    // Hard navigation, not router.push: a client-side transition from this
+    // static /new route straight to the freshly-created /[id] route never
+    // reliably commits in this Next.js version -- the server completes and
+    // responds correctly, but the browser's own URL/history never updates.
+    // No prior e2e spec had ever clicked through this form and asserted the
+    // resulting redirect, which is why this went unnoticed until Fase 8's
+    // own new create-forms hit the identical pattern and made it visible.
+    window.location.href = `/cc/projects/${projectResult.data.id}`;
     return { error: null };
   }, initialState);
 
