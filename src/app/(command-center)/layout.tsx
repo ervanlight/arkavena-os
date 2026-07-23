@@ -27,8 +27,20 @@ export default async function CommandCenterLayout({ children }: { children: Reac
             <Link href="/cc/clients" className="text-slate-600 hover:text-slate-900">
               Klien
             </Link>
+            <Link href="/cc/leads" className="text-slate-600 hover:text-slate-900">
+              Leads
+            </Link>
+            <Link href="/cc/assessments" className="text-slate-600 hover:text-slate-900">
+              Assessment
+            </Link>
             <Link href="/cc/projects" className="text-slate-600 hover:text-slate-900">
               Proyek
+            </Link>
+            <Link href="/cc/vendors" className="text-slate-600 hover:text-slate-900">
+              Vendor
+            </Link>
+            <Link href="/cc/cost-library" className="text-slate-600 hover:text-slate-900">
+              Cost Library
             </Link>
             <Link href="/cc/quality-gate" className="text-slate-600 hover:text-slate-900">
               Quality Gate
