@@ -109,6 +109,49 @@ siap memutuskan.
 
 ---
 
+## 4. Fase 11 — subcontractor Desk dan notifikasi WA API (ADR 0024)
+
+**Status:** ditunda secara formal, sama seperti item Fase 10 di atas.
+
+- **Subcontractor Desk**: hanya sisi supplier dari Partner Desk yang dibangun
+  (quotes/purchase-orders/deliveries). Tidak ada tabel `subcontractors` atau
+  kolom penugasan subkontraktor di `work_packages` mana pun — belum ada
+  entitas bisnis yang bisa dibaca fitur ini. Perlu keputusan desain data model
+  dulu sebelum dibangun, bukan sekadar salin pola supplier.
+- **Notifikasi WhatsApp API**: `notifications` masih hanya in_app + email.
+  Memilih vendor WhatsApp (Meta Cloud API langsung, Twilio, broker seperti
+  Wati/Gupshup) adalah keputusan biaya berulang + vendor eksternal baru yang
+  menerima nomor telepon dan isi pesan — kategori keputusan yang sama dengan
+  pemilihan vendor speech-to-text Fase 10, sengaja tidak diputuskan sepihak.
+
+**Yang perlu terjadi sebelum ini ditutup:** lihat
+[ADR 0024](decisions/0024-fase11-partner-desk-scope-decisions.md) SS1 dan SS4
+— masing-masing perlu keputusan Owner (desain data model subcontractor;
+pemilihan vendor WA + anggaran) sebelum dibangun.
+
+## 5. Onboarding eksternal (client/mandor) masih tanpa UI (ditemukan saat Fase 11)
+
+**Status:** celah lama, ditemukan (bukan diciptakan) saat membangun undangan
+supplier Fase 11 — dicatat di sini karena mempengaruhi kesiapan uji orang
+luar, bukan hanya Partner Desk.
+
+Sebelum Fase 11, tidak ada satu pun UI atau action di seluruh basis kode ini
+yang benar-benar men-provision pengguna eksternal (client_approver, mandor,
+dll.) — semua `client_users`/`project_members` untuk role eksternal hanya
+pernah dibuat lewat test factory yang memakai service-role client langsung.
+Fase 11 menambahkan `core/auth/provision-external-user.ts` (dipakai
+`inviteVendorUserAction`) yang menutup celah ini **khusus untuk supplier**.
+Jalur yang sama untuk client_approver/client_viewer/mandor belum punya UI
+staf — mekanismenya sudah bisa dipakai ulang, tapi belum ada tombol undang
+di halaman client/proyek mana pun.
+
+**Yang perlu terjadi sebelum ini ditutup:** kalau uji pilot melibatkan klien
+atau mandor sungguhan (bukan hanya supplier), staf butuh cara mengundang
+mereka lewat UI, bukan lewat SQL manual. Prioritas tergantung siapa yang
+diuji lebih dulu — lihat urutan di bawah.
+
+---
+
 ## Rekomendasi urutan penyelesaian (sebelum app ini boleh dites orang lain di luar Owner)
 
 Diurutkan dari yang paling murah/cepat divalidasi ke yang paling mahal:
@@ -119,11 +162,15 @@ Diurutkan dari yang paling murah/cepat divalidasi ke yang paling mahal:
 2. **CHECKPOINT #3 uji lapangan** — butuh menjadwalkan satu mandor/koordinator
    lokasi sungguhan; lakukan sebelum pilot klien pertama, bukan sesudahnya,
    karena kalau magic-link gagal ini mengubah arsitektur auth secara mendasar.
-3. **Fase 10 voice-note/weekly-report** — paling mahal (butuh keputusan
-   vendor + kemungkinan desain ulang jalur review), dan paling tidak
-   mendesak: keempat fitur AI Scribe lain sudah lengkap dan aman tanpa dua
-   ini. Bisa ditunda sampai setelah pilot pertama berjalan, kecuali Owner
-   menilai voice-note esensial untuk adopsi pilot itu sendiri.
+3. **Onboarding eksternal (client/mandor) belum ada UI** (item 5) — cepat
+   dikerjakan (mekanisme sudah ada, tinggal UI), tapi hanya mendesak kalau
+   pilot pertama melibatkan klien/mandor sungguhan, bukan hanya staf internal.
+4. **Fase 10 voice-note/weekly-report** dan **Fase 11 subcontractor/WA API**
+   — paling mahal (masing-masing butuh keputusan vendor dan/atau desain data
+   model baru), dan paling tidak mendesak: fitur inti tiap fase sudah lengkap
+   dan aman tanpa item-item ini. Bisa ditunda sampai setelah pilot pertama
+   berjalan, kecuali Owner menilai salah satunya esensial untuk pilot itu
+   sendiri.
 
-Item baru yang ditemukan selama Fase 11 (dan seterusnya) ditambahkan di
-bawah ini, bukan menggantikan tiga di atas.
+Item baru yang ditemukan sesudah ini ditambahkan di bawah, bukan menggantikan
+yang di atas.
