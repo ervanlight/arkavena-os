@@ -536,6 +536,44 @@ red/overdue gate goes through `cash_gate_override.create` instead (owner
 only), not a separate `purchase_order` action — identical to how
 `overrideOpenWorkPackageAction` is gated in modules/cash-gate.
 
+## Fase 9 — maintenance-engine (Wave 9-10, ADR 0019)
+
+Staff-only, same treatment as every other Fase 8/9 table — no project role,
+field, or client-portal surface reaches any of these five tables yet
+(no Facility Passport client view in this phase, ADR 0019 SS4).
+
+| Table | Owner/TD/Finance/QS/Procurement | Any project role | Client |
+| --- | --- | --- | --- |
+| `handover_items` | SELECT, INSERT (org) | — | — |
+| `warranties` | CRUD\* (org) | — | — |
+| `assets` | CRUD\* (org) | — | — |
+| `maintenance_plans` | CRUD\* (org) | — | — |
+| `service_tickets` | CRUD\* (org) | — | — |
+
+\* "CRUD" here means SELECT/INSERT/UPDATE — no DELETE policy exists for
+anyone, same as every other table in this document; soft delete
+(`deleted_at`) is the removal path. `handover_items` has no application-level
+`update` action (staff correct a mistaken entry by adding a new one, not
+editing history) even though its RLS policy set includes UPDATE like every
+other table here — the matrix being stricter than the policy is the safe
+direction (CLAUDE.md law 0.3).
+
+### Column-level and cross-row rules RLS cannot express
+
+| Rule | Enforced by |
+| --- | --- |
+| The moment a project first reaches `status = 'completed'`, one `warranties` row is inserted per `handover_items` row on that project that plausibly needs one (`'key'`/`'as_built_drawing'` excluded) | `fn_projects_sync_warranties_on_completion`, an `AFTER UPDATE OF status` trigger on `projects` — the fifth instance of the cross-module-sync-trigger pattern (after `work_packages`/`change_orders`, `change_orders`/`client_decisions`, `invoices`/`funding_receipts`, `leads`/`assessments`) |
+| A service ticket's status may only follow `open -> in_progress -> resolved`, cancellable from `open` or `in_progress` | `fn_service_tickets_guard_transition`, mirrored by `modules/maintenance-engine/domain/service-ticket-transition.ts`'s `transition()` |
+| `service_tickets.status = 'resolved'` requires `resolved_at` to be set | `ck_service_tickets_resolved_requires_resolved_at` |
+| `warranties.ends_at` must not be before `starts_at` | `ck_warranties_ends_after_starts` |
+| `photos.handover_item_id`/`photos.photo_stage` (added this wave, additive nullable columns, ADR 0019 SS8) have no RLS implication of their own — read wherever `photos` already is, gated by Fase 4's existing policies | n/a |
+
+`requirePermission()` for every action in this section lists every org role
+(`[...ORG_ROLES]`) — none of this phase's mechanisms are money/approval
+gates the way Cash Gate or invoice issuance are; `next_due_date`/`overdue`
+(ADR 0019 SS5) are computed advisory values, not something RLS or a trigger
+enforces.
+
 ## Later waves
 
 Added as their tables land. A table may not reach main without a row here, its

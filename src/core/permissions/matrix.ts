@@ -461,6 +461,40 @@ export const PERMISSIONS = {
     view: [...ORG_ROLES],
     create: [...ORG_ROLES],
   },
+
+  // -------------------------------------------------------------------------
+  // Fase 9 (modules/maintenance-engine, ADR 0019)
+  // -------------------------------------------------------------------------
+
+  handover_item: {
+    view: [...ORG_ROLES],
+    create: [...ORG_ROLES],
+  },
+
+  /** No `create` gate needed beyond staff-only: most rows come from fn_projects_sync_warranties_on_completion, not a user action (ADR 0019 SS3). */
+  warranty: {
+    view: [...ORG_ROLES],
+    create: [...ORG_ROLES],
+    update: [...ORG_ROLES],
+  },
+
+  asset: {
+    view: [...ORG_ROLES],
+    create: [...ORG_ROLES],
+    update: [...ORG_ROLES],
+  },
+
+  maintenance_plan: {
+    view: [...ORG_ROLES],
+    create: [...ORG_ROLES],
+    update: [...ORG_ROLES],
+  },
+
+  service_ticket: {
+    view: [...ORG_ROLES],
+    create: [...ORG_ROLES],
+    update: [...ORG_ROLES],
+  },
 } as const satisfies PermissionMatrix;
 
 // ---------------------------------------------------------------------------

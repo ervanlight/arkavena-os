@@ -92,6 +92,14 @@ export const ERROR_CODES = {
    */
   PROPOSAL_INVALID_TRANSITION: 'PROPOSAL_INVALID_TRANSITION',
 
+  /**
+   * A service ticket status change does not exist as an edge in
+   * modules/maintenance-engine/domain/service-ticket-transition.ts's own
+   * graph (ADR 0019 SS6) -- same "domain layer refused before any database
+   * write" reasoning as LEAD_INVALID_TRANSITION.
+   */
+  SERVICE_TICKET_INVALID_TRANSITION: 'SERVICE_TICKET_INVALID_TRANSITION',
+
   /** Supabase, storage, or another dependency failed. Never shown verbatim to a client. */
   INFRA_UNAVAILABLE: 'INFRA_UNAVAILABLE',
 
@@ -126,6 +134,7 @@ export const ERROR_MESSAGES_ID: Record<ErrorCode, string> = {
   LEAD_NOT_QUALIFIED: 'Lead harus berstatus "qualified" sebelum bisa dikonversi menjadi proyek.',
   LEAD_INVALID_TRANSITION: 'Perubahan status untuk lead ini tidak diperbolehkan saat ini.',
   PROPOSAL_INVALID_TRANSITION: 'Perubahan status untuk proposal ini tidak diperbolehkan saat ini.',
+  SERVICE_TICKET_INVALID_TRANSITION: 'Perubahan status untuk tiket servis ini tidak diperbolehkan saat ini.',
   INFRA_UNAVAILABLE: 'Sistem sedang tidak dapat diakses. Coba beberapa saat lagi.',
   RATE_LIMITED: 'Terlalu banyak percobaan. Tunggu sebentar sebelum mencoba lagi.',
   INTERNAL_ERROR: 'Terjadi kesalahan pada sistem. Tim kami sudah dicatat kejadiannya.',
@@ -145,6 +154,7 @@ export const ERROR_HTTP_STATUS: Record<ErrorCode, number> = {
   LEAD_NOT_QUALIFIED: 422,
   LEAD_INVALID_TRANSITION: 422,
   PROPOSAL_INVALID_TRANSITION: 422,
+  SERVICE_TICKET_INVALID_TRANSITION: 422,
   INFRA_UNAVAILABLE: 503,
   RATE_LIMITED: 429,
   INTERNAL_ERROR: 500,
