@@ -3,6 +3,8 @@ import {
   listPartnerPurchaseOrdersAction,
   listPartnerVendorQuotesAction,
 } from '@/modules/partner-desk';
+import { Card, PageHeader, StatusBadge, EmptyState } from '@/core/ui';
+import { formatRp, toRupiah } from '@/core/money/rupiah';
 
 export const metadata = { title: 'Partner Desk — BuildTrust OS' };
 
@@ -10,6 +12,12 @@ const QUOTE_STATUS_LABEL_ID: Record<string, string> = {
   received: 'Diterima',
   accepted: 'Disetujui',
   rejected: 'Ditolak',
+};
+
+const QUOTE_STATUS_TONE: Record<string, 'neutral' | 'success' | 'danger'> = {
+  received: 'neutral',
+  accepted: 'success',
+  rejected: 'danger',
 };
 
 export default async function PartnerDeskProjectPage({ params }: { params: Promise<{ projectId: string }> }) {
@@ -31,53 +39,46 @@ export default async function PartnerDeskProjectPage({ params }: { params: Promi
   );
 
   return (
-    <div className="space-y-8">
-      <h1 className="text-lg font-semibold text-slate-900">Penawaran &amp; Purchase Order Anda</h1>
+    <div className="space-y-6">
+      <PageHeader title="Penawaran & Purchase Order Anda" />
 
-      <div className="space-y-4 rounded-lg bg-white p-6 shadow-sm">
-        <h2 className="text-base font-semibold text-slate-900">Penawaran (quotes)</h2>
-        {quotes.length === 0 && <p className="text-sm text-slate-500">Belum ada penawaran untuk proyek ini.</p>}
+      <Card>
+        <h2 className="text-[15px] font-semibold text-[color:var(--color-ink)]">Penawaran (quotes)</h2>
+        {quotes.length === 0 && <p className="mt-2 text-sm text-[color:var(--color-ink-secondary)]">Belum ada penawaran untuk proyek ini.</p>}
         {quotes.length > 0 && (
-          <div className="overflow-hidden rounded-lg border border-slate-200">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 text-slate-500">
-                <tr>
-                  <th className="px-4 py-2 font-medium">Deskripsi</th>
-                  <th className="px-4 py-2 font-medium">Nominal</th>
-                  <th className="px-4 py-2 font-medium">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {quotes.map((quote) => (
-                  <tr key={quote.id}>
-                    <td className="px-4 py-2 font-medium text-slate-900">{quote.description}</td>
-                    <td className="px-4 py-2 text-slate-600">Rp {quote.amount.toLocaleString('id-ID')}</td>
-                    <td className="px-4 py-2 text-slate-600">
-                      {QUOTE_STATUS_LABEL_ID[quote.status] ?? quote.status}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <ul className="mt-3 divide-y divide-[color:var(--color-hairline)]">
+            {quotes.map((quote) => (
+              <li key={quote.id} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                <div>
+                  <p className="text-[15px] font-medium text-[color:var(--color-ink)]">{quote.description}</p>
+                  <p className="text-sm text-[color:var(--color-ink-secondary)]">{formatRp(toRupiah(quote.amount))}</p>
+                </div>
+                <StatusBadge tone={QUOTE_STATUS_TONE[quote.status] ?? 'neutral'}>
+                  {QUOTE_STATUS_LABEL_ID[quote.status] ?? quote.status}
+                </StatusBadge>
+              </li>
+            ))}
+          </ul>
         )}
-      </div>
+      </Card>
 
-      <div className="space-y-4 rounded-lg bg-white p-6 shadow-sm">
-        <h2 className="text-base font-semibold text-slate-900">Purchase order &amp; pengiriman</h2>
-        {purchaseOrders.length === 0 && <p className="text-sm text-slate-500">Belum ada purchase order untuk proyek ini.</p>}
+      <Card>
+        <h2 className="text-[15px] font-semibold text-[color:var(--color-ink)]">Purchase order &amp; pengiriman</h2>
+        {purchaseOrders.length === 0 && (
+          <EmptyState title="Belum ada purchase order" description="Belum ada purchase order untuk proyek ini." />
+        )}
         {purchaseOrders.length > 0 && (
-          <div className="space-y-4">
+          <div className="mt-3 space-y-3">
             {purchaseOrders.map((po) => {
               const deliveriesResult = deliveriesByPo.get(po.id);
               const deliveries = deliveriesResult?.ok ? deliveriesResult.data : [];
               return (
-                <div key={po.id} className="rounded-lg border border-slate-200 p-4">
+                <div key={po.id} className="rounded-[var(--radius-control)] border border-[color:var(--color-hairline)] p-4">
                   <div className="flex items-center justify-between">
-                    <p className="font-medium text-slate-900">{po.description}</p>
-                    <p className="text-sm text-slate-600">Rp {po.amount.toLocaleString('id-ID')}</p>
+                    <p className="font-medium text-[color:var(--color-ink)]">{po.description}</p>
+                    <p className="text-sm text-[color:var(--color-ink-secondary)]">{formatRp(toRupiah(po.amount))}</p>
                   </div>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs text-[color:var(--color-ink-tertiary)]">
                     {deliveries.length === 0
                       ? 'Belum dikirim'
                       : `${deliveries.length} pengiriman tercatat, terakhir ${new Date(deliveries[0]!.delivered_at).toLocaleDateString('id-ID')}`}
@@ -87,7 +88,7 @@ export default async function PartnerDeskProjectPage({ params }: { params: Promi
             })}
           </div>
         )}
-      </div>
+      </Card>
     </div>
   );
 }

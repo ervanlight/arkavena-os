@@ -1,7 +1,9 @@
 import type { Route } from 'next';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { ChevronRight } from 'lucide-react';
 import { listMyPartnerProjectsAction } from '@/modules/projects';
+import { Card, PageHeader, EmptyState } from '@/core/ui';
 
 export const metadata = { title: 'Partner Desk — BuildTrust OS' };
 
@@ -20,20 +22,18 @@ export default async function PartnerDeskHomePage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-lg font-semibold text-slate-900">Proyek Anda</h1>
-      {projects.length === 0 && <p className="text-sm text-slate-500">Belum ada proyek yang bisa Anda akses.</p>}
-      <ul className="space-y-2">
+      <PageHeader title="Proyek Anda" />
+      {projects.length === 0 && <EmptyState title="Belum ada proyek" description="Belum ada proyek yang bisa Anda akses." />}
+      <div className="space-y-2.5">
         {projects.map((project) => (
-          <li key={project.id}>
-            <Link
-              href={`/partner/${project.id}` as Route}
-              className="block rounded-lg bg-white p-4 text-sm font-medium text-slate-900 shadow-sm hover:bg-slate-50"
-            >
-              {project.name}
-            </Link>
-          </li>
+          <Link key={project.id} href={`/partner/${project.id}` as Route}>
+            <Card interactive className="flex items-center justify-between">
+              <span className="text-[15px] font-medium text-[color:var(--color-ink)]">{project.name}</span>
+              <ChevronRight size={18} className="text-[color:var(--color-ink-tertiary)]" />
+            </Card>
+          </Link>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }

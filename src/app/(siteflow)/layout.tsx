@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { LogOut } from 'lucide-react';
 import { getCurrentUser } from '@/core/auth/session';
 import { signOut } from '@/core/auth/login';
 import { InstallBanner } from '@/core/pwa/install-banner';
@@ -20,11 +21,11 @@ export default async function SiteFlowLayout({ children }: { children: React.Rea
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[color:var(--color-canvas)]">
       <OutboxSync />
       <InstallBanner />
-      <header className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3">
-        <span className="text-base font-semibold text-slate-900">SiteFlow</span>
+      <header className="glass sticky top-0 z-10 flex items-center justify-between border-b border-[color:var(--color-hairline)] px-5 py-3.5">
+        <span className="text-[17px] font-semibold text-[color:var(--color-ink)]">SiteFlow</span>
         <form
           action={async () => {
             'use server';
@@ -32,12 +33,15 @@ export default async function SiteFlowLayout({ children }: { children: React.Rea
             redirect('/login');
           }}
         >
-          <button type="submit" className="text-sm font-medium text-slate-500 underline">
-            Keluar
+          <button
+            type="submit"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-[color:var(--color-ink-tertiary)] active:bg-[color:var(--color-danger)]/10 active:text-[color:var(--color-danger)]"
+          >
+            <LogOut size={16} />
           </button>
         </form>
       </header>
-      <main className="px-4 py-4">{children}</main>
+      <main className="px-4 py-5">{children}</main>
     </div>
   );
 }

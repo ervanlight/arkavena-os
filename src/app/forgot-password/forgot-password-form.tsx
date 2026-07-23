@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useActionState } from 'react';
 import { requestPasswordReset } from '@/core/auth/login';
+import { Button, Input, Label } from '@/core/ui';
 
 type FormState = { status: 'idle' | 'sent'; email: string; error: string | null };
 
@@ -21,13 +22,16 @@ export function ForgotPasswordForm() {
 
   if (state.status === 'sent') {
     return (
-      <div role="status" className="space-y-2 text-center">
-        <p className="text-lg font-medium text-slate-900">Periksa email Anda</p>
-        <p className="text-sm text-slate-600">
-          Kami mengirim tautan atur ulang kata sandi ke <span className="font-medium">{state.email}</span>, jika
+      <div role="status" className="space-y-3 text-center">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[color:var(--color-success)]/12 text-2xl">
+          ✓
+        </div>
+        <p className="text-[17px] font-semibold text-[color:var(--color-ink)]">Periksa email Anda</p>
+        <p className="text-sm text-[color:var(--color-ink-secondary)]">
+          Kami mengirim tautan atur ulang kata sandi ke <span className="font-medium text-[color:var(--color-ink)]">{state.email}</span>, jika
           alamat tersebut terdaftar.
         </p>
-        <Link href="/login" className="inline-block text-sm text-slate-600 underline hover:text-slate-900">
+        <Link href="/login" className="inline-block text-sm text-[color:var(--color-accent)] hover:underline">
           Kembali ke halaman masuk
         </Link>
       </div>
@@ -35,39 +39,32 @@ export function ForgotPasswordForm() {
   }
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form action={formAction} className="space-y-5">
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-slate-700">
-          Alamat email
-        </label>
-        <input
+        <Label htmlFor="email">Alamat email</Label>
+        <Input
           id="email"
           name="email"
           type="email"
           required
           autoComplete="email"
           defaultValue={state.email}
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-slate-900 shadow-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
           placeholder="nama@perusahaan.com"
         />
       </div>
 
       {state.error !== null && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="rounded-[var(--radius-control)] bg-[color:var(--color-danger)]/10 px-3 py-2 text-sm text-[color:var(--color-danger)]">
           {state.error}
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="w-full rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-      >
+      <Button type="submit" disabled={isPending} className="w-full">
         {isPending ? 'Mengirim...' : 'Kirim tautan atur ulang'}
-      </button>
+      </Button>
 
-      <p className="text-center text-xs text-slate-500">
-        <Link href="/login" className="underline hover:text-slate-700">
+      <p className="text-center text-sm">
+        <Link href="/login" className="text-[color:var(--color-accent)] hover:underline">
           Kembali ke halaman masuk
         </Link>
       </p>

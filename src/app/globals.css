@@ -1,7 +1,50 @@
 @import 'tailwindcss';
 
+/*
+ * Design tokens: an iOS/macOS-inspired visual language (Owner request,
+ * 2026-07-23 -- "rombak" from the plain utilitarian look every page had).
+ * -apple-system leads the font stack so a real Mac/iPhone renders this in
+ * actual SF Pro; Inter (loaded in layout.tsx via next/font) is the fallback
+ * everywhere else, chosen because its metrics and letterforms are the
+ * closest freely-licensed sibling to SF Pro.
+ */
 @theme {
-  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', ui-sans-serif,
+    sans-serif;
+
+  /* Neutral scale -- tuned toward Apple's systemGray palette rather than Tailwind's default slate/gray, which reads bluer and flatter. */
+  --color-canvas: #f2f2f7;
+  --color-canvas-dark: #000000;
+  --color-surface: #ffffff;
+  --color-surface-secondary: #f9f9fb;
+  --color-surface-dark: #1c1c1e;
+  --color-surface-secondary-dark: #2c2c2e;
+  --color-hairline: rgba(60, 60, 67, 0.12);
+  --color-hairline-dark: rgba(255, 255, 255, 0.12);
+
+  --color-ink: #1c1c1e;
+  --color-ink-secondary: #6e6e73;
+  --color-ink-tertiary: #8e8e93;
+  --color-ink-dark: #f5f5f7;
+  --color-ink-secondary-dark: #98989d;
+
+  /* iOS system accent + semantic colors -- kept distinct from any money-amount styling (core/money owns that meaning, this is purely visual). */
+  --color-accent: #0a84ff;
+  --color-accent-hover: #0071e3;
+  --color-success: #34c759;
+  --color-warning: #ff9f0a;
+  --color-danger: #ff453a;
+  --color-purple: #af52de;
+
+  /* Continuous-corner-style radius scale -- iOS/macOS cards read as ~14-20px, never Tailwind's default sharp 4-8px. */
+  --radius-control: 0.625rem;
+  --radius-card: 1.25rem;
+  --radius-sheet: 1.75rem;
+
+  /* Soft, layered elevation instead of Tailwind's harsher default shadows. */
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px -8px rgba(0, 0, 0, 0.08);
+  --shadow-card-hover: 0 2px 4px rgba(0, 0, 0, 0.06), 0 16px 32px -12px rgba(0, 0, 0, 0.14);
+  --shadow-sheet: 0 8px 16px rgba(0, 0, 0, 0.06), 0 24px 48px -16px rgba(0, 0, 0, 0.18);
 }
 
 html {
@@ -9,5 +52,21 @@ html {
 }
 
 body {
-  @apply bg-white text-slate-900 antialiased;
+  @apply antialiased;
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* A translucent, blurred surface -- the macOS/iOS "material" every top bar and sheet in this redesign uses. Falls back to a solid surface color where backdrop-filter isn't supported. */
+.glass {
+  background-color: rgba(255, 255, 255, 0.72);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .glass {
+    background-color: rgba(255, 255, 255, 0.94);
+  }
 }

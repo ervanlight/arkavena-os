@@ -1,4 +1,5 @@
 import type { DecisionClockTier } from '@/modules/client-portal';
+import { StatusBadge } from '@/core/ui';
 
 const TIER_LABEL_ID: Record<DecisionClockTier, string> = {
   fresh: 'Baru',
@@ -6,16 +7,12 @@ const TIER_LABEL_ID: Record<DecisionClockTier, string> = {
   overdue: 'Terlambat',
 };
 
-const TIER_BADGE_CLASS: Record<DecisionClockTier, string> = {
-  fresh: 'bg-emerald-100 text-emerald-800',
-  aging: 'bg-amber-100 text-amber-800',
-  overdue: 'bg-red-100 text-red-800',
+const TIER_TONE: Record<DecisionClockTier, 'success' | 'warning' | 'danger'> = {
+  fresh: 'success',
+  aging: 'warning',
+  overdue: 'danger',
 };
 
 export function DecisionClockBadge({ tier }: { tier: DecisionClockTier }) {
-  return (
-    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${TIER_BADGE_CLASS[tier]}`}>
-      {TIER_LABEL_ID[tier]}
-    </span>
-  );
+  return <StatusBadge tone={TIER_TONE[tier]}>{TIER_LABEL_ID[tier]}</StatusBadge>;
 }

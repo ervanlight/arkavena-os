@@ -10,15 +10,18 @@ const TABS = [
   { href: '/laporan-mingguan', label: 'Laporan Mingguan' },
 ] as const;
 
+/** An iOS-style segmented scroller rather than a plain underlined tab row. */
 export function PortalNav({ projectId, active }: { projectId: string; active: (typeof TABS)[number]['href'] }) {
   return (
-    <nav className="flex flex-wrap gap-1 border-b border-slate-200 pb-3 text-sm">
+    <nav className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1">
       {TABS.map((tab) => (
         <Link
           key={tab.href}
           href={`/portal/${projectId}${tab.href}` as Route}
-          className={`rounded-md px-3 py-1.5 font-medium ${
-            tab.href === active ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'
+          className={`shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors ${
+            tab.href === active
+              ? 'bg-[color:var(--color-ink)] text-white'
+              : 'bg-[color:var(--color-surface-secondary)] text-[color:var(--color-ink-secondary)] hover:bg-[color:var(--color-hairline)]'
           }`}
         >
           {tab.label}
