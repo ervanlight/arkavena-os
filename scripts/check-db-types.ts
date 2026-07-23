@@ -52,9 +52,33 @@ function main(): void {
       'regenerated. Run:\n\n' +
       '    pnpm db:types\n\n' +
       'and commit the result. Do not edit the file by hand -- it is generated,\n' +
-      'and hand-edits are overwritten the next time anyone runs the command.\n',
+      'and hand-edits are overwritten the next time anyone runs the command.\n\n' +
+      'First differing lines (committed vs freshly generated --local):\n\n' +
+      diffPreview(committed, fresh) +
+      '\n',
   );
   process.exitCode = 1;
+}
+
+/** A minimal line-by-line diff preview -- enough to tell a formatting quirk from a real schema drift without pulling in a diff library. */
+function diffPreview(committed: string, fresh: string, maxLines = 40): string {
+  const committedLines = committed.split('\n');
+  const freshLines = fresh.split('\n');
+  const out: string[] = [];
+  const max = Math.max(committedLines.length, freshLines.length);
+
+  for (let i = 0; i < max && out.length < maxLines; i++) {
+    const a = committedLines[i];
+    const b = freshLines[i];
+    if (a !== b) {
+      out.push(`  line ${i + 1}:`);
+      out.push(`    committed: ${a === undefined ? '<missing>' : JSON.stringify(a)}`);
+      out.push(`    fresh:     ${b === undefined ? '<missing>' : JSON.stringify(b)}`);
+    }
+  }
+
+  if (out.length === 0) return '  (no line-level difference found -- likely a trailing-whitespace-only mismatch)\n';
+  return out.join('\n') + '\n';
 }
 
 main();
