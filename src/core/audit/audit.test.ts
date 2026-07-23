@@ -41,6 +41,32 @@ describe('diffRows', () => {
     expect(previousValue).toEqual({ id: undefined, status: undefined });
     expect(newValue).toEqual({ id: '1', status: 'draft' });
   });
+
+  /**
+   * Regression: every Rupiah money column is a raw bigint (CLAUDE.md 0.1),
+   * and the old equality check ran every changed value through
+   * `JSON.stringify` as a deep-equality fallback -- which throws
+   * `TypeError: Do not know how to serialize a BigInt`. Caught by actually
+   * clicking through a new lead form with an estimated value in a browser
+   * (crm.createLead), not by any existing test, since nothing here had
+   * exercised an insert with a changed bigint field before.
+   */
+  it('diffs a changed bigint field without throwing', () => {
+    const { previousValue, newValue } = diffRows(undefined, { id: '1', estimated_value: 750_000_000n });
+
+    expect(previousValue).toEqual({ id: undefined, estimated_value: undefined });
+    expect(newValue).toEqual({ id: '1', estimated_value: 750_000_000n });
+  });
+
+  it('does not flag an unchanged bigint field as a diff', () => {
+    const { previousValue, newValue } = diffRows(
+      { id: '1', amount: 5_000_000n },
+      { id: '1', amount: 5_000_000n },
+    );
+
+    expect(previousValue).toEqual({});
+    expect(newValue).toEqual({});
+  });
 });
 
 describe('recordAudit', () => {

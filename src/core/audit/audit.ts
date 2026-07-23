@@ -14,6 +14,23 @@ import { requiresReason, type AuditAction, type AuditEntry, type AuditGateway } 
  */
 
 /**
+ * Two values are the same column value, for diffing purposes.
+ *
+ * `Object.is` alone is the correct and complete answer for every primitive,
+ * `bigint` included (CLAUDE.md law 0.1 -- every Rupiah money column is a raw
+ * `bigint`, and `JSON.stringify` throws on one, `TypeError: Do not know how
+ * to serialize a BigInt`). The `JSON.stringify` fallback below exists only
+ * for the object/array case -- two distinct references to structurally
+ * identical JSON data (an unchanged jsonb column, say) that `Object.is` would
+ * otherwise call "different" -- so it must never run on a bare primitive.
+ */
+function isSameValue(a: unknown, b: unknown): boolean {
+  if (Object.is(a, b)) return true;
+  if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null) return false;
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
+/**
  * Compute the diff between two versions of a row.
  *
  * Only changed keys are kept. Storing whole rows would multiply the audit table
@@ -35,7 +52,7 @@ export function diffRows(
 
   for (const key of new Set([...Object.keys(before), ...Object.keys(after)])) {
     if (key === 'updated_at') continue;
-    if (!Object.is(before[key], after[key]) && JSON.stringify(before[key]) !== JSON.stringify(after[key])) {
+    if (!isSameValue(before[key], after[key])) {
       previousValue[key] = before[key];
       newValue[key] = after[key];
     }
