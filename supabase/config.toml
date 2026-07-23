@@ -129,10 +129,17 @@ port = 54324
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
-# Photo upload arrives in Fase 4 (field reporting). Turn this on there, together
-# with the storage-usage monitoring owner decision D2 requires.
+# Photo upload arrived in Fase 4 (field reporting) -- turned on here, together
+# with the storage-usage monitoring owner decision D2 requires. Left `false`
+# through Fase 4-7 was a real bug in this config, only surfaced now that CI
+# actually runs on GitHub's own runners instead of only being verified
+# locally against Supabase Cloud dev (ADR 0006): local dev never applies this
+# file's `enabled` flag the same way `supabase start`'s from-scratch
+# migration run does, so `insert into storage.buckets` in
+# 20260722000200_wave7_8_photos_storage_bucket.sql had never actually been
+# exercised end-to-end before this session's first real CI run.
 [storage]
-enabled = false
+enabled = true
 # The maximum file size allowed (e.g. "5MB", "500KB").
 file_size_limit = "50MiB"
 
