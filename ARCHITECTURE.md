@@ -625,6 +625,14 @@ FASE 10 — AI Scribe & Intelligence                             [modules: ai-sc
 FASE 11 — Partner Desk + polish                                (setelah internal stabil,
   supplier quotes/delivery/invoice terbatas; notifikasi WA API      sesuai dokumen)
   bila volume sudah tinggi.
+
+  **Belum dimulai per 2026-07-23** (lihat [ADR 0022](decisions/0022-fase11-deferred-pending-real-partner-volume.md))
+  — "setelah internal stabil" sudah benar (Fase 0-10 hijau di CI), tapi
+  "bila volume sudah tinggi" adalah kondisi bisnis nyata, bukan kondisi
+  teknis, dan Owner mengonfirmasi kondisi itu belum terpenuhi. Fase 0-10
+  (Fase 10 dalam bentuk yang sudah dikurangi per ADR 0021) adalah produk inti
+  yang lengkap dan siap deploy untuk Build Sequence ini; Fase 11 menunggu
+  volume partner nyata, bukan sekadar giliran berikutnya.
 ```
 
 **Aturan antar-fase:** fase N+1 tidak dimulai kalau exit criteria fase N belum hijau di CI. Setiap fase mengunci: migration wave-nya, RLS matrix ter-update, test-nya, dan seed demo diperluas. Dengan begitu setiap lapisan teruji sebelum lapisan berikutnya berdiri di atasnya — sesuai permintaan Anda: semua dibangun, tapi tidak ada yang dibangun di atas fondasi yang belum terbukti.
