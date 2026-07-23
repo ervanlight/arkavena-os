@@ -10,6 +10,7 @@ import { CreateVendorQuoteForm } from './vendor-quote-form';
 import { CreatePurchaseOrderForm } from './purchase-order-form';
 import { OverridePurchaseOrderForm } from './override-purchase-order-form';
 import { CreateDeliveryForm } from './delivery-form';
+import { QuoteSummaryWidget } from './quote-summary-widget';
 
 export const metadata = { title: 'Prokuremen — BuildTrust OS' };
 
@@ -56,6 +57,7 @@ export default async function ProjectProcurementPage({ params }: { params: Promi
                   <th className="px-4 py-2 font-medium">Deskripsi</th>
                   <th className="px-4 py-2 font-medium">Nominal</th>
                   <th className="px-4 py-2 font-medium">Status</th>
+                  <th className="px-4 py-2 font-medium"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -65,6 +67,9 @@ export default async function ProjectProcurementPage({ params }: { params: Promi
                     <td className="px-4 py-2 text-slate-600">Rp {quote.amount.toLocaleString('id-ID')}</td>
                     <td className="px-4 py-2 text-slate-600">
                       {QUOTE_STATUS_LABEL_ID[quote.status] ?? quote.status}
+                    </td>
+                    <td className="px-4 py-2">
+                      <QuoteSummaryWidget vendorQuoteId={quote.id} />
                     </td>
                   </tr>
                 ))}

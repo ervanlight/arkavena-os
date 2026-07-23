@@ -6,4 +6,4 @@ import type { Tables, TablesInsert } from '@/core/db/database.types';
 export type AiGeneration = Omit<Tables<'ai_generations'>, 'cost_amount'> & { cost_amount: Rupiah };
 export type NewAiGeneration = Omit<TablesInsert<'ai_generations'>, 'cost_amount'> & { cost_amount: Rupiah };
 
-export type AiFeature = 'issue_classification' | 'delay_detection';
+export type AiFeature = 'issue_classification' | 'delay_detection' | 'quote_summary' | 'assessment_scope_draft';

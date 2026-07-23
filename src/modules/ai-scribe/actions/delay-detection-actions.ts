@@ -4,24 +4,17 @@ import { toRupiah } from '@/core/money/rupiah';
 import { getActionContext } from '@/core/auth/session';
 import { safeAction } from '@/core/actions/safe-action';
 import { createServerSupabase } from '@/core/db/client.server';
-import { DomainRuleError } from '@/core/errors/app-error';
-import { ERROR_CODES } from '@/core/errors/codes';
 import { listContractsForProjectAction, listMilestonesForContractAction } from '@/modules/projects';
-import { isOverBudget } from '../domain/budget-cap';
 import { detectOverdueMilestones, type OverdueMilestone } from '../domain/delay-detection';
 import { completeWithClaude } from '../data/claude-client';
-import { insertAiGeneration, sumAiGenerationCostThisMonth } from '../data/ai-generations-repository';
+import { insertAiGeneration } from '../data/ai-generations-repository';
 import { generateDelayDetectionSchema } from '../schemas';
+import { assertWithinBudget } from './budget-guard';
 
 export type DelayDetectionResult = {
   readonly overdueMilestones: readonly OverdueMilestone[];
   readonly draftSummary: string | null;
 };
-
-function startOfCurrentMonthIso(): string {
-  const now = new Date();
-  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
-}
 
 /**
  * Detection itself is deterministic (modules/ai-scribe/domain/delay-detection.ts) --
@@ -64,12 +57,7 @@ export const generateDelayDetectionAction = safeAction(
     }
 
     const supabase = await createServerSupabase();
-    const spentSoFar = await sumAiGenerationCostThisMonth(supabase, ctx.organizationId, startOfCurrentMonthIso());
-    if (isOverBudget(toRupiah(spentSoFar))) {
-      throw new DomainRuleError(ERROR_CODES.AI_BUDGET_EXCEEDED, 'Organization AI budget cap reached for this month', {
-        meta: { organizationId: ctx.organizationId },
-      });
-    }
+    await assertWithinBudget(supabase, ctx.organizationId);
 
     const model = 'claude-haiku-4-5';
     const completion = await completeWithClaude({

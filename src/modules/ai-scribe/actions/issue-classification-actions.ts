@@ -4,12 +4,10 @@ import { toRupiah } from '@/core/money/rupiah';
 import { getActionContext } from '@/core/auth/session';
 import { safeAction } from '@/core/actions/safe-action';
 import { createServerSupabase } from '@/core/db/client.server';
-import { DomainRuleError } from '@/core/errors/app-error';
-import { ERROR_CODES } from '@/core/errors/codes';
-import { isOverBudget } from '../domain/budget-cap';
 import { completeWithClaude } from '../data/claude-client';
-import { insertAiGeneration, sumAiGenerationCostThisMonth } from '../data/ai-generations-repository';
+import { insertAiGeneration } from '../data/ai-generations-repository';
 import { generateIssueClassificationSchema } from '../schemas';
+import { assertWithinBudget } from './budget-guard';
 
 const SEVERITIES = ['low', 'medium', 'high'] as const;
 
@@ -17,11 +15,6 @@ export type IssueClassificationSuggestion = {
   readonly suggestedSeverity: (typeof SEVERITIES)[number];
   readonly suggestedCategory: string;
 };
-
-function startOfCurrentMonthIso(): string {
-  const now = new Date();
-  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
-}
 
 function parseSuggestion(text: string): IssueClassificationSuggestion {
   const severityMatch = text.match(/severity:\s*(low|medium|high)/i);
@@ -50,13 +43,7 @@ export const generateIssueClassificationAction = safeAction(
   },
   async (input, ctx): Promise<IssueClassificationSuggestion> => {
     const supabase = await createServerSupabase();
-
-    const spentSoFar = await sumAiGenerationCostThisMonth(supabase, ctx.organizationId, startOfCurrentMonthIso());
-    if (isOverBudget(toRupiah(spentSoFar))) {
-      throw new DomainRuleError(ERROR_CODES.AI_BUDGET_EXCEEDED, 'Organization AI budget cap reached for this month', {
-        meta: { organizationId: ctx.organizationId },
-      });
-    }
+    await assertWithinBudget(supabase, ctx.organizationId);
 
     const model = 'claude-haiku-4-5';
     const completion = await completeWithClaude({

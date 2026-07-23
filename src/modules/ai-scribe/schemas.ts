@@ -21,3 +21,15 @@ export const generateDelayDetectionSchema = z.object({
   projectId: z.string().uuid(),
 });
 export type GenerateDelayDetectionInput = z.infer<typeof generateDelayDetectionSchema>;
+
+/** An id, reading through modules/procurement's own public API (ADR 0020 SS5). */
+export const generateQuoteSummarySchema = z.object({
+  vendorQuoteId: z.string().uuid(),
+});
+export type GenerateQuoteSummaryInput = z.infer<typeof generateQuoteSummarySchema>;
+
+/** An id, reading through modules/assessment's own public API (ADR 0020 SS5). */
+export const generateAssessmentScopeDraftSchema = z.object({
+  assessmentId: z.string().uuid(),
+});
+export type GenerateAssessmentScopeDraftInput = z.infer<typeof generateAssessmentScopeDraftSchema>;
