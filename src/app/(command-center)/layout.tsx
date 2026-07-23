@@ -45,6 +45,9 @@ export default async function CommandCenterLayout({ children }: { children: Reac
             <Link href="/cc/quality-gate" className="text-slate-600 hover:text-slate-900">
               Quality Gate
             </Link>
+            <Link href="/cc/assets" className="text-slate-600 hover:text-slate-900">
+              Aset
+            </Link>
             <Link href={'/cc/billing' as Route} className="text-slate-600 hover:text-slate-900">
               Billing
             </Link>

@@ -5,6 +5,13 @@ import type { Asset, AssetUpdate, NewAsset } from '../types';
 
 /** All direct `assets` table access lives here (ARCHITECTURE.md 1.2). */
 
+export async function listAssets(supabase: ServerSupabase): Promise<Asset[]> {
+  const { data, error } = await supabase.from('assets').select('*').is('deleted_at', null).order('name', { ascending: true });
+
+  if (error !== null) throw error;
+  return data;
+}
+
 export async function listAssetsForSite(supabase: ServerSupabase, siteId: string): Promise<Asset[]> {
   const { data, error } = await supabase
     .from('assets')

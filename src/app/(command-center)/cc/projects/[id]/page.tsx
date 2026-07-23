@@ -62,6 +62,12 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
               Prokuremen
             </Link>
             <Link
+              href={`/cc/projects/${project.id}/handover`}
+              className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            >
+              Handover
+            </Link>
+            <Link
               href={`/cc/projects/${project.id}/variations`}
               className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
             >

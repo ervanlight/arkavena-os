@@ -63,7 +63,13 @@ export {
   updateWarrantyAction,
 } from './actions/warranty-actions';
 
-export { createAssetAction, getAssetAction, listAssetsForSiteAction, updateAssetAction } from './actions/asset-actions';
+export {
+  createAssetAction,
+  getAssetAction,
+  listAssetsAction,
+  listAssetsForSiteAction,
+  updateAssetAction,
+} from './actions/asset-actions';
 
 export {
   createMaintenancePlanAction,

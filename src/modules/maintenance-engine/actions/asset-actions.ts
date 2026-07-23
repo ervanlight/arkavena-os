@@ -7,7 +7,7 @@ import { getActionContext } from '@/core/auth/session';
 import { safeAction } from '@/core/actions/safe-action';
 import { createServerSupabase } from '@/core/db/client.server';
 import { getSiteAction } from '@/modules/crm';
-import { getAsset, insertAsset, listAssetsForSite, updateAsset } from '../data/assets-repository';
+import { getAsset, insertAsset, listAssets, listAssetsForSite, updateAsset } from '../data/assets-repository';
 import { createAssetSchema, updateAssetSchema } from '../schemas';
 import type { Asset } from '../types';
 
@@ -84,6 +84,19 @@ export const updateAssetAction = safeAction(
     });
 
     return after;
+  },
+);
+
+export const listAssetsAction = safeAction(
+  {
+    schema: z.void(),
+    permission: { resource: 'asset', action: 'view' },
+    loadContext: getActionContext,
+    name: 'maintenanceEngine.listAssets',
+  },
+  async (): Promise<Asset[]> => {
+    const supabase = await createServerSupabase();
+    return listAssets(supabase);
   },
 );
 
