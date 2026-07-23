@@ -92,7 +92,7 @@ export const getInvoiceIssuanceStatusAction = safeAction(
     loadContext: getActionContext,
     name: 'billing.getInvoiceIssuanceStatus',
   },
-  async (invoiceId): Promise<Result<Proceed, Blocked>> => {
+  async (invoiceId, ctx): Promise<Result<Proceed, Blocked>> => {
     const supabase = await createServerSupabase();
     const invoice = await getInvoice(supabase, invoiceId);
 
@@ -128,7 +128,16 @@ export const getInvoiceIssuanceStatusAction = safeAction(
       milestone: milestoneResult.data,
       holdPoints,
       changeOrder,
-      approvedByTechnicalDirector: invoice.approved_by !== null,
+      // Not "has this invoice already been approved" -- approved_by is only
+      // ever set in the same atomic update that also sets status='issued'
+      // (issueInvoiceAction), so checking the stored column here would make
+      // this precondition permanently unsatisfiable before the button that
+      // satisfies it is even clicked. What this advisory check actually
+      // needs to know is "would clicking issue right now succeed" -- which
+      // depends on whether the *current viewer* is a Technical Director,
+      // the same role fn_invoices_guard_issuance will check against
+      // whatever approved_by ends up holding.
+      approvedByTechnicalDirector: ctx.orgRole === 'technical_director',
     });
   },
 );
