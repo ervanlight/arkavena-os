@@ -12,6 +12,7 @@ import {
   insertProjectMember,
   listMyClientProjects,
   listMyFieldProjects,
+  listMyPartnerProjects,
   listProjectMembers,
   listMyProjectRoles,
 } from '../data/project-members-repository';
@@ -114,6 +115,19 @@ export const listMyClientProjectsAction = safeAction(
   async (_input, ctx): Promise<{ id: string; name: string }[]> => {
     const supabase = await createServerSupabase();
     return listMyClientProjects(supabase, ctx.userId);
+  },
+);
+
+/** Same "available to any signed-in user" case as listMyClientProjectsAction -- Partner Desk's project picker uses this. */
+export const listMyPartnerProjectsAction = safeAction(
+  {
+    schema: z.void(),
+    loadContext: getActionContext,
+    name: 'projects.listMyPartnerProjects',
+  },
+  async (_input, ctx): Promise<{ id: string; name: string }[]> => {
+    const supabase = await createServerSupabase();
+    return listMyPartnerProjects(supabase, ctx.userId);
   },
 );
 

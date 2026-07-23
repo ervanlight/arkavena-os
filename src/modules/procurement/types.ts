@@ -17,3 +17,5 @@ export type NewPurchaseOrder = Omit<TablesInsert<'purchase_orders'>, 'amount'> &
 
 export type Delivery = Tables<'deliveries'>;
 export type NewDelivery = TablesInsert<'deliveries'>;
+
+export type VendorUser = Tables<'vendor_users'>;

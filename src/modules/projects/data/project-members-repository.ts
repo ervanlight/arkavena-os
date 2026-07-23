@@ -111,6 +111,26 @@ export async function listMyClientProjects(
   return data.flatMap((row) => (row.project === null ? [] : [row.project]));
 }
 
+/**
+ * The projects a supplier actually has access to, with names -- Partner
+ * Desk (Fase 11) needs this for its own project picker, same shape as
+ * listMyClientProjects. Subcontractor is deliberately not included here yet
+ * (ADR 0024 SS1): no subcontractor-facing feature exists to link to.
+ */
+export async function listMyPartnerProjects(
+  supabase: ServerSupabase,
+  userId: string,
+): Promise<{ id: string; name: string }[]> {
+  const { data, error } = await supabase
+    .from('project_members')
+    .select('project:projects(id, name)')
+    .eq('user_id', userId)
+    .in('project_role', ['supplier']);
+
+  if (error !== null) throw error;
+  return data.flatMap((row) => (row.project === null ? [] : [row.project]));
+}
+
 export async function insertProjectMember(
   supabase: ServerSupabase,
   input: NewProjectMember,

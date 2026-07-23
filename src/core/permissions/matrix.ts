@@ -405,6 +405,15 @@ export const PERMISSIONS = {
     view: [...ORG_ROLES],
     create: [...ORG_ROLES],
     update: [...ORG_ROLES],
+    /**
+     * Provisions a vendor_users row (+ the auth/users rows if the email is
+     * new) so a supplier can sign in to Partner Desk (ADR 0024 SS6). Same
+     * "add vs invite" distinction as project_member.add vs user.invite --
+     * unchecked by gen:rls-check (no single RESOURCE_TABLES entry maps
+     * cleanly to vendor_users), verified instead by
+     * supabase/tests/partner-desk.test.ts.
+     */
+    invite: [...ORG_ROLES],
   },
 
   cost_library: {

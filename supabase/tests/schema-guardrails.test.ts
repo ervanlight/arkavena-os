@@ -42,6 +42,9 @@ const ORG_ID_EXEMPT = new Set([
   // that could drift from the parent's.
   'client_users',
   'project_members',
+  // Fase 11 (ADR 0024): same shape as client_users -- scoped through
+  // vendors.organization_id via RLS policy.
+  'vendor_users',
 ]);
 
 /** Tables exempt from carrying the generic audit trigger. */
@@ -234,6 +237,10 @@ describe('foreign keys are explicit about deletion', () => {
     const CASCADE_EXEMPT = new Set([
       'client_users.client_users_client_id_fkey',
       'project_members.project_members_project_id_fkey',
+      // Fase 11 (ADR 0024): a vendor_users row means nothing without the
+      // vendor it links (vendor_id cascades; user_id stays RESTRICT, same
+      // "pure child relationship" shape as client_users above).
+      'vendor_users.vendor_users_vendor_id_fkey',
     ]);
     expect(rows.map((r) => `${r.table_name}.${r.conname}`).filter((key) => !CASCADE_EXEMPT.has(key))).toEqual([]);
   });

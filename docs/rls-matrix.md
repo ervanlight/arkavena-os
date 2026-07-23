@@ -602,6 +602,51 @@ correct).
 available to any staff member, not a money/approval gate; the budget cap
 above is what actually limits spend, not the permission matrix.
 
+## Fase 11 — partner-desk (Wave 11, ADR 0024)
+
+Adds `vendor_users` (owned by modules/procurement — it links users to
+vendors, the same "owning module" reasoning as `clients` owning
+`client_users`) and additive supplier-scoped SELECT policies on
+`vendor_quotes`/`purchase_orders`/`deliveries` (Fase 8's tables, unchanged
+otherwise). Subcontractor gets nothing this phase — no `subcontractors`
+business entity or work-assignment column exists anywhere in the schema, and
+Fase 11's own feature line names only supplier-shaped data (ADR 0024 SS1).
+
+| Table | Owner/TD/Finance/QS/Procurement | Supplier | Other project roles | Client |
+| --- | --- | --- | --- | --- |
+| `vendor_users` | SELECT, INSERT, DELETE (org) | SELECT (self only) | — | — |
+| `vendor_quotes` | CRUD\* (org, unchanged) | SELECT (own `vendor_id` only) | — | — |
+| `purchase_orders` | SELECT, INSERT (org, unchanged) | SELECT (own `vendor_id` only) | — | — |
+| `deliveries` | CRUD\* (org, unchanged) | SELECT (own `vendor_id`, via `purchase_order_id`) | — | — |
+
+A supplier's SELECT additionally requires
+`fn_has_project_role(project_id, ARRAY['supplier'])` — being linked to a
+vendor is not, by itself, enough to see that vendor's rows on a project the
+supplier isn't a member of. The three `vw_partner_*` views
+(`vw_partner_vendor_quotes`, `vw_partner_purchase_orders`,
+`vw_partner_deliveries`) are `security_invoker = true`, same as every
+`vw_client_*` view — these SELECT policies are the real gate, not the views.
+
+Partner Desk's own read actions
+(`modules/partner-desk/actions/partner-desk-actions.ts`) carry no
+`permission` entry, the same "RLS on a security_invoker view is the real
+gate, a matrix check here would add nothing" shape `client-portal-actions.ts`
+already established (ADR 0016).
+
+### Column-level and cross-row rules RLS cannot express
+
+| Rule | Enforced by |
+| --- | --- |
+| A supplier never sees another vendor's `vendor_quotes`/`purchase_orders`/`deliveries`, even on a project where both are `supplier` members | The `vendor_users` join inside each `*_select_supplier` policy — `fn_has_project_role` alone only proves project membership, not which vendor a given supplier represents |
+| `vw_partner_*` views never expose `notes`, `issued_by`, or `received_by` | Column list is hand-picked in each view's `SELECT`, not `SELECT *` (ARCHITECTURE.md 2.6) |
+
+`inviteVendorUserAction` (modules/procurement) is the only way a
+`vendor_users` row gets created outside a test factory; it uses the
+service-role client (`core/auth/provision-external-user.ts`) to create the
+`auth.users`/`users` rows first if they don't already exist, since Supabase
+Auth requires a profile row to exist before a magic link can sign someone in
+(`shouldCreateUser: false`, `core/auth/magic-link.ts`).
+
 ## Later waves
 
 Added as their tables land. A table may not reach main without a row here, its

@@ -1,3 +1,4 @@
+import type { Route } from 'next';
 import Link from 'next/link';
 import { listVendorsAction } from '@/modules/procurement';
 
@@ -41,7 +42,11 @@ export default async function VendorsPage() {
             <tbody className="divide-y divide-slate-100">
               {vendors.map((vendor) => (
                 <tr key={vendor.id}>
-                  <td className="px-4 py-2 font-medium text-slate-900">{vendor.name}</td>
+                  <td className="px-4 py-2 font-medium text-slate-900">
+                    <Link href={`/cc/vendors/${vendor.id}` as Route} className="underline">
+                      {vendor.name}
+                    </Link>
+                  </td>
                   <td className="px-4 py-2 text-slate-600">{vendor.contact_name ?? '—'}</td>
                   <td className="px-4 py-2 text-slate-600">{vendor.email ?? '—'}</td>
                   <td className="px-4 py-2 text-slate-600">{vendor.phone ?? '—'}</td>

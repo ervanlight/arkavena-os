@@ -1,17 +1,29 @@
 /**
  * Public API of modules/procurement. The only door other modules and app/
- * may use to reach vendors, vendor_quotes, purchase_orders, or deliveries
- * (ARCHITECTURE.md 1.2) -- nothing under data/, domain/, or actions/ is
- * ever imported directly from outside this folder.
+ * may use to reach vendors, vendor_quotes, purchase_orders, deliveries, or
+ * vendor_users (ARCHITECTURE.md 1.2) -- nothing under data/, domain/, or
+ * actions/ is ever imported directly from outside this folder.
  */
 
-export type { Delivery, NewDelivery, NewVendor, NewVendorQuote, PurchaseOrder, Vendor, VendorQuote, VendorUpdate, VendorQuoteUpdate } from './types';
+export type {
+  Delivery,
+  NewDelivery,
+  NewVendor,
+  NewVendorQuote,
+  PurchaseOrder,
+  Vendor,
+  VendorQuote,
+  VendorUpdate,
+  VendorQuoteUpdate,
+  VendorUser,
+} from './types';
 
 export {
   createDeliverySchema,
   createPurchaseOrderSchema,
   createVendorQuoteSchema,
   createVendorSchema,
+  inviteVendorUserSchema,
   overrideIssuePurchaseOrderSchema,
   updateVendorQuoteSchema,
   updateVendorSchema,
@@ -19,6 +31,7 @@ export {
   type CreatePurchaseOrderInput,
   type CreateVendorInput,
   type CreateVendorQuoteInput,
+  type InviteVendorUserInput,
   type OverrideIssuePurchaseOrderInput,
   type UpdateVendorInput,
   type UpdateVendorQuoteInput,
@@ -45,3 +58,5 @@ export {
   getDeliveryAction,
   listDeliveriesForPurchaseOrderAction,
 } from './actions/delivery-actions';
+
+export { inviteVendorUserAction } from './actions/vendor-user-actions';

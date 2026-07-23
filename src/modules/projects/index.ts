@@ -59,6 +59,7 @@ export {
   getMyProjectRolesAction,
   listMyClientProjectsAction,
   listMyFieldProjectsAction,
+  listMyPartnerProjectsAction,
   listProjectMembersAction,
   removeProjectMemberAction,
 } from './actions/project-member-actions';

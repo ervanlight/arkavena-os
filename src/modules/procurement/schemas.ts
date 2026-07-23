@@ -69,3 +69,11 @@ export const createDeliverySchema = z.object({
   notes: z.string().trim().max(2000).optional(),
 });
 export type CreateDeliveryInput = z.infer<typeof createDeliverySchema>;
+
+export const inviteVendorUserSchema = z.object({
+  vendorId: z.string().uuid(),
+  email: z.string().trim().email('Format email tidak valid'),
+  fullName: z.string().trim().min(1, 'Nama wajib diisi').max(200),
+  projectId: z.string().uuid().optional(),
+});
+export type InviteVendorUserInput = z.infer<typeof inviteVendorUserSchema>;

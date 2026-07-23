@@ -997,6 +997,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "deliveries_purchase_order_id_fkey"
+            columns: ["purchase_order_id"]
+            isOneToOne: false
+            referencedRelation: "vw_partner_purchase_orders"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "deliveries_received_by_fkey"
             columns: ["received_by"]
             isOneToOne: false
@@ -2810,6 +2817,13 @@ export type Database = {
             referencedRelation: "vendor_quotes"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "purchase_orders_vendor_quote_id_fkey"
+            columns: ["vendor_quote_id"]
+            isOneToOne: false
+            referencedRelation: "vw_partner_vendor_quotes"
+            referencedColumns: ["id"]
+          },
         ]
       }
       roles: {
@@ -3124,6 +3138,45 @@ export type Database = {
           },
           {
             foreignKeyName: "vendor_quotes_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_users: {
+        Row: {
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_users_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_users_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "vendors"
@@ -3503,6 +3556,173 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "vw_client_project_overview"
             referencedColumns: ["project_id"]
+          },
+        ]
+      }
+      vw_partner_deliveries: {
+        Row: {
+          created_at: string | null
+          delivered_at: string | null
+          id: string | null
+          purchase_order_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          delivered_at?: string | null
+          id?: string | null
+          purchase_order_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          delivered_at?: string | null
+          id?: string | null
+          purchase_order_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deliveries_purchase_order_id_fkey"
+            columns: ["purchase_order_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deliveries_purchase_order_id_fkey"
+            columns: ["purchase_order_id"]
+            isOneToOne: false
+            referencedRelation: "vw_partner_purchase_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vw_partner_purchase_orders: {
+        Row: {
+          amount: number | null
+          created_at: string | null
+          description: string | null
+          id: string | null
+          project_id: string | null
+          vendor_id: string | null
+          vendor_quote_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          project_id?: string | null
+          vendor_id?: string | null
+          vendor_quote_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          project_id?: string | null
+          vendor_id?: string | null
+          vendor_quote_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_orders_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_vendor_quote_id_fkey"
+            columns: ["vendor_quote_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_vendor_quote_id_fkey"
+            columns: ["vendor_quote_id"]
+            isOneToOne: false
+            referencedRelation: "vw_partner_vendor_quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vw_partner_vendor_quotes: {
+        Row: {
+          amount: number | null
+          created_at: string | null
+          description: string | null
+          id: string | null
+          material_request_id: string | null
+          project_id: string | null
+          status: Database["public"]["Enums"]["vendor_quote_status"] | null
+          valid_until: string | null
+          vendor_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          material_request_id?: string | null
+          project_id?: string | null
+          status?: Database["public"]["Enums"]["vendor_quote_status"] | null
+          valid_until?: string | null
+          vendor_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          material_request_id?: string | null
+          project_id?: string | null
+          status?: Database["public"]["Enums"]["vendor_quote_status"] | null
+          valid_until?: string | null
+          vendor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_quotes_material_request_id_fkey"
+            columns: ["material_request_id"]
+            isOneToOne: false
+            referencedRelation: "material_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_quotes_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_quotes_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "vendor_quotes_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
           },
         ]
       }
