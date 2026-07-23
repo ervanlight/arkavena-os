@@ -42,6 +42,7 @@ export default async function ClientPortalLayout({ children }: { children: React
           >
             <button
               type="submit"
+              aria-label="Keluar"
               className="flex h-8 w-8 items-center justify-center rounded-full text-[color:var(--color-ink-tertiary)] hover:bg-[color:var(--color-danger)]/10 hover:text-[color:var(--color-danger)]"
             >
               <LogOut size={16} />

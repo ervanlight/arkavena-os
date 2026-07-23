@@ -35,6 +35,7 @@ export default async function SiteFlowLayout({ children }: { children: React.Rea
         >
           <button
             type="submit"
+            aria-label="Keluar"
             className="flex h-8 w-8 items-center justify-center rounded-full text-[color:var(--color-ink-tertiary)] active:bg-[color:var(--color-danger)]/10 active:text-[color:var(--color-danger)]"
           >
             <LogOut size={16} />

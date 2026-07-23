@@ -84,6 +84,7 @@ export default async function CommandCenterLayout({ children }: { children: Reac
               <button
                 type="submit"
                 title="Keluar"
+                aria-label="Keluar"
                 className="flex h-7 w-7 items-center justify-center rounded-full text-[color:var(--color-ink-tertiary)] hover:bg-[color:var(--color-danger)]/10 hover:text-[color:var(--color-danger)]"
               >
                 <LogOut size={15} />

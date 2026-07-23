@@ -6,7 +6,7 @@ import {
   listClientZoneProgressAction,
   listPendingClientDecisionsAction,
 } from '@/modules/client-portal';
-import { Card, StatusBadge, Button } from '@/core/ui';
+import { Card, StatusBadge } from '@/core/ui';
 import { PortalNav } from '../portal-nav';
 import { DecisionClockBadge } from '../decision-clock-badge';
 
@@ -105,8 +105,14 @@ export default async function ClientPortalOverviewPage({ params }: { params: Pro
                   </span>
                 </div>
                 {decision.change_order_id !== null && (
-                  <Link href={`/variations/${decision.change_order_id}/approve`}>
-                    <Button size="sm">Lihat &amp; putuskan</Button>
+                  // A styled Link, not a <Button> nested inside it -- an anchor
+                  // wrapping a <button> is invalid HTML (nested interactive
+                  // content) and some engines silently mis-render it.
+                  <Link
+                    href={`/variations/${decision.change_order_id}/approve`}
+                    className="inline-flex items-center justify-center gap-2 rounded-[var(--radius-control)] bg-[color:var(--color-accent)] px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-[color:var(--color-accent-hover)]"
+                  >
+                    Lihat &amp; putuskan
                   </Link>
                 )}
               </li>
