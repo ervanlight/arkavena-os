@@ -626,13 +626,16 @@ FASE 11 — Partner Desk + polish                                (setelah intern
   supplier quotes/delivery/invoice terbatas; notifikasi WA API      sesuai dokumen)
   bila volume sudah tinggi.
 
-  **Belum dimulai per 2026-07-23** (lihat [ADR 0022](decisions/0022-fase11-deferred-pending-real-partner-volume.md))
+  **Sempat ditunda per 2026-07-23** (lihat [ADR 0022](decisions/0022-fase11-deferred-pending-real-partner-volume.md))
   — "setelah internal stabil" sudah benar (Fase 0-10 hijau di CI), tapi
   "bila volume sudah tinggi" adalah kondisi bisnis nyata, bukan kondisi
-  teknis, dan Owner mengonfirmasi kondisi itu belum terpenuhi. Fase 0-10
-  (Fase 10 dalam bentuk yang sudah dikurangi per ADR 0021) adalah produk inti
-  yang lengkap dan siap deploy untuk Build Sequence ini; Fase 11 menunggu
-  volume partner nyata, bukan sekadar giliran berikutnya.
+  teknis, dan Owner sempat mengonfirmasi kondisi itu belum terpenuhi.
+  **Owner kemudian memutuskan tetap dibangun sekarang** (lihat
+  [ADR 0023](decisions/0023-fase11-owner-override-build-despite-volume-gate.md))
+  — fakta volume di ADR 0022 tidak berubah, tapi kode dibangun mendahului
+  volume tersebut secara sadar; ADR 0023 menegaskan ini bukan izin untuk
+  mengundang partner sungguhan sebelum item `docs/PRE-LAUNCH-CHECKLIST.md`
+  ditutup.
 ```
 
 **Aturan antar-fase:** fase N+1 tidak dimulai kalau exit criteria fase N belum hijau di CI. Setiap fase mengunci: migration wave-nya, RLS matrix ter-update, test-nya, dan seed demo diperluas. Dengan begitu setiap lapisan teruji sebelum lapisan berikutnya berdiri di atasnya — sesuai permintaan Anda: semua dibangun, tapi tidak ada yang dibangun di atas fondasi yang belum terbukti.
