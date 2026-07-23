@@ -587,6 +587,50 @@ export type Database = {
           },
         ]
       }
+      cost_library: {
+        Row: {
+          category: string | null
+          created_at: string
+          default_unit_cost: number
+          deleted_at: string | null
+          id: string
+          name: string
+          organization_id: string
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          default_unit_cost: number
+          deleted_at?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          unit: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          default_unit_cost?: number
+          deleted_at?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cost_library_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       daily_logs: {
         Row: {
           created_at: string
@@ -1141,6 +1185,92 @@ export type Database = {
           },
         ]
       }
+      leads: {
+        Row: {
+          budget_known: boolean
+          client_id: string | null
+          contact_name: string
+          created_at: string
+          deleted_at: string | null
+          desired_start_date: string | null
+          email: string | null
+          estimated_value: number | null
+          id: string
+          lost_reason: string | null
+          organization_id: string
+          phone: string | null
+          project_id: string | null
+          source: string | null
+          status: Database["public"]["Enums"]["lead_status"]
+          updated_at: string
+        }
+        Insert: {
+          budget_known?: boolean
+          client_id?: string | null
+          contact_name: string
+          created_at?: string
+          deleted_at?: string | null
+          desired_start_date?: string | null
+          email?: string | null
+          estimated_value?: number | null
+          id?: string
+          lost_reason?: string | null
+          organization_id: string
+          phone?: string | null
+          project_id?: string | null
+          source?: string | null
+          status?: Database["public"]["Enums"]["lead_status"]
+          updated_at?: string
+        }
+        Update: {
+          budget_known?: boolean
+          client_id?: string | null
+          contact_name?: string
+          created_at?: string
+          deleted_at?: string | null
+          desired_start_date?: string | null
+          email?: string | null
+          estimated_value?: number | null
+          id?: string
+          lost_reason?: string | null
+          organization_id?: string
+          phone?: string | null
+          project_id?: string | null
+          source?: string | null
+          status?: Database["public"]["Enums"]["lead_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
       material_requests: {
         Row: {
           created_at: string
@@ -1428,6 +1558,7 @@ export type Database = {
           created_at: string
           deleted_at: string | null
           id: string
+          margin_floor_bp: number
           name: string
           slug: string
           status: Database["public"]["Enums"]["organization_status"]
@@ -1437,6 +1568,7 @@ export type Database = {
           created_at?: string
           deleted_at?: string | null
           id?: string
+          margin_floor_bp?: number
           name: string
           slug: string
           status?: Database["public"]["Enums"]["organization_status"]
@@ -1446,6 +1578,7 @@ export type Database = {
           created_at?: string
           deleted_at?: string | null
           id?: string
+          margin_floor_bp?: number
           name?: string
           slug?: string
           status?: Database["public"]["Enums"]["organization_status"]
@@ -2003,6 +2136,56 @@ export type Database = {
           },
         ]
       }
+      vendors: {
+        Row: {
+          address: string | null
+          contact_name: string | null
+          created_at: string
+          deleted_at: string | null
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          organization_id: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          contact_name?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          organization_id: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          contact_name?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          organization_id?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendors_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       work_packages: {
         Row: {
           change_order_id: string | null
@@ -2342,6 +2525,14 @@ export type Database = {
       invoice_status: "draft" | "issued" | "paid" | "cancelled"
       issue_severity: "low" | "medium" | "high"
       issue_status: "open" | "resolved"
+      lead_status:
+        | "new"
+        | "contacted"
+        | "qualified"
+        | "assessment_scheduled"
+        | "proposal_sent"
+        | "won"
+        | "lost"
       material_request_status: "requested" | "fulfilled" | "cancelled"
       milestone_status: "pending" | "completed"
       notification_channel: "in_app" | "email"
@@ -2530,6 +2721,15 @@ export const Constants = {
       invoice_status: ["draft", "issued", "paid", "cancelled"],
       issue_severity: ["low", "medium", "high"],
       issue_status: ["open", "resolved"],
+      lead_status: [
+        "new",
+        "contacted",
+        "qualified",
+        "assessment_scheduled",
+        "proposal_sent",
+        "won",
+        "lost",
+      ],
       material_request_status: ["requested", "fulfilled", "cancelled"],
       milestone_status: ["pending", "completed"],
       notification_channel: ["in_app", "email"],

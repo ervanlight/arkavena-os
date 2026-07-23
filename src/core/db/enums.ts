@@ -190,3 +190,18 @@ export const INVOICE_STATUS = {
   PAID: 'paid',
   CANCELLED: 'cancelled',
 } satisfies Record<string, Enums<'invoice_status'>>;
+
+// ---------------------------------------------------------------------------
+// Fase 8 (modules/crm, modules/assessment, modules/estimating, modules/procurement)
+// ---------------------------------------------------------------------------
+
+/** Mirrors the TRANSITIONS graph in modules/crm/domain/lead-transition.ts (ADR 0018). */
+export const LEAD_STATUS = {
+  NEW: 'new',
+  CONTACTED: 'contacted',
+  QUALIFIED: 'qualified',
+  ASSESSMENT_SCHEDULED: 'assessment_scheduled',
+  PROPOSAL_SENT: 'proposal_sent',
+  WON: 'won',
+  LOST: 'lost',
+} satisfies Record<string, Enums<'lead_status'>>;
