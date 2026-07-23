@@ -15,7 +15,7 @@ Stack: Next.js App Router · TypeScript (strict) · Tailwind · Supabase (Postgr
 5. **Semua mutasi bernilai audit lewat `core/audit`.** Dilarang `insert into audit_logs` manual. Aksi override/approval WAJIB menyertakan `reason`.
 6. **Setiap tabel wajib punya RLS + entri di `docs/rls-matrix.md` + test RLS.** Tabel tanpa RLS = CI merah.
 7. **Jangan lompati Build Sequence.** Fase N+1 hanya dimulai setelah exit criteria fase N hijau di CI. Jangan bangun modul yang belum gilirannya "karena sekalian".
-8. **Sepuluh keputusan Owner (ARCHITECTURE.md §9 D1–D10) mengikat.** Yang paling sering tergoda dilanggar: `organization_id` wajib di SEMUA tabel (D1); auth = magic link saja, tanpa OTP/SMS (D4); tanpa kolom pajak apa pun (D6); `ai-scribe` dibekukan total (D7); tanpa framework i18n (D10). Melanggar salah satunya = revisi arsitektur, bukan pilihan implementasi.
+8. **Sepuluh keputusan Owner (ARCHITECTURE.md §9 D1–D10) mengikat.** Yang paling sering tergoda dilanggar: `organization_id` wajib di SEMUA tabel (D1); tanpa kolom pajak apa pun (D6); tanpa framework i18n (D10). Melanggar salah satunya = revisi arsitektur, bukan pilihan implementasi. Dua pengecualian sudah direvisi secara eksplisit dan tercatat: D7 (`ai-scribe`) dicabut per [ADR 0020](docs/decisions/0020-fase10-ai-scribe-unfreeze-and-scope.md); D4 (magic link) diganti email+password per [ADR 0025](docs/decisions/0025-password-auth-reversing-d4.md).
 
 ---
 

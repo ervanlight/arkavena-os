@@ -1,12 +1,19 @@
 import 'server-only';
 import { createAdminSupabase } from '@/core/db/admin.server';
 import { ConflictError } from '@/core/errors/app-error';
+import { generateTemporaryPassword } from './generate-temporary-password';
+
+export type ProvisionedUser = {
+  userId: string;
+  /** Only set when a new account was actually created -- null when an existing row was reused, since re-provisioning must never silently change an existing password. */
+  temporaryPassword: string | null;
+};
 
 /**
  * Creates the `auth.users`/`public.users` rows an external contact (client,
- * supplier, subcontractor) needs before they can ever sign in -- magic link
- * deliberately never self-provisions (`shouldCreateUser: false`,
- * `core/auth/magic-link.ts`), so someone has to write these rows first.
+ * supplier, subcontractor) needs before they can ever sign in. Sign-in itself
+ * deliberately never self-provisions (ADR 0025 SS1: no sign-up form anywhere),
+ * so someone has to write these rows first.
  *
  * Written from Fase 1 (`core/db/admin.server.ts`'s own docstring names
  * exactly this use), never actually called until Fase 11's supplier invite
@@ -30,7 +37,7 @@ export async function provisionExternalUser(input: {
   organizationId: string;
   email: string;
   fullName: string;
-}): Promise<string> {
+}): Promise<ProvisionedUser> {
   const admin = createAdminSupabase();
   const email = input.email.trim().toLowerCase();
 
@@ -49,11 +56,13 @@ export async function provisionExternalUser(input: {
         meta: { email },
       });
     }
-    return existing.id;
+    return { userId: existing.id, temporaryPassword: null };
   }
 
+  const temporaryPassword = generateTemporaryPassword();
   const { data: created, error: createError } = await admin.auth.admin.createUser({
     email,
+    password: temporaryPassword,
     email_confirm: true,
   });
   if (createError !== null) throw createError;
@@ -72,5 +81,5 @@ export async function provisionExternalUser(input: {
     .single();
   if (insertError !== null) throw insertError;
 
-  return inserted.id;
+  return { userId: inserted.id, temporaryPassword };
 }

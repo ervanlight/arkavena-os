@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/core/auth/session';
-import { signOut } from '@/core/auth/magic-link';
+import { signOut } from '@/core/auth/login';
 import { InstallBanner } from '@/core/pwa/install-banner';
 import { OutboxSync } from './outbox-sync';
 

@@ -10,8 +10,8 @@ export const metadata = { title: 'Persetujuan Variation — BuildTrust OS' };
  * standalone link (e.g. from a notification) and now from inside the
  * navigable portal's own Keputusan page (ADR 0016, "approval variation
  * pindah ke portal"), since it shares the (client-portal) layout. Reuses
- * the same magic-link session every other role signs in with (owner
- * decision D4); proxy.ts already redirects an unauthenticated visitor to
+ * the same signed-in session every other role signs in with (email +
+ * password, ADR 0025); proxy.ts already redirects an unauthenticated visitor to
  * /login before this page ever renders. RLS
  * (change_orders_select_client_approver) is what actually decides whether
  * this specific signed-in person can see this specific change order --

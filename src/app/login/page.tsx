@@ -6,7 +6,7 @@ export const metadata = { title: 'Masuk — BuildTrust OS' };
 
 export default async function LoginPage() {
   if (await isSignedIn()) {
-    redirect('/cc');
+    redirect('/');
   }
 
   return (

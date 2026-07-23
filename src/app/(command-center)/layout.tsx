@@ -2,7 +2,7 @@ import type { Route } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/core/auth/session';
-import { signOut } from '@/core/auth/magic-link';
+import { signOut } from '@/core/auth/login';
 
 /**
  * Shared shell for every Command Center page (owner, TD, finance, QS, ...).
@@ -50,6 +50,9 @@ export default async function CommandCenterLayout({ children }: { children: Reac
             </Link>
             <Link href={'/cc/billing' as Route} className="text-slate-600 hover:text-slate-900">
               Billing
+            </Link>
+            <Link href={'/cc/team' as Route} className="text-slate-600 hover:text-slate-900">
+              Tim
             </Link>
           </nav>
           <div className="flex items-center gap-4 text-sm">

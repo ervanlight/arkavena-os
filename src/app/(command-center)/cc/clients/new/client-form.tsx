@@ -9,7 +9,7 @@ type FormState = { error: string | null };
 /**
  * safeAction-wrapped actions take a plain object matching their Zod schema,
  * not FormData -- so this reads the form fields into an object itself rather
- * than passing the FormData straight through, unlike the magic-link form
+ * than passing the FormData straight through, unlike the login form
  * (which is a hand-written action reading FormData.get() directly).
  */
 export function NewClientForm() {

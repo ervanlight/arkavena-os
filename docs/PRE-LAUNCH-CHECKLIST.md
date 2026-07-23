@@ -78,11 +78,22 @@ instruksi Owner "temukan bug dan fix"):**
 
 ---
 
-## 2. CHECKPOINT #3 — uji lapangan magic link (Fase 4) belum divalidasi
+## 2. CHECKPOINT #3 — uji lapangan sign-in (Fase 4) belum divalidasi
 
 **Status:** di-skip, belum divalidasi. Tidak bisa divalidasi oleh sesi
 Claude Code mana pun — checkpoint ini secara eksplisit meminta uji lapangan
 dengan mandor sungguhan.
+
+**Update 2026-07-23 ([ADR 0025](decisions/0025-password-auth-reversing-d4.md)):**
+mekanisme sign-in berubah dari magic link ke email+password atas permintaan
+Owner (preferensi UX, bukan hasil uji lapangan ini). Checkpoint ini TETAP
+terbuka — pertanyaannya bergeser dari "bisakah mandor membuka tautan di
+email" menjadi "bisakah mandor mengingat/memasukkan email+password di HP
+lapangan, dan bagaimana kata sandi awal (dibuat admin, disampaikan manual)
+benar-benar sampai ke mereka." Risiko baru yang belum diuji: kata sandi awal
+yang di-generate sistem hanya tampil satu kali di layar staf yang mengundang
+— belum ada mekanisme "lupa/hilang sebelum sempat dipakai" selain jalur lupa
+password (yang balik butuh email, sama seperti magic link lama).
 
 **Ringkasan risiko** (ARCHITECTURE.md, D4 §9, baris 668):
 

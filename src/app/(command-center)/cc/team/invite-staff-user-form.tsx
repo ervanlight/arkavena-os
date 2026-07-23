@@ -2,22 +2,27 @@
 
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
-import { inviteVendorUserAction } from '@/modules/procurement';
-import type { Project } from '@/modules/projects';
+import { inviteStaffUserAction } from '@/core/auth/invite-staff-user';
 
 type FormState = { error: string | null; ok: boolean; temporaryPassword: string | null };
 const initialState: FormState = { error: null, ok: false, temporaryPassword: null };
 
-export function InviteVendorUserForm({ vendorId, projects }: { vendorId: string; projects: Project[] }) {
+const ROLE_OPTIONS = [
+  { value: 'owner', label: 'Owner' },
+  { value: 'technical_director', label: 'Technical Director' },
+  { value: 'finance', label: 'Finance' },
+  { value: 'qs', label: 'QS' },
+  { value: 'procurement', label: 'Procurement' },
+] as const;
+
+export function InviteStaffUserForm() {
   const router = useRouter();
 
   const [state, formAction, isPending] = useActionState(async (_prev: FormState, formData: FormData) => {
-    const projectId = String(formData.get('projectId') ?? '');
-    const result = await inviteVendorUserAction({
-      vendorId,
+    const result = await inviteStaffUserAction({
       email: String(formData.get('email') ?? ''),
       fullName: String(formData.get('fullName') ?? ''),
-      ...(projectId !== '' ? { projectId } : {}),
+      orgRole: String(formData.get('orgRole') ?? '') as (typeof ROLE_OPTIONS)[number]['value'],
     });
 
     if (!result.ok) {
@@ -29,10 +34,10 @@ export function InviteVendorUserForm({ vendorId, projects }: { vendorId: string;
   }, initialState);
 
   return (
-    <form action={formAction} className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+    <form action={formAction} className="grid grid-cols-1 gap-4 sm:grid-cols-4">
       <div>
         <label htmlFor="fullName" className="block text-sm font-medium text-slate-700">
-          Nama kontak *
+          Nama *
         </label>
         <input
           id="fullName"
@@ -54,24 +59,38 @@ export function InviteVendorUserForm({ vendorId, projects }: { vendorId: string;
         />
       </div>
       <div>
-        <label htmlFor="projectId" className="block text-sm font-medium text-slate-700">
-          Proyek (opsional)
+        <label htmlFor="orgRole" className="block text-sm font-medium text-slate-700">
+          Peran *
         </label>
         <select
-          id="projectId"
-          name="projectId"
+          id="orgRole"
+          name="orgRole"
+          required
+          defaultValue=""
           className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
         >
-          <option value="">-- Tidak ditambahkan ke proyek --</option>
-          {projects.map((project) => (
-            <option key={project.id} value={project.id}>
-              {project.name}
+          <option value="" disabled>
+            -- Pilih peran --
+          </option>
+          {ROLE_OPTIONS.map((role) => (
+            <option key={role.value} value={role.value}>
+              {role.label}
             </option>
           ))}
         </select>
       </div>
 
-      <div className="sm:col-span-3">
+      <div className="flex items-end">
+        <button
+          type="submit"
+          disabled={isPending}
+          className="w-full rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+        >
+          {isPending ? 'Mengundang...' : 'Undang'}
+        </button>
+      </div>
+
+      <div className="sm:col-span-4">
         {state.error !== null && (
           <p role="alert" className="text-sm text-red-600">
             {state.error}
@@ -80,22 +99,14 @@ export function InviteVendorUserForm({ vendorId, projects }: { vendorId: string;
         {state.ok && state.temporaryPassword !== null && (
           <div role="status" className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm">
             <p className="text-emerald-800">
-              Kontak vendor berhasil diundang. Kata sandi awal (sampaikan ke kontak ini secara langsung, tidak
-              dikirim lewat email):
+              Staf berhasil diundang. Kata sandi awal (sampaikan secara langsung, tidak dikirim lewat email):
             </p>
             <p className="mt-1 font-mono text-base font-semibold text-emerald-900">{state.temporaryPassword}</p>
           </div>
         )}
         {state.ok && state.temporaryPassword === null && (
-          <p className="text-sm text-emerald-600">Kontak vendor sudah terdaftar sebelumnya, ditambahkan ke proyek.</p>
+          <p className="text-sm text-emerald-600">Email ini sudah terdaftar di organisasi Anda.</p>
         )}
-        <button
-          type="submit"
-          disabled={isPending}
-          className="mt-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-        >
-          {isPending ? 'Mengundang...' : 'Undang ke Partner Desk'}
-        </button>
       </div>
     </form>
   );

@@ -672,6 +672,11 @@ Tidak ada conflict resolution kompleks. Asumsi: satu koordinator per lokasi.
 
 ### D4 — Auth lapangan: EMAIL + MAGIC LINK (bukan HP+OTP)
 
+> **Direvisi 2026-07-23** — lihat [ADR 0025](docs/decisions/0025-password-auth-reversing-d4.md).
+> Sign-in kini email + password untuk semua role, atas permintaan eksplisit
+> Owner (preferensi UX, bukan tambal bug). Teks di bawah tetap sebagai
+> sejarah keputusan, tidak dihapus.
+
 Supabase Auth built-in, gratis. Berlaku untuk **semua role** — lapangan, kantor, klien, partner.
 
 **Alasan:** OTP berbayar per pesan; kita mulai dari zero-cost. Ini membatalkan rekomendasi awal dokumen ini (HP+OTP untuk lapangan).

@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/core/auth/session';
-import { signOut } from '@/core/auth/magic-link';
+import { signOut } from '@/core/auth/login';
 
 /**
  * Shared shell for Partner Desk (Fase 11, ADR 0024) -- same plain,

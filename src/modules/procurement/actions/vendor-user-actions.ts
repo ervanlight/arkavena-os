@@ -26,8 +26,8 @@ export const inviteVendorUserAction = safeAction(
     loadContext: getActionContext,
     name: 'procurement.inviteVendorUser',
   },
-  async (input, ctx): Promise<VendorUser> => {
-    const userId = await provisionExternalUser({
+  async (input, ctx): Promise<VendorUser & { temporaryPassword: string | null }> => {
+    const { userId, temporaryPassword } = await provisionExternalUser({
       organizationId: ctx.organizationId,
       email: input.email,
       fullName: input.fullName,
@@ -55,6 +55,6 @@ export const inviteVendorUserAction = safeAction(
       }
     }
 
-    return vendorUser;
+    return { ...vendorUser, temporaryPassword };
   },
 );

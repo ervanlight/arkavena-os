@@ -22,7 +22,7 @@ import { supabaseAnonKey, supabaseUrl } from '@/core/db/env';
  * query returned nothing.
  */
 
-const PUBLIC_PATHS = ['/login', '/auth/callback'];
+const PUBLIC_PATHS = ['/login', '/auth/callback', '/forgot-password', '/reset-password'];
 
 function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
