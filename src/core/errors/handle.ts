@@ -55,6 +55,18 @@ function isPostgrestLike(value: unknown): value is { code?: string; message?: st
 }
 
 /**
+ * Who is reading the error message. 'staff' (default) sees the specific
+ * message an error carries -- trigger hints, domain rule wording, blocked
+ * reasons -- all written in staff vocabulary ("hold point", "Cash Gate",
+ * "termin", ADR references). 'external' is a client-portal or partner-desk
+ * caller: every message except our own field-level input validation collapses
+ * to the catalogue's generic Indonesian text (ADR 0015 follow-up,
+ * PRE-LAUNCH-CHECKLIST item 1). The code stays intact either way, so the UI
+ * can still branch and support can still correlate.
+ */
+export type ErrorAudience = 'staff' | 'external';
+
+/**
  * Turn anything thrown into an ActionResult.
  *
  * Two rules govern this function.
@@ -67,16 +79,32 @@ function isPostgrestLike(value: unknown): value is { code?: string; message?: st
  *
  * Second, an RLS refusal is reported as PERMISSION_DENIED rather than as a
  * database failure, because that is what it means.
+ *
+ * Third (external audience only): even a *recognised* error's specific message
+ * is staff-facing text -- trigger messages and domain rule wording assume the
+ * reader knows internal process names. For an external caller the message
+ * falls back to the catalogue entry for its code, except field-level
+ * validation, whose text comes from our own Zod schemas and is written for
+ * the person filling the form.
  */
-export function toActionResult(error: unknown): ActionResult<never> {
+export function toActionResult(error: unknown, opts?: { audience?: ErrorAudience }): ActionResult<never> {
+  const audience = opts?.audience ?? 'staff';
+
   if (isAppError(error)) {
     const field = error instanceof Object && 'field' in error ? (error.field as string | undefined) : undefined;
     const blockedReasons =
       'blockedReasons' in error ? (error.blockedReasons as readonly string[] | undefined) : undefined;
 
+    if (audience === 'external' && field === undefined) {
+      // No blockedReasons either: those strings are staff wording too.
+      return actionFail(error.code, ERROR_MESSAGES_ID[error.code]);
+    }
+
     return actionFail(error.code, error.displayMessage, {
       ...(field !== undefined ? { field } : {}),
-      ...(blockedReasons !== undefined && blockedReasons.length > 0 ? { blockedReasons } : {}),
+      ...(audience === 'staff' && blockedReasons !== undefined && blockedReasons.length > 0
+        ? { blockedReasons }
+        : {}),
     });
   }
 

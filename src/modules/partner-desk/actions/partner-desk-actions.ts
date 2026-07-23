@@ -26,6 +26,7 @@ export const listPartnerVendorQuotesAction = safeAction(
     schema: z.string().uuid(),
     loadContext: getActionContext,
     name: 'partnerDesk.listPartnerVendorQuotes',
+    audience: 'external',
   },
   async (projectId): Promise<PartnerVendorQuote[]> => {
     const supabase = await createServerSupabase();
@@ -38,6 +39,7 @@ export const listPartnerPurchaseOrdersAction = safeAction(
     schema: z.string().uuid(),
     loadContext: getActionContext,
     name: 'partnerDesk.listPartnerPurchaseOrders',
+    audience: 'external',
   },
   async (projectId): Promise<PartnerPurchaseOrder[]> => {
     const supabase = await createServerSupabase();
@@ -50,6 +52,7 @@ export const listPartnerDeliveriesForPurchaseOrderAction = safeAction(
     schema: z.string().uuid(),
     loadContext: getActionContext,
     name: 'partnerDesk.listPartnerDeliveriesForPurchaseOrder',
+    audience: 'external',
   },
   async (purchaseOrderId): Promise<PartnerDelivery[]> => {
     const supabase = await createServerSupabase();

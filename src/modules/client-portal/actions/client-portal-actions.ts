@@ -37,6 +37,7 @@ export const getClientProjectOverviewAction = safeAction(
     schema: z.string().uuid(),
     loadContext: getActionContext,
     name: 'clientPortal.getClientProjectOverview',
+    audience: 'external',
   },
   async (projectId): Promise<ClientProjectOverview | null> => {
     const supabase = await createServerSupabase();
@@ -49,6 +50,7 @@ export const listClientZoneProgressAction = safeAction(
     schema: z.string().uuid(),
     loadContext: getActionContext,
     name: 'clientPortal.listClientZoneProgress',
+    audience: 'external',
   },
   async (projectId): Promise<ClientZoneProgress[]> => {
     const supabase = await createServerSupabase();
@@ -61,6 +63,7 @@ export const listClientTimelineEventsAction = safeAction(
     schema: z.string().uuid(),
     loadContext: getActionContext,
     name: 'clientPortal.listClientTimelineEvents',
+    audience: 'external',
   },
   async (projectId): Promise<ClientTimelineEvent[]> => {
     const supabase = await createServerSupabase();
@@ -73,6 +76,7 @@ export const listClientProgressPhotosAction = safeAction(
     schema: z.string().uuid(),
     loadContext: getActionContext,
     name: 'clientPortal.listClientProgressPhotos',
+    audience: 'external',
   },
   async (projectId): Promise<ClientProgressPhoto[]> => {
     const supabase = await createServerSupabase();
@@ -86,6 +90,7 @@ export const listClientDecisionsAction = safeAction(
     permission: { resource: 'client_decision', action: 'view' },
     loadContext: getActionContext,
     name: 'clientPortal.listClientDecisions',
+    audience: 'external',
   },
   async (projectId): Promise<ClientDecision[]> => {
     const supabase = await createServerSupabase();
@@ -100,6 +105,7 @@ export const listPendingClientDecisionsAction = safeAction(
     permission: { resource: 'client_decision', action: 'view' },
     loadContext: getActionContext,
     name: 'clientPortal.listPendingClientDecisions',
+    audience: 'external',
   },
   async (projectId): Promise<(ClientDecision & { clockTier: DecisionClockTier })[]> => {
     const supabase = await createServerSupabase();

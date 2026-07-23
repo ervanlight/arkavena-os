@@ -45,6 +45,7 @@ export const clientApproveChangeOrderAction = safeAction(
     permission: { resource: 'change_order', action: 'client_approve' },
     loadContext: getActionContext,
     name: 'scopeVariation.clientApproveChangeOrder',
+    audience: 'external',
   },
   async (input, ctx): Promise<ChangeOrder> => {
     const supabase = await createServerSupabase();
@@ -87,6 +88,7 @@ export const clientRejectChangeOrderAction = safeAction(
     permission: { resource: 'change_order', action: 'client_reject' },
     loadContext: getActionContext,
     name: 'scopeVariation.clientRejectChangeOrder',
+    audience: 'external',
   },
   async (input, ctx): Promise<ChangeOrder> => {
     const supabase = await createServerSupabase();

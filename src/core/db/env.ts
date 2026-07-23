@@ -47,6 +47,18 @@ export function supabaseServiceRoleKey(): string {
   return required('SUPABASE_SERVICE_ROLE_KEY', process.env.SUPABASE_SERVICE_ROLE_KEY);
 }
 
+/**
+ * The localhost fallback exists for local dev only. In production a missing
+ * NEXT_PUBLIC_SITE_URL must fail loudly: this value becomes the magic-link
+ * redirect target, and the silent fallback meant a deploy that forgot the
+ * variable sent every login email pointing at localhost -- no error anywhere,
+ * users simply could not sign in (exactly what happened on the first Vercel
+ * deploy, 2026-07-23). Supabase then quietly substituted its Site URL because
+ * localhost was not in the redirect allow-list, which masked the bug further.
+ */
 export function siteUrl(): string {
+  if (process.env.NODE_ENV === 'production') {
+    return required('NEXT_PUBLIC_SITE_URL', process.env.NEXT_PUBLIC_SITE_URL);
+  }
   return process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 }

@@ -52,6 +52,30 @@ belum pernah dianalisis untuk jalur klien portal secara spesifik.
    percabangan eksplisit (mis. `safeAction` diberi tahu "caller ini eksternal,
    jangan pernah pakai `hint` verbatim, selalu jatuh ke pesan generik").
 
+**Update 2026-07-23 (audit selesai + percabangan diimplementasikan, atas
+instruksi Owner "temukan bug dan fix"):**
+
+- Hasil audit: jalur bocor NYATA ada. `clientApproveChangeOrderAction` dan
+  `clientRejectChangeOrderAction` (`modules/scope-variation/actions/
+  client-decision-actions.ts`) dipanggil dari
+  `(client-portal)/variations/[id]/approve` dan menulis ke `change_orders`,
+  yang dijaga trigger ber-hint (guard transisi + guard kolom klien). Pada
+  race/double-submit, pesan trigger berbahasa staf sampai verbatim ke klien.
+  Semua action client-portal dan partner-desk lain read-only, tapi tetap bisa
+  memunculkan pesan infra/RLS.
+- Perbaikan yang masuk: `safeAction` kini menerima `audience: 'external'`;
+  untuk audiens eksternal setiap pesan selain validasi input field-level
+  jatuh ke teks katalog `ERROR_MESSAGES_ID` (kode error tetap), dan
+  `blockedReasons` di-drop. 11 action eksternal ditandai (6 client-portal,
+  3 partner-desk, 2 client-decision scope-variation). Unit test di
+  `core/errors/handle.test.ts`.
+- Belum ada penegakan otomatis bahwa action eksternal BARU wajib menandai
+  `audience: 'external'` — masih konvensi. Kandidat: check di
+  `scripts/verify-boundaries.ts` (import graph route-group eksternal →
+  actions). Diserahkan ke sesi berikutnya.
+- Status: tinggal keputusan formal Owner untuk MENUTUP item ini (aturan file
+  ini: hanya Owner yang menutup).
+
 ---
 
 ## 2. CHECKPOINT #3 — uji lapangan magic link (Fase 4) belum divalidasi

@@ -1,5 +1,5 @@
 import type { z } from 'zod';
-import { asAppError, toActionResult, type ActionResult } from '@/core/errors/handle';
+import { asAppError, toActionResult, type ActionResult, type ErrorAudience } from '@/core/errors/handle';
 import { ValidationError } from '@/core/errors/app-error';
 import { requirePermission, type ActionContext } from '@/core/permissions/guard';
 import type { ActionFor, Resource } from '@/core/permissions/matrix';
@@ -34,6 +34,14 @@ type SafeActionConfig<TResource extends Resource> = {
   loadContext: ContextLoader;
   /** For logs and audit correlation, e.g. 'billing.issueInvoice'. */
   name: string;
+  /**
+   * Who reads this action's error messages. Every action reachable from
+   * (client-portal) or (partner-desk) MUST declare 'external' -- staff
+   * wording (trigger hints, domain rule text, blockedReasons) then never
+   * reaches an external user; they get the catalogue text for the same code
+   * instead (ADR 0015 follow-up). Defaults to 'staff'.
+   */
+  audience?: ErrorAudience;
 };
 
 /**
@@ -97,7 +105,7 @@ export function safeAction<TInput, TOutput, TResource extends Resource>(
         meta: appError.meta,
       });
 
-      return toActionResult(appError);
+      return toActionResult(appError, { audience: config.audience ?? 'staff' });
     }
   };
 }
