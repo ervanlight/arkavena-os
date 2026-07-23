@@ -66,6 +66,7 @@ const RESOURCE_TABLES: Record<Resource, string> = {
   lead: 'leads',
   vendor: 'vendors',
   cost_library: 'cost_library',
+  assessment: 'assessments',
 };
 
 /** Matrix actions that map onto a SQL command the policy list should cover. */

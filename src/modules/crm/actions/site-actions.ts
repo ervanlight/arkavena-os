@@ -67,6 +67,19 @@ export const updateSiteAction = safeAction(
   },
 );
 
+export const getSiteAction = safeAction(
+  {
+    schema: z.string().uuid(),
+    permission: { resource: 'site', action: 'view' },
+    loadContext: getActionContext,
+    name: 'crm.getSite',
+  },
+  async (id): Promise<Site> => {
+    const supabase = await createServerSupabase();
+    return getSite(supabase, id);
+  },
+);
+
 export const listSitesAction = safeAction(
   {
     schema: z.void(),

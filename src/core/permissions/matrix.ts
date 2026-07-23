@@ -412,6 +412,13 @@ export const PERMISSIONS = {
     create: [...ORG_ROLES],
     update: [...ORG_ROLES],
   },
+
+  assessment: {
+    view: [...ORG_ROLES],
+    create: [...ORG_ROLES],
+    update: [...ORG_ROLES],
+    complete: [...ORG_ROLES],
+  },
 } as const satisfies PermissionMatrix;
 
 // ---------------------------------------------------------------------------

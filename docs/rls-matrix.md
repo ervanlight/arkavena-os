@@ -435,6 +435,40 @@ the friendly Indonesian refusal for everyone else. `fn_invoices_guard_issuance`
 is what actually holds regardless of what the application layer decided
 (CLAUDE.md law 0.3's two independent layers).
 
+## Fase 8 — crm/assessment (Wave 2-4, ADR 0018)
+
+Staff-only, like Fase 5's quality-gate tables — no project role, field or
+client-facing policy exists for any table in this section. Leads,
+procurement master data, and pre-sale assessments are internal/sales
+concerns, not something a client portal or SiteFlow role reaches.
+
+| Table | Owner/TD/Finance/QS/Procurement | Any project role | Client |
+| --- | --- | --- | --- |
+| `leads` | CRUD\* (org) | — | — |
+| `vendors` | CRUD\* (org) | — | — |
+| `cost_library` | CRUD\* (org) | — | — |
+| `assessments` | CRUD\* (org) | — | — |
+
+\* "CRUD" here means SELECT/INSERT/UPDATE — no DELETE policy exists for
+anyone, same as every other table in this document; soft delete
+(`deleted_at`) is the removal path.
+
+### Column-level and cross-row rules RLS cannot express
+
+| Rule | Enforced by |
+| --- | --- |
+| A lead's status may only follow the pipeline graph (`new -> contacted -> qualified -> assessment_scheduled -> proposal_sent -> won`, `lost` reachable from any stage before `won`) | `fn_leads_guard_transition`, mirrored by `modules/crm/domain/lead-transition.ts`'s `transition()` |
+| `leads.lost_reason` must be set whenever `status = 'lost'` | `ck_leads_lost_reason_requires_lost` |
+| `assessments.status = 'completed'` requires both `assessed_by` and `assessed_at` to be set | `ck_assessments_completed_requires_assessor` |
+| An assessment linked to a lead has its `project_id` backfilled once, automatically, the moment that lead's own `project_id` is first set by `convertLeadToProjectAction` | `fn_leads_sync_assessment_project` (an `AFTER UPDATE OF project_id` trigger on `leads`, writing into `assessments` -- the fourth instance of the cross-module-via-SQL-trigger pattern, after `work_packages`/`change_orders`, `change_orders`/`client_decisions`, and `invoices`/`funding_receipts`) |
+| `organizations.margin_floor_bp` (added this wave, additive column) has no RLS implication of its own -- it is read wherever `organizations` already is, gated by the existing `organizations_select_member` policy | n/a |
+
+`requirePermission()` for `lead.convert` and `assessment.complete` list
+every org role (`[...ORG_ROLES]`) -- neither is role-restricted the way
+`invoice.issue` (Fase 7) is, since converting a lead or completing an
+assessment is a workflow-progress action available to any staff member, not
+a money/approval gate.
+
 ## Later waves
 
 Added as their tables land. A table may not reach main without a row here, its

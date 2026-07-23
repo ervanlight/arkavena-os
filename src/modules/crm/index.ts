@@ -41,7 +41,7 @@ export {
 } from './schemas';
 
 export { createClientAction, listClientsAction, updateClientAction } from './actions/client-actions';
-export { createSiteAction, listSitesAction, listSitesForClientAction, updateSiteAction } from './actions/site-actions';
+export { createSiteAction, getSiteAction, listSitesAction, listSitesForClientAction, updateSiteAction } from './actions/site-actions';
 export {
   convertLeadToProjectAction,
   createLeadAction,
