@@ -495,6 +495,21 @@ export const PERMISSIONS = {
     create: [...ORG_ROLES],
     update: [...ORG_ROLES],
   },
+
+  // -------------------------------------------------------------------------
+  // Fase 10 (modules/ai-scribe, ADR 0020 -- D7 freeze lifted 2026-07-23)
+  // -------------------------------------------------------------------------
+
+  /**
+   * 'create' here means "run a generation" (ADR 0020 SS1's two actions),
+   * not "write a row" -- a generation writes only to ai_generations, its own
+   * cost ledger. Staff-only, same as every other Fase 8/9/10 resource; no
+   * project role or client surface reaches this.
+   */
+  ai_generation: {
+    view: [...ORG_ROLES],
+    create: [...ORG_ROLES],
+  },
 } as const satisfies PermissionMatrix;
 
 // ---------------------------------------------------------------------------

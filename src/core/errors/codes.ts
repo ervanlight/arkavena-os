@@ -100,6 +100,14 @@ export const ERROR_CODES = {
    */
   SERVICE_TICKET_INVALID_TRANSITION: 'SERVICE_TICKET_INVALID_TRANSITION',
 
+  /**
+   * The organization's monthly AI budget cap (ADR 0020 SS4,
+   * modules/ai-scribe/domain/budget-cap.ts) is already met or exceeded.
+   * Checked before every Claude API call, not after -- refusing the request
+   * is cheaper than making the call and refusing to log it.
+   */
+  AI_BUDGET_EXCEEDED: 'AI_BUDGET_EXCEEDED',
+
   /** Supabase, storage, or another dependency failed. Never shown verbatim to a client. */
   INFRA_UNAVAILABLE: 'INFRA_UNAVAILABLE',
 
@@ -135,6 +143,7 @@ export const ERROR_MESSAGES_ID: Record<ErrorCode, string> = {
   LEAD_INVALID_TRANSITION: 'Perubahan status untuk lead ini tidak diperbolehkan saat ini.',
   PROPOSAL_INVALID_TRANSITION: 'Perubahan status untuk proposal ini tidak diperbolehkan saat ini.',
   SERVICE_TICKET_INVALID_TRANSITION: 'Perubahan status untuk tiket servis ini tidak diperbolehkan saat ini.',
+  AI_BUDGET_EXCEEDED: 'Kuota AI bulanan organisasi Anda sudah tercapai. Coba lagi bulan depan atau hubungi admin.',
   INFRA_UNAVAILABLE: 'Sistem sedang tidak dapat diakses. Coba beberapa saat lagi.',
   RATE_LIMITED: 'Terlalu banyak percobaan. Tunggu sebentar sebelum mencoba lagi.',
   INTERNAL_ERROR: 'Terjadi kesalahan pada sistem. Tim kami sudah dicatat kejadiannya.',
@@ -155,6 +164,7 @@ export const ERROR_HTTP_STATUS: Record<ErrorCode, number> = {
   LEAD_INVALID_TRANSITION: 422,
   PROPOSAL_INVALID_TRANSITION: 422,
   SERVICE_TICKET_INVALID_TRANSITION: 422,
+  AI_BUDGET_EXCEEDED: 422,
   INFRA_UNAVAILABLE: 503,
   RATE_LIMITED: 429,
   INTERNAL_ERROR: 500,

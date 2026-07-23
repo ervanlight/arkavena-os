@@ -101,13 +101,14 @@ safeAction(schema, permission, async (input, ctx) => {
 - Test membangun datanya sendiri via `supabase/tests/factories.ts`. Tidak bergantung urutan test lain atau seed demo.
 - Mutasi tanpa audit entry = test gagal (sengaja).
 
-## 9. AI (ai-scribe) — **MODUL DIBEKUKAN**
+## 9. AI (ai-scribe)
 
-> **STOP.** Per keputusan Owner D7 (ARCHITECTURE.md §9), modul `ai-scribe` **tidak disentuh sama sekali** sampai Owner memintanya secara eksplisit. Sampai saat itu, di seluruh repo **dilarang**: memanggil Claude API, membuat stub/placeholder call, menulis prompt template, menambah env var API key, atau memasang dependency SDK Anthropic. Folder `modules/ai-scribe/` tetap kosong. Aturan di bawah baru berlaku setelah pembekuan dicabut.
+> Pembekuan D7 **dicabut 2026-07-23** atas permintaan eksplisit Owner — lihat [ADR 0020](docs/decisions/0020-fase10-ai-scribe-unfreeze-and-scope.md) untuk scope, model, dan keputusan yang menyertainya (termasuk: fitur voice-note ditunda karena butuh vendor transkripsi kedua di luar Claude; increment pertama hanya klasifikasi issue + deteksi keterlambatan). Riwayat pembekuan tetap di ARCHITECTURE.md §9 D7, tidak dihapus.
 
-- Semua panggilan Claude API **server-side only**, API key di backend, budget cap + log biaya per proyek.
-- Output AI **selalu status draft**. Manusia mengedit & menyimpan. AI tidak pernah mengesahkan: progress pembayaran, kualitas, biaya, variation, status keselamatan (dites eksplisit).
-- Data sensitif tidak dikirim dari browser langsung ke API.
+- `@anthropic-ai/sdk` hanya dipanggil dari `modules/ai-scribe/actions/`, dibungkus `safeAction` seperti mutasi lainnya (§4) — bukan Route Handler; tidak ada kebutuhan streaming/webhook yang membenarkan pola berbeda.
+- Semua panggilan Claude API **server-side only**, API key di backend, budget cap (org-wide, `ai_generations` mencatat biaya per proyek) dicek sebelum setiap panggilan.
+- **AI tidak pernah menulis ke tabel bisnis modul lain.** Sebuah action AI mengembalikan teks/saran saja; manusia meninjau lalu menyimpan lewat action create/update modul pemilik yang sudah ada, tidak berubah. Ini yang membuat "AI tidak pernah mengesahkan pembayaran/kualitas/biaya/variation/status keselamatan" berlaku struktural, bukan sekadar konvensi yang harus diingat — `ai-scribe` tidak pernah punya akses tulis ke tabel-tabel itu sama sekali.
+- Data sensitif tidak dikirim dari browser langsung ke API — action AI menerima id, membaca data sumber sendiri lewat public API modul pemilik (server-side), bukan menerima teks bebas dari klien.
 
 ## 10. Perintah pnpm (referensi)
 

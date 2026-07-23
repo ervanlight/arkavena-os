@@ -1,17 +1,13 @@
-# ai-scribe — FROZEN
+# ai-scribe
 
-This module is frozen by owner decision **D7** (`ARCHITECTURE.md` §9). It stays
-empty until the owner explicitly asks for it. It is listed in the folder
-structure (§1.1) only so the structure is complete.
+Owner decision D7's freeze was lifted 2026-07-23 — see
+[ADR 0020](../../../docs/decisions/0020-fase10-ai-scribe-unfreeze-and-scope.md)
+for scope, model choice, cost/budget mechanism, and what is deliberately
+deferred (voice-note transcription needs a second AI vendor decision this ADR
+does not make; draft weekly report and draft assessment/proposal wait for a
+follow-up round, F10-2).
 
-Until the freeze is lifted, the following are forbidden **anywhere in this
-repository**, not just in this folder:
-
-- calling the Claude API, or any other LLM API
-- stubs, placeholder calls, or "we'll fill this in later" adapters
-- prompt templates
-- environment variables holding an AI API key
-- adding `@anthropic-ai/sdk` or any comparable SDK to `package.json`
-
-Lifting the freeze requires an ADR in `docs/decisions/` plus explicit owner
-approval. Do not treat a task that merely *sounds* AI-adjacent as authorization.
+This module never writes to another module's table. Every action here reads
+its source data through the owning module's public API and returns suggested
+text; the human saves it through that module's own existing create/update
+action, unchanged.

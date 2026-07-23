@@ -284,6 +284,10 @@ export async function cleanupOrganizations(orgIds: readonly string[]): Promise<v
       await run('delete from assets where organization_id = any($1::uuid[])', [orgIds]);
       await run('delete from warranties where organization_id = any($1::uuid[])', [orgIds]);
       await run('delete from handover_items where organization_id = any($1::uuid[])', [orgIds]);
+      // Fase 10 (modules/ai-scribe): ai_generations references organizations/
+      // projects (nullably)/users, all ON DELETE RESTRICT -- same class of
+      // gap as everything above, blocks `projects`/`users` below otherwise.
+      await run('delete from ai_generations where organization_id = any($1::uuid[])', [orgIds]);
       // Fase 1 (modules/crm, modules/projects): children before parents, even
       // though replica mode suspends the FK checks that would otherwise force
       // this order -- keeping it anyway is cheap and reads as documentation.

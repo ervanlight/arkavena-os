@@ -574,6 +574,34 @@ gates the way Cash Gate or invoice issuance are; `next_due_date`/`overdue`
 (ADR 0019 SS5) are computed advisory values, not something RLS or a trigger
 enforces.
 
+## Fase 10 — ai-scribe (Wave 10, ADR 0020)
+
+Staff-only. No project role or client surface reaches `ai_generations` --
+same reasoning as every other Fase 8/9 table (no external-facing feature
+exists yet), plus this table specifically is a cost ledger, not something
+any UI outside the Command Center has a reason to read.
+
+| Table | Owner/TD/Finance/QS/Procurement | Any project role | Client |
+| --- | --- | --- | --- |
+| `ai_generations` | SELECT, INSERT (org) | — | — |
+
+No DELETE or UPDATE policy for anyone — append-only, same shape as
+`audit_logs` (a generation is never edited after the fact; a wrong cost
+estimate is a bug to fix in `claude-client.ts`'s pricing table, not a row to
+correct).
+
+### Column-level and cross-row rules RLS cannot express
+
+| Rule | Enforced by |
+| --- | --- |
+| An organization's total `ai_generations.cost_amount` this calendar month must be under `AI_MONTHLY_BUDGET_CAP` before a new Claude API call is made | `isOverBudget()` (`modules/ai-scribe/domain/budget-cap.ts`), checked in the action layer before the call — not a DB constraint, since the cap is a soft, correctable-later placeholder number (ADR 0020 SS4), not a money/approval rule needing CLAUDE.md law 0.3's two-layer enforcement |
+| Neither `generateIssueClassificationAction` nor `generateDelayDetectionAction` writes to `issues`, `milestones`, or any table this module does not itself own | Architectural, not RLS-enforced: `modules/ai-scribe`'s own `data/` layer only ever calls `.from('ai_generations')` — see `supabase/tests/ai-scribe.test.ts`'s explicit before/after row-count assertion, the "(dites eksplisit)" ARCHITECTURE.md §7's exit criterion itself asks for |
+
+`requirePermission()` for `ai_generation.create` lists every org role
+(`[...ORG_ROLES]`) — running a generation is a workflow-assist action
+available to any staff member, not a money/approval gate; the budget cap
+above is what actually limits spend, not the permission matrix.
+
 ## Later waves
 
 Added as their tables land. A table may not reach main without a row here, its

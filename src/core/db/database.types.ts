@@ -14,6 +14,74 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_generations: {
+        Row: {
+          cost_amount: number
+          created_at: string
+          feature: string
+          id: string
+          input_tokens: number
+          model: string
+          organization_id: string
+          output_tokens: number
+          project_id: string | null
+          requested_by: string
+        }
+        Insert: {
+          cost_amount: number
+          created_at?: string
+          feature: string
+          id?: string
+          input_tokens: number
+          model: string
+          organization_id: string
+          output_tokens: number
+          project_id?: string | null
+          requested_by: string
+        }
+        Update: {
+          cost_amount?: number
+          created_at?: string
+          feature?: string
+          id?: string
+          input_tokens?: number
+          model?: string
+          organization_id?: string
+          output_tokens?: number
+          project_id?: string | null
+          requested_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_generations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_generations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_generations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "ai_generations_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assessments: {
         Row: {
           assessed_at: string | null

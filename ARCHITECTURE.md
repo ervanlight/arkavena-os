@@ -670,9 +670,13 @@ PPN/PPh **tidak dihitung sistem di fase mana pun sekarang**. Nominal bruto saja;
 
 ### D7 — AI runtime: `ai-scribe` DIBEKUKAN sampai instruksi eksplisit Owner
 
+**Dicabut 2026-07-23** (lihat [ADR 0020](decisions/0020-fase10-ai-scribe-unfreeze-and-scope.md)) — Owner secara eksplisit meminta Fase 10 dimulai. Pembekuan di bawah berlaku sampai tanggal tersebut; dicatat di sini apa adanya sebagai riwayat keputusan, bukan diedit menjadi seolah tidak pernah ada.
+
 Modul `ai-scribe` (Fase 10) **tidak disentuh sama sekali** sampai Owner secara eksplisit memintanya.
 
-**Konsekuensi teknis — larangan keras:** tidak boleh ada panggilan Claude API di kode mana pun sebelum itu. **Tidak boleh ada stub, placeholder call, prompt template, environment variable API key, atau dependency SDK Anthropic** di fase-fase awal. Folder `modules/ai-scribe/` boleh ada sebagai placeholder kosong demi kelengkapan struktur §1.1, tapi isinya harus tetap kosong.
+**Konsekuensi teknis — larangan keras (berlaku sampai tanggal pencabutan di atas):** tidak boleh ada panggilan Claude API di kode mana pun sebelum itu. **Tidak boleh ada stub, placeholder call, prompt template, environment variable API key, atau dependency SDK Anthropic** di fase-fase awal. Folder `modules/ai-scribe/` boleh ada sebagai placeholder kosong demi kelengkapan struktur §1.1, tapi isinya harus tetap kosong.
+
+Aturan operasional Fase 10 setelah pencabutan ada di ADR 0020, bukan diulang di sini — ADR itu satu sumber kebenaran untuk scope, model, dan batasan biaya, dan sesi mendatang harus membacanya sebelum menyentuh modul ini lebih lanjut.
 
 ### D8 — E-signature: ditunda
 

@@ -78,6 +78,7 @@ const RESOURCE_TABLES: Record<Resource, string> = {
   asset: 'assets',
   maintenance_plan: 'maintenance_plans',
   service_ticket: 'service_tickets',
+  ai_generation: 'ai_generations',
 };
 
 /** Matrix actions that map onto a SQL command the policy list should cover. */
