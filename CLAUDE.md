@@ -130,7 +130,17 @@ CI menjalankan: lint + typecheck + db:types diff + gen:rls-check + test + test:d
 
 **Project dev bersifat shared, mutable state, bukan database segar per run.** Anggap disposable (boleh di-reset/truncate), tapi tidak ada "reset lokal" untuk kembali ke kondisi bersih — `test:db` membersihkan data yang ia buat sendiri lewat `cleanupOrganizations`.
 
-## 11. Kalau ragu
+## 11. Effort level — self-adjust tanpa diminta
+
+- **Default: MEDIUM** untuk pekerjaan rutin yang mengikuti pola modul yang sudah ada — CRUD, repository/actions baru yang strukturnya sama seperti modul lain, menulis test yang mengikuti konvensi test lain, migration yang bentuknya mirip migration sebelumnya.
+- **Naikkan ke HIGH secara mandiri** (tanpa menunggu user minta) untuk:
+  - mendesain domain layer/state machine baru dari nol,
+  - menemukan ambiguitas arsitektur yang perlu dipikirkan matang sebelum diputuskan,
+  - debugging bug yang tidak langsung ketahuan penyebabnya,
+  - keputusan apa pun yang menyentuh uang/keamanan/RLS (lihat hukum §0).
+- Setelah momen HIGH itu selesai, **turunkan lagi ke MEDIUM** untuk lanjut kerja rutin berikutnya. Jangan biarkan effort tetap tinggi sepanjang sesi hanya karena satu bagian tugas sempat butuh HIGH.
+
+## 12. Kalau ragu
 
 - Ambiguitas arsitektur baru → tulis sebagai ADR di `docs/decisions/` dan tanyakan ke user, jangan putuskan diam-diam.
 - Jangan menambah dependency besar tanpa alasan tertulis di PR.
