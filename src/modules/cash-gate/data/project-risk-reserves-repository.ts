@@ -1,7 +1,6 @@
 import 'server-only';
 import { rupiahFromColumn, rupiahToColumn, ZERO_RP, type Rupiah } from '@/core/money/rupiah';
 import type { ServerSupabase } from '@/core/db/client.server';
-import { InfraError } from '@/core/errors/app-error';
 import type { Tables } from '@/core/db/database.types';
 import type { ProjectRiskReserve } from '../types';
 
@@ -30,9 +29,7 @@ export async function getProjectRiskReserve(supabase: ServerSupabase, projectId:
     .is('deleted_at', null)
     .maybeSingle();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to load risk reserve for project ${projectId}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   return data === null ? ZERO_RP : rupiahFromColumn(data.risk_reserve_amount);
 }
 
@@ -47,9 +44,7 @@ export async function getProjectRiskReserveRow(
     .is('deleted_at', null)
     .maybeSingle();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to load risk reserve row for project ${projectId}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   return data === null ? null : toProjectRiskReserve(data);
 }
 
@@ -69,8 +64,6 @@ export async function upsertProjectRiskReserve(
     .select('*')
     .single();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to set risk reserve for project ${projectId}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   return toProjectRiskReserve(data);
 }

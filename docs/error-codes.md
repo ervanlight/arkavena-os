@@ -23,6 +23,7 @@ free-form string cannot be counted, searched, or translated.
 | `VARIATION_NOT_FUNDED` | 422 | Variation ini belum berstatus "dana masuk" -- pekerjaan belum bisa dibuka. | A work package tried to attach to a change order that isn't `approved_funded` yet |
 | `LEAD_NOT_QUALIFIED` | 422 | Lead harus berstatus "qualified" sebelum bisa dikonversi menjadi proyek. | `convertLeadToProjectAction` called before the lead reached `qualified` |
 | `LEAD_INVALID_TRANSITION` | 422 | Perubahan status untuk lead ini tidak diperbolehkan saat ini. | `updateLeadStatusAction`'s domain `transition()` refused the requested status change (no such edge in the pipeline graph) |
+| `PROPOSAL_INVALID_TRANSITION` | 422 | Perubahan status untuk proposal ini tidak diperbolehkan saat ini. | `sendProposalAction` called on a non-draft proposal, or `decideProposalAction` called on a proposal that has not been sent yet |
 | `INFRA_UNAVAILABLE` | 503 | Sistem sedang tidak dapat diakses. Coba beberapa saat lagi. | Supabase, storage, or the network failed |
 | `RATE_LIMITED` | 429 | Terlalu banyak percobaan. Tunggu sebentar sebelum mencoba lagi. | Too many magic link requests |
 | `INTERNAL_ERROR` | 500 | Terjadi kesalahan pada sistem. Tim kami sudah dicatat kejadiannya. | Anything uncategorised. An unexpected one in the logs is a bug, not a category |

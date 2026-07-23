@@ -15,13 +15,19 @@ import { asAppError } from './handle';
  */
 describe('asAppError -- Postgres check_violation mapping', () => {
   /**
-   * @supabase/postgrest-js's PostgrestError extends Error -- asAppError reads
-   * `error.message` only when `error instanceof Error`, so a plain object
-   * literal here would silently take the `String(error)` fallback instead and
-   * pass for the wrong reason.
+   * The shape asAppError actually receives in production: `@supabase/
+   * supabase-js`'s default, non-`.throwOnError()` query path returns `error`
+   * as a plain `JSON.parse`'d object (postgrest-js's `PostgrestBuilder.
+   * _parseResponse` only wraps it in the `PostgrestError` class -- which does
+   * extend `Error` -- on the opt-in throwing path this codebase never uses).
+   * An earlier version of this fixture built an `Error` instance instead
+   * (`Object.assign(new Error(...), props)`), which let a real bug in
+   * asAppError's message extraction pass here while still producing
+   * "[object Object]" in production, caught only by running
+   * e2e/quality-gate.spec.ts and cash-gate.spec.ts against a real browser.
    */
   function postgrestError(props: { code: string; message: string; hint: string | null; details?: string | null }) {
-    return Object.assign(new Error(props.message), props);
+    return { ...props };
   }
 
   it('surfaces a hinted business-rule message verbatim (our own raise exception)', () => {

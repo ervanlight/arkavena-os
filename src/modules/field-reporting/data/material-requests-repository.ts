@@ -1,6 +1,6 @@
 import 'server-only';
 import type { ServerSupabase } from '@/core/db/client.server';
-import { InfraError, NotFoundError } from '@/core/errors/app-error';
+import { NotFoundError } from '@/core/errors/app-error';
 import type { MaterialRequest, MaterialRequestUpdate, NewMaterialRequest } from '../types';
 
 /** All direct `material_requests` table access lives here (ARCHITECTURE.md 1.2). */
@@ -16,9 +16,7 @@ export async function listMaterialRequestsForProject(
     .is('deleted_at', null)
     .order('created_at', { ascending: false });
 
-  if (error !== null) {
-    throw new InfraError(`Failed to list material requests for project ${projectId}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   return data;
 }
 
@@ -30,9 +28,7 @@ export async function getMaterialRequest(supabase: ServerSupabase, id: string): 
     .is('deleted_at', null)
     .maybeSingle();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to load material request ${id}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   if (data === null) {
     throw new NotFoundError(`Material request ${id} not found`, { meta: { materialRequestId: id } });
   }
@@ -46,9 +42,7 @@ export async function insertMaterialRequest(
 ): Promise<MaterialRequest> {
   const { data, error } = await supabase.from('material_requests').upsert(input).select().single();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to create material request: ${error.message}`);
-  }
+  if (error !== null) throw error;
   return data;
 }
 
@@ -65,9 +59,7 @@ export async function updateMaterialRequest(
     .select()
     .maybeSingle();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to update material request ${id}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   if (data === null) {
     throw new NotFoundError(`Material request ${id} not found`, { meta: { materialRequestId: id } });
   }

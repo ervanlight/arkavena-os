@@ -2835,6 +2835,30 @@ export type Database = {
         }
         Returns: string
       }
+      fn_set_baseline_estimate: {
+        Args: { p_estimate_id: string }
+        Returns: {
+          assessment_id: string | null
+          created_at: string
+          created_by: string
+          deleted_at: string | null
+          id: string
+          is_baseline: boolean
+          notes: string | null
+          organization_id: string
+          project_id: string
+          status: Database["public"]["Enums"]["estimate_status"]
+          title: string
+          updated_at: string
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "estimates"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       assessment_status: "scheduled" | "completed"

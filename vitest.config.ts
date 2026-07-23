@@ -57,7 +57,14 @@ export default defineConfig({
       provider: 'v8',
       include: ['src/core/**/*.ts', 'src/modules/*/domain/**/*.ts'],
       exclude: ['**/*.test.ts', '**/*.test.tsx'],
-      reporter: ['text', 'lcov'],
+      // Vitest's `text` reporter defaults `skipFull: true` when it detects an
+      // agent environment (`std-env`'s `isAgent`, e.g. `CLAUDECODE=1`), which
+      // silently drops any 100%-covered row from the printed table. That has
+      // hidden cash-gate/scope-variation/quality-gate's domain coverage
+      // entirely whenever Claude Code ran the suite, making the >=90% branch
+      // gate (ARCHITECTURE.md 4.5) look unenforced. Pinning it false keeps
+      // every row visible regardless of who/what invokes the command.
+      reporter: [['text', { skipFull: false }], 'lcov'],
     },
   },
 });

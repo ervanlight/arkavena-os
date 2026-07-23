@@ -1,7 +1,7 @@
 import 'server-only';
 import { rupiahFromColumn, rupiahToColumn } from '@/core/money/rupiah';
 import type { ServerSupabase } from '@/core/db/client.server';
-import { InfraError, NotFoundError } from '@/core/errors/app-error';
+import { NotFoundError } from '@/core/errors/app-error';
 import type { Contract, ContractUpdate, NewContract } from '../types';
 import type { Tables } from '@/core/db/database.types';
 
@@ -26,9 +26,7 @@ export async function listContractsForProject(supabase: ServerSupabase, projectI
     .is('deleted_at', null)
     .order('created_at');
 
-  if (error !== null) {
-    throw new InfraError(`Failed to list contracts for project ${projectId}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   return data.map(toContract);
 }
 
@@ -40,9 +38,7 @@ export async function getContract(supabase: ServerSupabase, id: string): Promise
     .is('deleted_at', null)
     .maybeSingle();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to load contract ${id}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   if (data === null) {
     throw new NotFoundError(`Contract ${id} not found`, { meta: { contractId: id } });
   }
@@ -56,9 +52,7 @@ export async function insertContract(supabase: ServerSupabase, input: NewContrac
     .select()
     .single();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to create contract: ${error.message}`);
-  }
+  if (error !== null) throw error;
   return toContract(data);
 }
 
@@ -76,9 +70,7 @@ export async function updateContract(supabase: ServerSupabase, id: string, patch
     .select()
     .maybeSingle();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to update contract ${id}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   if (data === null) {
     throw new NotFoundError(`Contract ${id} not found`, { meta: { contractId: id } });
   }

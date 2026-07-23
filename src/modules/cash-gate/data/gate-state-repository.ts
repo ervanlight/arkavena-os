@@ -1,7 +1,6 @@
 import 'server-only';
 import { rupiahFromColumn, sumRp, toRupiah } from '@/core/money/rupiah';
 import type { ServerSupabase } from '@/core/db/client.server';
-import { InfraError } from '@/core/errors/app-error';
 import { getProjectRiskReserve } from './project-risk-reserves-repository';
 import { computeFundingCoverage, determineGateStatus, OVERDUE_GRACE_DAYS } from '../domain/funding-coverage';
 import type { GateState } from '../domain/types';
@@ -58,15 +57,9 @@ export async function loadGateState(supabase: ServerSupabase, projectId: string)
       .limit(1),
   ]);
 
-  if (clearedResult.error !== null) {
-    throw new InfraError(`Failed to load cleared funds for project ${projectId}: ${clearedResult.error.message}`);
-  }
-  if (forecastResult.error !== null) {
-    throw new InfraError(`Failed to load cash forecasts for project ${projectId}: ${forecastResult.error.message}`);
-  }
-  if (overdueResult.error !== null) {
-    throw new InfraError(`Failed to check overdue receipts for project ${projectId}: ${overdueResult.error.message}`);
-  }
+  if (clearedResult.error !== null) throw clearedResult.error;
+  if (forecastResult.error !== null) throw forecastResult.error;
+  if (overdueResult.error !== null) throw overdueResult.error;
 
   const clearedFunds = sumRp(clearedResult.data.map((row) => rupiahFromColumn(row.amount)));
   const next14DayNeeds = sumRp(forecastResult.data.map((row) => rupiahFromColumn(row.needed_amount)));

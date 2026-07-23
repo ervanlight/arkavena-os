@@ -1,7 +1,7 @@
 import 'server-only';
 import { rupiahFromColumn, rupiahToColumn } from '@/core/money/rupiah';
 import type { ServerSupabase } from '@/core/db/client.server';
-import { InfraError, NotFoundError } from '@/core/errors/app-error';
+import { NotFoundError } from '@/core/errors/app-error';
 import type { Tables } from '@/core/db/database.types';
 import type { FundingReceipt, NewFundingReceipt } from '../types';
 
@@ -27,9 +27,7 @@ export async function listFundingReceiptsForProject(
     .is('deleted_at', null)
     .order('expected_date', { ascending: false });
 
-  if (error !== null) {
-    throw new InfraError(`Failed to list funding receipts for project ${projectId}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   return data.map(toFundingReceipt);
 }
 
@@ -41,9 +39,7 @@ export async function getFundingReceipt(supabase: ServerSupabase, id: string): P
     .is('deleted_at', null)
     .maybeSingle();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to load funding receipt ${id}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   if (data === null) {
     throw new NotFoundError(`Funding receipt ${id} not found`, { meta: { fundingReceiptId: id } });
   }
@@ -60,9 +56,7 @@ export async function insertFundingReceipt(
     .select()
     .single();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to record funding receipt: ${error.message}`);
-  }
+  if (error !== null) throw error;
   return toFundingReceipt(data);
 }
 
@@ -80,9 +74,7 @@ export async function markFundingReceiptCleared(
     .select()
     .maybeSingle();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to mark funding receipt ${id} cleared: ${error.message}`);
-  }
+  if (error !== null) throw error;
   if (data === null) {
     throw new NotFoundError(`Funding receipt ${id} not found`, { meta: { fundingReceiptId: id } });
   }

@@ -419,6 +419,26 @@ export const PERMISSIONS = {
     update: [...ORG_ROLES],
     complete: [...ORG_ROLES],
   },
+
+  estimate: {
+    view: [...ORG_ROLES],
+    create: [...ORG_ROLES],
+    update: [...ORG_ROLES],
+    set_baseline: [...ORG_ROLES],
+  },
+
+  estimate_item: {
+    view: [...ORG_ROLES],
+    create: [...ORG_ROLES],
+    update: [...ORG_ROLES],
+  },
+
+  proposal: {
+    view: [...ORG_ROLES],
+    create: [...ORG_ROLES],
+    send: [...ORG_ROLES],
+    decide: [...ORG_ROLES],
+  },
 } as const satisfies PermissionMatrix;
 
 // ---------------------------------------------------------------------------

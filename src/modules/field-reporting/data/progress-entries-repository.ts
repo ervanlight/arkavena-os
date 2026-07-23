@@ -1,6 +1,6 @@
 import 'server-only';
 import type { ServerSupabase } from '@/core/db/client.server';
-import { InfraError, NotFoundError } from '@/core/errors/app-error';
+import { NotFoundError } from '@/core/errors/app-error';
 import type { NewProgressEntry, ProgressEntry, ProgressEntryUpdate } from '../types';
 
 /** All direct `progress_entries` table access lives here (ARCHITECTURE.md 1.2). */
@@ -16,9 +16,7 @@ export async function listProgressEntriesForDailyLog(
     .is('deleted_at', null)
     .order('created_at');
 
-  if (error !== null) {
-    throw new InfraError(`Failed to list progress entries for daily log ${dailyLogId}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   return data;
 }
 
@@ -30,9 +28,7 @@ export async function getProgressEntry(supabase: ServerSupabase, id: string): Pr
     .is('deleted_at', null)
     .maybeSingle();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to load progress entry ${id}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   if (data === null) {
     throw new NotFoundError(`Progress entry ${id} not found`, { meta: { progressEntryId: id } });
   }
@@ -43,9 +39,7 @@ export async function getProgressEntry(supabase: ServerSupabase, id: string): Pr
 export async function insertProgressEntry(supabase: ServerSupabase, input: NewProgressEntry): Promise<ProgressEntry> {
   const { data, error } = await supabase.from('progress_entries').upsert(input).select().single();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to create progress entry: ${error.message}`);
-  }
+  if (error !== null) throw error;
   return data;
 }
 
@@ -62,9 +56,7 @@ export async function updateProgressEntry(
     .select()
     .maybeSingle();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to update progress entry ${id}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   if (data === null) {
     throw new NotFoundError(`Progress entry ${id} not found`, { meta: { progressEntryId: id } });
   }

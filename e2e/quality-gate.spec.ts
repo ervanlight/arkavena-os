@@ -68,13 +68,16 @@ test('inspeksi gagal -> pekerjaan terkunci -> override TD -> terbuka + alasan te
     await page.goto(`/cc/projects/${projectId}`);
     await page.getByRole('button', { name: 'Mulai pekerjaan' }).click();
 
-    // Same assertion shape as cash-gate.spec.ts's equivalent step: an alert
-    // appears and the transition never happens. It does not check the exact
-    // text -- repositories collapse every Postgres error to InfraError's
-    // generic message before core/errors/handle.ts's specific-message mapping
-    // ever sees it (a pre-existing, cross-cutting gap found while writing
-    // this test, flagged separately rather than fixed here).
-    await expect(page.getByRole('alert')).toBeVisible();
+    // Asserts the actual trigger message (fn_work_packages_guard_hold_point,
+    // ADR 0014), not just that some alert appeared -- ADR 0015 fixed
+    // repositories collapsing this to InfraError's generic message before it
+    // ever reached core/errors/handle.ts's asAppError(). Scoped to the form's
+    // own `<span role="alert">` (start-work-package-form.tsx) rather than
+    // `getByRole('alert')`, which also matches Next.js's route announcer
+    // (`#__next-route-announcer__`, also `role="alert"`) and fails strict mode.
+    await expect(page.locator('span[role="alert"]')).toHaveText(
+      /Hold point belum lulus: 1 pemeriksaan wajib untuk jenis pekerjaan "waterproofing" belum disetujui/,
+    );
     await expect(page.getByText('Belum mulai')).toBeVisible();
   });
 

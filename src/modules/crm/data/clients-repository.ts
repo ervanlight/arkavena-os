@@ -1,6 +1,6 @@
 import 'server-only';
 import type { ServerSupabase } from '@/core/db/client.server';
-import { InfraError, NotFoundError } from '@/core/errors/app-error';
+import { NotFoundError } from '@/core/errors/app-error';
 import type { Client, ClientUpdate, NewClient } from '../types';
 
 /**
@@ -23,18 +23,14 @@ export async function listClients(supabase: ServerSupabase): Promise<Client[]> {
     .is('deleted_at', null)
     .order('name');
 
-  if (error !== null) {
-    throw new InfraError(`Failed to list clients: ${error.message}`);
-  }
+  if (error !== null) throw error;
   return data;
 }
 
 export async function getClient(supabase: ServerSupabase, id: string): Promise<Client> {
   const { data, error } = await supabase.from('clients').select('*').eq('id', id).is('deleted_at', null).maybeSingle();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to load client ${id}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   if (data === null) {
     throw new NotFoundError(`Client ${id} not found`, { meta: { clientId: id } });
   }
@@ -44,9 +40,7 @@ export async function getClient(supabase: ServerSupabase, id: string): Promise<C
 export async function insertClient(supabase: ServerSupabase, input: NewClient): Promise<Client> {
   const { data, error } = await supabase.from('clients').insert(input).select().single();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to create client: ${error.message}`);
-  }
+  if (error !== null) throw error;
   return data;
 }
 
@@ -59,9 +53,7 @@ export async function updateClient(supabase: ServerSupabase, id: string, patch: 
     .select()
     .maybeSingle();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to update client ${id}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   if (data === null) {
     throw new NotFoundError(`Client ${id} not found`, { meta: { clientId: id } });
   }

@@ -1,6 +1,5 @@
 import 'server-only';
 import type { ServerSupabase } from '@/core/db/client.server';
-import { InfraError } from '@/core/errors/app-error';
 import type { CashGateOverrideRow, WorkPackage } from '../types';
 
 /** All direct `cash_gate_overrides` table access lives here (ARCHITECTURE.md 1.2). */
@@ -15,9 +14,7 @@ export async function listOverridesForProject(
     .eq('project_id', projectId)
     .order('created_at', { ascending: false });
 
-  if (error !== null) {
-    throw new InfraError(`Failed to list Cash Gate overrides for project ${projectId}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   return data;
 }
 
@@ -37,8 +34,6 @@ export async function overrideAndOpenWorkPackage(
     .rpc('fn_override_and_open_work_package', { p_work_package_id: workPackageId, p_reason: reason })
     .single();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to override Cash Gate for work package ${workPackageId}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   return data;
 }

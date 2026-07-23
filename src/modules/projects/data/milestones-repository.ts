@@ -1,7 +1,7 @@
 import 'server-only';
 import { rupiahFromColumn, rupiahToColumn } from '@/core/money/rupiah';
 import type { ServerSupabase } from '@/core/db/client.server';
-import { InfraError, NotFoundError } from '@/core/errors/app-error';
+import { NotFoundError } from '@/core/errors/app-error';
 import type { Milestone, MilestoneUpdate, NewMilestone } from '../types';
 import type { Tables } from '@/core/db/database.types';
 
@@ -23,9 +23,7 @@ export async function listMilestonesForContract(supabase: ServerSupabase, contra
     .is('deleted_at', null)
     .order('due_date', { nullsFirst: false });
 
-  if (error !== null) {
-    throw new InfraError(`Failed to list milestones for contract ${contractId}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   return data.map(toMilestone);
 }
 
@@ -37,9 +35,7 @@ export async function getMilestone(supabase: ServerSupabase, id: string): Promis
     .is('deleted_at', null)
     .maybeSingle();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to load milestone ${id}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   if (data === null) {
     throw new NotFoundError(`Milestone ${id} not found`, { meta: { milestoneId: id } });
   }
@@ -53,9 +49,7 @@ export async function insertMilestone(supabase: ServerSupabase, input: NewMilest
     .select()
     .single();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to create milestone: ${error.message}`);
-  }
+  if (error !== null) throw error;
   return toMilestone(data);
 }
 
@@ -77,9 +71,7 @@ export async function updateMilestone(
     .select()
     .maybeSingle();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to update milestone ${id}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   if (data === null) {
     throw new NotFoundError(`Milestone ${id} not found`, { meta: { milestoneId: id } });
   }

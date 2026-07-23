@@ -1,6 +1,6 @@
 import 'server-only';
 import type { ServerSupabase } from '@/core/db/client.server';
-import { InfraError, NotFoundError } from '@/core/errors/app-error';
+import { NotFoundError } from '@/core/errors/app-error';
 import type { NewWorkPackage, WorkPackage, WorkPackageUpdate } from '../types';
 
 /** All direct `work_packages` table access lives here (ARCHITECTURE.md 1.2). */
@@ -13,9 +13,7 @@ export async function listWorkPackagesForProject(supabase: ServerSupabase, proje
     .is('deleted_at', null)
     .order('name');
 
-  if (error !== null) {
-    throw new InfraError(`Failed to list work packages for project ${projectId}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   return data;
 }
 
@@ -27,9 +25,7 @@ export async function getWorkPackage(supabase: ServerSupabase, id: string): Prom
     .is('deleted_at', null)
     .maybeSingle();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to load work package ${id}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   if (data === null) {
     throw new NotFoundError(`Work package ${id} not found`, { meta: { workPackageId: id } });
   }
@@ -39,9 +35,7 @@ export async function getWorkPackage(supabase: ServerSupabase, id: string): Prom
 export async function insertWorkPackage(supabase: ServerSupabase, input: NewWorkPackage): Promise<WorkPackage> {
   const { data, error } = await supabase.from('work_packages').insert(input).select().single();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to create work package: ${error.message}`);
-  }
+  if (error !== null) throw error;
   return data;
 }
 
@@ -58,9 +52,7 @@ export async function updateWorkPackage(
     .select()
     .maybeSingle();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to update work package ${id}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   if (data === null) {
     throw new NotFoundError(`Work package ${id} not found`, { meta: { workPackageId: id } });
   }

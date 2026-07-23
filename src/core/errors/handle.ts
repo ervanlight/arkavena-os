@@ -97,7 +97,21 @@ export function toActionResult(error: unknown): ActionResult<never> {
 export function asAppError(error: unknown, meta?: Record<string, unknown>): AppError {
   if (isAppError(error)) return error;
 
-  const message = error instanceof Error ? error.message : String(error);
+  // supabase-js's default (non-`.throwOnError()`) query result carries `error`
+  // as a plain `JSON.parse`'d object -- postgrest-js only wraps it in the
+  // `PostgrestError` class (an actual `Error` subclass) on the opt-in
+  // throwing path this codebase does not use. So `error instanceof Error`
+  // is false for the real shape this function classifies most often, and
+  // reading `.message` only in that branch silently fell through to
+  // `String(error)` ("[object Object]") for every real Postgres/PostgREST
+  // failure -- masked in this file's own tests by a fixture that happened to
+  // extend `Error`.
+  const message =
+    error instanceof Error
+      ? error.message
+      : isPostgrestLike(error) && typeof error.message === 'string'
+        ? error.message
+        : String(error);
   const options = { meta: meta ?? {}, cause: error };
 
   if (isPostgrestLike(error) && typeof error.code === 'string') {

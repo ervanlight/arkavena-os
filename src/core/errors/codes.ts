@@ -80,6 +80,18 @@ export const ERROR_CODES = {
    */
   LEAD_INVALID_TRANSITION: 'LEAD_INVALID_TRANSITION',
 
+  /**
+   * A proposal's status change was attempted out of order -- sending a
+   * non-draft proposal, or deciding a proposal that has not been sent yet
+   * (ARCHITECTURE.md 8, ADR 0018 SS5). No domain-layer state machine backs
+   * this one the way leads/change_orders have: proposals only have two real
+   * edges (draft->sent, sent->accepted|rejected), checked inline in
+   * sendProposalAction/decideProposalAction rather than a full transition()
+   * pure function -- the same "not every module needs domain/" judgement
+   * modules/assessment's one-way completion flag already made.
+   */
+  PROPOSAL_INVALID_TRANSITION: 'PROPOSAL_INVALID_TRANSITION',
+
   /** Supabase, storage, or another dependency failed. Never shown verbatim to a client. */
   INFRA_UNAVAILABLE: 'INFRA_UNAVAILABLE',
 
@@ -113,6 +125,7 @@ export const ERROR_MESSAGES_ID: Record<ErrorCode, string> = {
   VARIATION_NOT_FUNDED: 'Variation ini belum berstatus "dana masuk" -- pekerjaan belum bisa dibuka.',
   LEAD_NOT_QUALIFIED: 'Lead harus berstatus "qualified" sebelum bisa dikonversi menjadi proyek.',
   LEAD_INVALID_TRANSITION: 'Perubahan status untuk lead ini tidak diperbolehkan saat ini.',
+  PROPOSAL_INVALID_TRANSITION: 'Perubahan status untuk proposal ini tidak diperbolehkan saat ini.',
   INFRA_UNAVAILABLE: 'Sistem sedang tidak dapat diakses. Coba beberapa saat lagi.',
   RATE_LIMITED: 'Terlalu banyak percobaan. Tunggu sebentar sebelum mencoba lagi.',
   INTERNAL_ERROR: 'Terjadi kesalahan pada sistem. Tim kami sudah dicatat kejadiannya.',
@@ -131,6 +144,7 @@ export const ERROR_HTTP_STATUS: Record<ErrorCode, number> = {
   VARIATION_NOT_FUNDED: 422,
   LEAD_NOT_QUALIFIED: 422,
   LEAD_INVALID_TRANSITION: 422,
+  PROPOSAL_INVALID_TRANSITION: 422,
   INFRA_UNAVAILABLE: 503,
   RATE_LIMITED: 429,
   INTERNAL_ERROR: 500,

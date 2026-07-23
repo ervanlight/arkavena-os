@@ -1,6 +1,6 @@
 import 'server-only';
 import type { ServerSupabase } from '@/core/db/client.server';
-import { InfraError, NotFoundError } from '@/core/errors/app-error';
+import { NotFoundError } from '@/core/errors/app-error';
 import type { HoldPointTemplate, HoldPointTemplateUpdate, NewHoldPointTemplate } from '../types';
 
 /** All direct `hold_point_templates` table access lives here (ARCHITECTURE.md 1.2). */
@@ -17,9 +17,7 @@ export async function listHoldPointTemplatesForWorkType(
     .is('deleted_at', null)
     .order('sort_order');
 
-  if (error !== null) {
-    throw new InfraError(`Failed to list hold point templates for work type ${workType}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   return data;
 }
 
@@ -31,9 +29,7 @@ export async function listHoldPointTemplates(supabase: ServerSupabase): Promise<
     .order('work_type')
     .order('sort_order');
 
-  if (error !== null) {
-    throw new InfraError(`Failed to list hold point templates: ${error.message}`);
-  }
+  if (error !== null) throw error;
   return data;
 }
 
@@ -45,9 +41,7 @@ export async function getHoldPointTemplate(supabase: ServerSupabase, id: string)
     .is('deleted_at', null)
     .maybeSingle();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to load hold point template ${id}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   if (data === null) {
     throw new NotFoundError(`Hold point template ${id} not found`, { meta: { holdPointTemplateId: id } });
   }
@@ -60,9 +54,7 @@ export async function insertHoldPointTemplate(
 ): Promise<HoldPointTemplate> {
   const { data, error } = await supabase.from('hold_point_templates').insert(input).select().single();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to create hold point template: ${error.message}`);
-  }
+  if (error !== null) throw error;
   return data;
 }
 
@@ -79,9 +71,7 @@ export async function updateHoldPointTemplate(
     .select()
     .maybeSingle();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to update hold point template ${id}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   if (data === null) {
     throw new NotFoundError(`Hold point template ${id} not found`, { meta: { holdPointTemplateId: id } });
   }

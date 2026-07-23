@@ -67,6 +67,9 @@ const RESOURCE_TABLES: Record<Resource, string> = {
   vendor: 'vendors',
   cost_library: 'cost_library',
   assessment: 'assessments',
+  estimate: 'estimates',
+  estimate_item: 'estimate_items',
+  proposal: 'proposals',
 };
 
 /** Matrix actions that map onto a SQL command the policy list should cover. */
@@ -107,6 +110,14 @@ const ACTION_COMMANDS: Record<string, 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE'>
   // Fase 8: converting a lead is, mechanically, an UPDATE of leads.project_id
   // (+ status) -- leads_update_staff is the policy underneath.
   convert: 'UPDATE',
+  // fn_set_baseline_estimate is an RPC, not a plain PostgREST update, but it
+  // carries no security definer -- it runs as the calling user, so
+  // estimates_update_staff is still the policy actually gating it.
+  set_baseline: 'UPDATE',
+  // sending/deciding a proposal are both, mechanically, an UPDATE of status
+  // (+ tracking columns) -- proposals_update_staff is the policy underneath.
+  send: 'UPDATE',
+  decide: 'UPDATE',
   // change_role and invite are deliberately absent. Neither has, or should
   // ever have, a matching RLS policy: change_role is enforced by
   // fn_users_guard_privileged_columns (a trigger, not a policy), and invite

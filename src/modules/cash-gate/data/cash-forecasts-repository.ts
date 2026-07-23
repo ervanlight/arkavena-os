@@ -1,7 +1,6 @@
 import 'server-only';
 import { rupiahFromColumn, rupiahToColumn } from '@/core/money/rupiah';
 import type { ServerSupabase } from '@/core/db/client.server';
-import { InfraError } from '@/core/errors/app-error';
 import type { Tables } from '@/core/db/database.types';
 import type { CashForecast, NewCashForecast } from '../types';
 
@@ -22,9 +21,7 @@ export async function listCashForecastsForProject(
     .is('deleted_at', null)
     .order('needed_by_date');
 
-  if (error !== null) {
-    throw new InfraError(`Failed to list cash forecasts for project ${projectId}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   return data.map(toCashForecast);
 }
 
@@ -35,8 +32,6 @@ export async function insertCashForecast(supabase: ServerSupabase, input: NewCas
     .select()
     .single();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to create cash forecast: ${error.message}`);
-  }
+  if (error !== null) throw error;
   return toCashForecast(data);
 }

@@ -1,6 +1,6 @@
 import 'server-only';
 import type { ServerSupabase } from '@/core/db/client.server';
-import { InfraError, NotFoundError } from '@/core/errors/app-error';
+import { NotFoundError } from '@/core/errors/app-error';
 import type { DailyLog, DailyLogUpdate, NewDailyLog } from '../types';
 
 /** All direct `daily_logs` table access lives here (ARCHITECTURE.md 1.2). */
@@ -13,18 +13,14 @@ export async function listDailyLogsForProject(supabase: ServerSupabase, projectI
     .is('deleted_at', null)
     .order('log_date', { ascending: false });
 
-  if (error !== null) {
-    throw new InfraError(`Failed to list daily logs for project ${projectId}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   return data;
 }
 
 export async function getDailyLog(supabase: ServerSupabase, id: string): Promise<DailyLog> {
   const { data, error } = await supabase.from('daily_logs').select('*').eq('id', id).is('deleted_at', null).maybeSingle();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to load daily log ${id}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   if (data === null) {
     throw new NotFoundError(`Daily log ${id} not found`, { meta: { dailyLogId: id } });
   }
@@ -39,9 +35,7 @@ export async function getDailyLog(supabase: ServerSupabase, id: string): Promise
 export async function insertDailyLog(supabase: ServerSupabase, input: NewDailyLog): Promise<DailyLog> {
   const { data, error } = await supabase.from('daily_logs').upsert(input).select().single();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to create daily log: ${error.message}`);
-  }
+  if (error !== null) throw error;
   return data;
 }
 
@@ -54,9 +48,7 @@ export async function updateDailyLog(supabase: ServerSupabase, id: string, patch
     .select()
     .maybeSingle();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to update daily log ${id}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   if (data === null) {
     throw new NotFoundError(`Daily log ${id} not found`, { meta: { dailyLogId: id } });
   }

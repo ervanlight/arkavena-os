@@ -1,6 +1,6 @@
 import 'server-only';
 import type { ServerSupabase } from '@/core/db/client.server';
-import { InfraError, NotFoundError } from '@/core/errors/app-error';
+import { NotFoundError } from '@/core/errors/app-error';
 import type { NewNonconformity, Nonconformity, NonconformityUpdate } from '../types';
 
 /** All direct `nonconformities` table access lives here (ARCHITECTURE.md 1.2). */
@@ -16,9 +16,7 @@ export async function listNonconformitiesForInspection(
     .is('deleted_at', null)
     .order('created_at', { ascending: false });
 
-  if (error !== null) {
-    throw new InfraError(`Failed to list nonconformities for inspection ${inspectionId}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   return data;
 }
 
@@ -30,9 +28,7 @@ export async function getNonconformity(supabase: ServerSupabase, id: string): Pr
     .is('deleted_at', null)
     .maybeSingle();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to load nonconformity ${id}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   if (data === null) {
     throw new NotFoundError(`Nonconformity ${id} not found`, { meta: { nonconformityId: id } });
   }
@@ -42,9 +38,7 @@ export async function getNonconformity(supabase: ServerSupabase, id: string): Pr
 export async function insertNonconformity(supabase: ServerSupabase, input: NewNonconformity): Promise<Nonconformity> {
   const { data, error } = await supabase.from('nonconformities').insert(input).select().single();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to create nonconformity: ${error.message}`);
-  }
+  if (error !== null) throw error;
   return data;
 }
 
@@ -61,9 +55,7 @@ export async function updateNonconformity(
     .select()
     .maybeSingle();
 
-  if (error !== null) {
-    throw new InfraError(`Failed to update nonconformity ${id}: ${error.message}`);
-  }
+  if (error !== null) throw error;
   if (data === null) {
     throw new NotFoundError(`Nonconformity ${id} not found`, { meta: { nonconformityId: id } });
   }

@@ -54,7 +54,18 @@ test('termin dibayar -> gate hijau -> pekerjaan bisa dimulai', async ({ page, co
 
     await page.goto(`/cc/projects/${projectId}`);
     await page.getByRole('button', { name: 'Mulai pekerjaan' }).click();
-    await expect(page.getByRole('alert')).toBeVisible();
+    // Asserts the actual trigger message (fn_work_packages_guard_cash_gate,
+    // ADR 0010), not just that some alert appeared -- ADR 0015 fixed
+    // repositories collapsing this to InfraError's generic message before it
+    // ever reached core/errors/handle.ts's asAppError(). Scoped to the form's
+    // own `<span role="alert">` (start-work-package-form.tsx) rather than
+    // `getByRole('alert')`, which also matches Next.js's route announcer
+    // (`#__next-route-announcer__`, also `role="alert"`) and fails strict mode.
+    // v_status is the raw `cash_gate_status` enum value ('red'), not a
+    // translated Indonesian word -- confirmed against the real rendered text.
+    await expect(page.locator('span[role="alert"]')).toHaveText(
+      /Cash Gate red: pekerjaan tidak bisa dibuka sampai kas mencukupi/,
+    );
     await expect(page.getByText('Belum mulai')).toBeVisible();
   });
 
