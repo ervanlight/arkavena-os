@@ -222,3 +222,10 @@ export const PROPOSAL_STATUS = {
   ACCEPTED: 'accepted',
   REJECTED: 'rejected',
 } satisfies Record<string, Enums<'proposal_status'>>;
+
+/** ADR 0018 SS6. A vendor's response to an RFQ -- no domain state machine, a plain staff-driven field. */
+export const VENDOR_QUOTE_STATUS = {
+  RECEIVED: 'received',
+  ACCEPTED: 'accepted',
+  REJECTED: 'rejected',
+} satisfies Record<string, Enums<'vendor_quote_status'>>;

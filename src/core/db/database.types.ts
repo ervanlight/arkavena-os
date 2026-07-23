@@ -796,6 +796,64 @@ export type Database = {
           },
         ]
       }
+      deliveries: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          delivered_at: string
+          id: string
+          notes: string | null
+          organization_id: string
+          purchase_order_id: string
+          received_by: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          delivered_at?: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          purchase_order_id: string
+          received_by: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          delivered_at?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          purchase_order_id?: string
+          received_by?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deliveries_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deliveries_purchase_order_id_fkey"
+            columns: ["purchase_order_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deliveries_received_by_fkey"
+            columns: ["received_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       estimate_items: {
         Row: {
           cost_library_id: string | null
@@ -2351,6 +2409,94 @@ export type Database = {
           },
         ]
       }
+      purchase_orders: {
+        Row: {
+          amount: number
+          created_at: string
+          deleted_at: string | null
+          description: string
+          id: string
+          issued_by: string
+          notes: string | null
+          organization_id: string
+          project_id: string
+          updated_at: string
+          vendor_id: string
+          vendor_quote_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          deleted_at?: string | null
+          description: string
+          id?: string
+          issued_by: string
+          notes?: string | null
+          organization_id: string
+          project_id: string
+          updated_at?: string
+          vendor_id: string
+          vendor_quote_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          deleted_at?: string | null
+          description?: string
+          id?: string
+          issued_by?: string
+          notes?: string | null
+          organization_id?: string
+          project_id?: string
+          updated_at?: string
+          vendor_id?: string
+          vendor_quote_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_orders_issued_by_fkey"
+            columns: ["issued_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_vendor_quote_id_fkey"
+            columns: ["vendor_quote_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       roles: {
         Row: {
           created_at: string
@@ -2475,6 +2621,90 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_quotes: {
+        Row: {
+          amount: number
+          created_at: string
+          deleted_at: string | null
+          description: string
+          id: string
+          material_request_id: string | null
+          notes: string | null
+          organization_id: string
+          project_id: string
+          status: Database["public"]["Enums"]["vendor_quote_status"]
+          updated_at: string
+          valid_until: string | null
+          vendor_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          deleted_at?: string | null
+          description: string
+          id?: string
+          material_request_id?: string | null
+          notes?: string | null
+          organization_id: string
+          project_id: string
+          status?: Database["public"]["Enums"]["vendor_quote_status"]
+          updated_at?: string
+          valid_until?: string | null
+          vendor_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          deleted_at?: string | null
+          description?: string
+          id?: string
+          material_request_id?: string | null
+          notes?: string | null
+          organization_id?: string
+          project_id?: string
+          status?: Database["public"]["Enums"]["vendor_quote_status"]
+          updated_at?: string
+          valid_until?: string | null
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_quotes_material_request_id_fkey"
+            columns: ["material_request_id"]
+            isOneToOne: false
+            referencedRelation: "material_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_quotes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_quotes_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_quotes_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "vendor_quotes_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
             referencedColumns: ["id"]
           },
         ]
@@ -2929,6 +3159,7 @@ export type Database = {
       proposal_status: "draft" | "sent" | "accepted" | "rejected"
       role_scope: "organization" | "project"
       user_status: "invited" | "active" | "suspended"
+      vendor_quote_status: "received" | "accepted" | "rejected"
       work_package_status: "not_started" | "in_progress" | "completed"
     }
     CompositeTypes: {
@@ -3126,6 +3357,7 @@ export const Constants = {
       proposal_status: ["draft", "sent", "accepted", "rejected"],
       role_scope: ["organization", "project"],
       user_status: ["invited", "active", "suspended"],
+      vendor_quote_status: ["received", "accepted", "rejected"],
       work_package_status: ["not_started", "in_progress", "completed"],
     },
   },
