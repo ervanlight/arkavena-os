@@ -205,3 +205,20 @@ export const LEAD_STATUS = {
   WON: 'won',
   LOST: 'lost',
 } satisfies Record<string, Enums<'lead_status'>>;
+
+/** ADR 0018 SS4. `is_baseline` (a separate boolean column) is what "the accepted one" actually means -- `accepted` here only tracks the client's own reply to a sent estimate. */
+export const ESTIMATE_STATUS = {
+  DRAFT: 'draft',
+  SENT: 'sent',
+  ACCEPTED: 'accepted',
+  REJECTED: 'rejected',
+  SUPERSEDED: 'superseded',
+} satisfies Record<string, Enums<'estimate_status'>>;
+
+/** ADR 0018 SS5. */
+export const PROPOSAL_STATUS = {
+  DRAFT: 'draft',
+  SENT: 'sent',
+  ACCEPTED: 'accepted',
+  REJECTED: 'rejected',
+} satisfies Record<string, Enums<'proposal_status'>>;

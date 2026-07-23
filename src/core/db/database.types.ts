@@ -796,6 +796,174 @@ export type Database = {
           },
         ]
       }
+      estimate_items: {
+        Row: {
+          cost_library_id: string | null
+          created_at: string
+          deleted_at: string | null
+          description: string
+          estimate_id: string
+          id: string
+          organization_id: string
+          quantity: number
+          unit: string
+          unit_cost: number
+          unit_price: number
+          updated_at: string
+          zone_id: string | null
+        }
+        Insert: {
+          cost_library_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          description: string
+          estimate_id: string
+          id?: string
+          organization_id: string
+          quantity: number
+          unit: string
+          unit_cost: number
+          unit_price: number
+          updated_at?: string
+          zone_id?: string | null
+        }
+        Update: {
+          cost_library_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          description?: string
+          estimate_id?: string
+          id?: string
+          organization_id?: string
+          quantity?: number
+          unit?: string
+          unit_cost?: number
+          unit_price?: number
+          updated_at?: string
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "estimate_items_cost_library_id_fkey"
+            columns: ["cost_library_id"]
+            isOneToOne: false
+            referencedRelation: "cost_library"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "estimate_items_estimate_id_fkey"
+            columns: ["estimate_id"]
+            isOneToOne: false
+            referencedRelation: "estimates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "estimate_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "estimate_items_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_zone_progress"
+            referencedColumns: ["zone_id"]
+          },
+          {
+            foreignKeyName: "estimate_items_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      estimates: {
+        Row: {
+          assessment_id: string | null
+          created_at: string
+          created_by: string
+          deleted_at: string | null
+          id: string
+          is_baseline: boolean
+          notes: string | null
+          organization_id: string
+          project_id: string
+          status: Database["public"]["Enums"]["estimate_status"]
+          title: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          assessment_id?: string | null
+          created_at?: string
+          created_by: string
+          deleted_at?: string | null
+          id?: string
+          is_baseline?: boolean
+          notes?: string | null
+          organization_id: string
+          project_id: string
+          status?: Database["public"]["Enums"]["estimate_status"]
+          title: string
+          updated_at?: string
+          version: number
+        }
+        Update: {
+          assessment_id?: string | null
+          created_at?: string
+          created_by?: string
+          deleted_at?: string | null
+          id?: string
+          is_baseline?: boolean
+          notes?: string | null
+          organization_id?: string
+          project_id?: string
+          status?: Database["public"]["Enums"]["estimate_status"]
+          title?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "estimates_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "estimates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "estimates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "estimates_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "estimates_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
       funding_receipts: {
         Row: {
           amount: number
@@ -2102,6 +2270,87 @@ export type Database = {
           },
         ]
       }
+      proposals: {
+        Row: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_reason: string | null
+          deleted_at: string | null
+          estimate_id: string
+          id: string
+          organization_id: string
+          project_id: string
+          sent_at: string | null
+          status: Database["public"]["Enums"]["proposal_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_reason?: string | null
+          deleted_at?: string | null
+          estimate_id: string
+          id?: string
+          organization_id: string
+          project_id: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["proposal_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_reason?: string | null
+          deleted_at?: string | null
+          estimate_id?: string
+          id?: string
+          organization_id?: string
+          project_id?: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["proposal_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposals_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposals_estimate_id_fkey"
+            columns: ["estimate_id"]
+            isOneToOne: false
+            referencedRelation: "estimates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposals_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposals_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposals_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
       roles: {
         Row: {
           created_at: string
@@ -2616,6 +2865,7 @@ export type Database = {
         | "completed"
       client_decision_outcome: "approved" | "rejected"
       contract_status: "draft" | "active" | "completed" | "terminated"
+      estimate_status: "draft" | "sent" | "accepted" | "rejected" | "superseded"
       inspection_status: "pending" | "passed" | "failed"
       invoice_status: "draft" | "issued" | "paid" | "cancelled"
       issue_severity: "low" | "medium" | "high"
@@ -2652,6 +2902,7 @@ export type Database = {
         | "on_hold"
         | "completed"
         | "cancelled"
+      proposal_status: "draft" | "sent" | "accepted" | "rejected"
       role_scope: "organization" | "project"
       user_status: "invited" | "active" | "suspended"
       work_package_status: "not_started" | "in_progress" | "completed"
@@ -2813,6 +3064,7 @@ export const Constants = {
       ],
       client_decision_outcome: ["approved", "rejected"],
       contract_status: ["draft", "active", "completed", "terminated"],
+      estimate_status: ["draft", "sent", "accepted", "rejected", "superseded"],
       inspection_status: ["pending", "passed", "failed"],
       invoice_status: ["draft", "issued", "paid", "cancelled"],
       issue_severity: ["low", "medium", "high"],
@@ -2847,6 +3099,7 @@ export const Constants = {
         "completed",
         "cancelled",
       ],
+      proposal_status: ["draft", "sent", "accepted", "rejected"],
       role_scope: ["organization", "project"],
       user_status: ["invited", "active", "suspended"],
       work_package_status: ["not_started", "in_progress", "completed"],
