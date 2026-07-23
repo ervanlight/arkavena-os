@@ -70,6 +70,16 @@ export const ERROR_CODES = {
    */
   LEAD_NOT_QUALIFIED: 'LEAD_NOT_QUALIFIED',
 
+  /**
+   * A lead status change does not exist as an edge in the pipeline graph
+   * (ARCHITECTURE.md 8, ADR 0018 SS1) -- mirrors VARIATION_INVALID_TRANSITION's
+   * reasoning, one level down: the domain layer's own `transition()` refused
+   * before any database write, not fn_leads_guard_transition's exception.
+   * A missing `lost` reason uses AUDIT_REASON_REQUIRED instead, same split
+   * scope-variation's transition() already uses.
+   */
+  LEAD_INVALID_TRANSITION: 'LEAD_INVALID_TRANSITION',
+
   /** Supabase, storage, or another dependency failed. Never shown verbatim to a client. */
   INFRA_UNAVAILABLE: 'INFRA_UNAVAILABLE',
 
@@ -102,6 +112,7 @@ export const ERROR_MESSAGES_ID: Record<ErrorCode, string> = {
   VARIATION_INVALID_TRANSITION: 'Perubahan status untuk variation ini tidak diperbolehkan saat ini.',
   VARIATION_NOT_FUNDED: 'Variation ini belum berstatus "dana masuk" -- pekerjaan belum bisa dibuka.',
   LEAD_NOT_QUALIFIED: 'Lead harus berstatus "qualified" sebelum bisa dikonversi menjadi proyek.',
+  LEAD_INVALID_TRANSITION: 'Perubahan status untuk lead ini tidak diperbolehkan saat ini.',
   INFRA_UNAVAILABLE: 'Sistem sedang tidak dapat diakses. Coba beberapa saat lagi.',
   RATE_LIMITED: 'Terlalu banyak percobaan. Tunggu sebentar sebelum mencoba lagi.',
   INTERNAL_ERROR: 'Terjadi kesalahan pada sistem. Tim kami sudah dicatat kejadiannya.',
@@ -119,6 +130,7 @@ export const ERROR_HTTP_STATUS: Record<ErrorCode, number> = {
   VARIATION_INVALID_TRANSITION: 422,
   VARIATION_NOT_FUNDED: 422,
   LEAD_NOT_QUALIFIED: 422,
+  LEAD_INVALID_TRANSITION: 422,
   INFRA_UNAVAILABLE: 503,
   RATE_LIMITED: 429,
   INTERNAL_ERROR: 500,

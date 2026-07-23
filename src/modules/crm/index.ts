@@ -21,6 +21,7 @@ export type {
 
 export type { LeadScoreFactors } from './domain/lead-scoring';
 export { scoreLead } from './domain/lead-scoring';
+export type { LeadStatus } from './domain/lead-transition';
 
 export {
   convertLeadToProjectSchema,

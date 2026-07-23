@@ -7,14 +7,22 @@ import { createAuditGateway } from '@/core/audit/gateway.server';
 import { getActionContext } from '@/core/auth/session';
 import { safeAction } from '@/core/actions/safe-action';
 import { createServerSupabase } from '@/core/db/client.server';
-import { DomainRuleError } from '@/core/errors/app-error';
+import { AuditReasonRequiredError, DomainRuleError } from '@/core/errors/app-error';
 import { ERROR_CODES } from '@/core/errors/codes';
 import { createProjectAction, type Project } from '@/modules/projects';
+import { transition, type LeadTransitionBlocked } from '../domain/lead-transition';
 import { getLead, insertLead, listLeads, updateLead } from '../data/leads-repository';
 import { insertClient } from '../data/clients-repository';
 import { insertSite } from '../data/sites-repository';
 import { convertLeadToProjectSchema, createLeadSchema, updateLeadStatusSchema } from '../schemas';
 import type { Lead } from '../types';
+
+function throwTransitionBlocked(blocked: LeadTransitionBlocked): never {
+  if (blocked.kind === 'missing_reason') {
+    throw new AuditReasonRequiredError(blocked.reason, { userMessage: blocked.reason });
+  }
+  throw new DomainRuleError(ERROR_CODES.LEAD_INVALID_TRANSITION, blocked.reason, { userMessage: blocked.reason });
+}
 
 export const createLeadAction = safeAction(
   {
@@ -76,10 +84,11 @@ export const getLeadAction = safeAction(
 );
 
 /**
- * The trigger-enforced graph (fn_leads_guard_transition, ADR 0018) is what
- * actually holds regardless of what this action's own input allows through --
- * this only carries `lost_reason` alongside the status change, and lets the
- * database's own exception surface if the transition itself is illegal.
+ * The domain layer's transition() (modules/crm/domain/lead-transition.ts)
+ * decides first, turning an illegal move into an ActionResult before any
+ * database write is attempted -- the same two-layer split ADR 0012 already
+ * established for change_orders. fn_leads_guard_transition mirrors the same
+ * graph underneath and is the real, unbypassable enforcement either way.
  */
 export const updateLeadStatusAction = safeAction(
   {
@@ -92,8 +101,15 @@ export const updateLeadStatusAction = safeAction(
     const supabase = await createServerSupabase();
     const before = await getLead(supabase, input.id);
 
+    const decision = transition(
+      before.status,
+      input.status,
+      input.lostReason !== undefined ? { lostReason: input.lostReason } : {},
+    );
+    if (!decision.ok) throwTransitionBlocked(decision.error);
+
     const after = await updateLead(supabase, input.id, {
-      status: input.status,
+      status: decision.value,
       ...(input.lostReason !== undefined ? { lost_reason: input.lostReason } : {}),
     });
 

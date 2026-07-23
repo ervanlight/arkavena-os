@@ -14,6 +14,100 @@ export type Database = {
   }
   public: {
     Tables: {
+      assessments: {
+        Row: {
+          assessed_at: string | null
+          assessed_by: string | null
+          created_at: string
+          deleted_at: string | null
+          id: string
+          lead_id: string | null
+          notes: string | null
+          organization_id: string
+          project_id: string | null
+          recommended_scope: string | null
+          site_conditions: string | null
+          site_id: string
+          status: Database["public"]["Enums"]["assessment_status"]
+          updated_at: string
+        }
+        Insert: {
+          assessed_at?: string | null
+          assessed_by?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          lead_id?: string | null
+          notes?: string | null
+          organization_id: string
+          project_id?: string | null
+          recommended_scope?: string | null
+          site_conditions?: string | null
+          site_id: string
+          status?: Database["public"]["Enums"]["assessment_status"]
+          updated_at?: string
+        }
+        Update: {
+          assessed_at?: string | null
+          assessed_by?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          lead_id?: string | null
+          notes?: string | null
+          organization_id?: string
+          project_id?: string | null
+          recommended_scope?: string | null
+          site_conditions?: string | null
+          site_id?: string
+          status?: Database["public"]["Enums"]["assessment_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessments_assessed_by_fkey"
+            columns: ["assessed_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessments_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "assessments_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: Database["public"]["Enums"]["audit_action"]
@@ -2494,6 +2588,7 @@ export type Database = {
       }
     }
     Enums: {
+      assessment_status: "scheduled" | "completed"
       audit_action:
         | "insert"
         | "update"
@@ -2687,6 +2782,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      assessment_status: ["scheduled", "completed"],
       audit_action: [
         "insert",
         "update",
