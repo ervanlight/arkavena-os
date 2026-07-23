@@ -274,6 +274,16 @@ export async function cleanupOrganizations(orgIds: readonly string[]): Promise<v
       await run('delete from purchase_orders where organization_id = any($1::uuid[])', [orgIds]);
       await run('delete from vendor_quotes where organization_id = any($1::uuid[])', [orgIds]);
       await run('delete from vendors where organization_id = any($1::uuid[])', [orgIds]);
+      // Wave 9-10 (Fase 9, modules/maintenance-engine): same class of gap --
+      // service_tickets references assets/maintenance_plans/warranties;
+      // maintenance_plans and assets (nullably) reference warranties;
+      // warranties references handover_items; all ON DELETE RESTRICT, all
+      // before projects/sites/clients (deleted further below).
+      await run('delete from service_tickets where organization_id = any($1::uuid[])', [orgIds]);
+      await run('delete from maintenance_plans where organization_id = any($1::uuid[])', [orgIds]);
+      await run('delete from assets where organization_id = any($1::uuid[])', [orgIds]);
+      await run('delete from warranties where organization_id = any($1::uuid[])', [orgIds]);
+      await run('delete from handover_items where organization_id = any($1::uuid[])', [orgIds]);
       // Fase 1 (modules/crm, modules/projects): children before parents, even
       // though replica mode suspends the FK checks that would otherwise force
       // this order -- keeping it anyway is cheap and reads as documentation.

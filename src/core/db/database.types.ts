@@ -108,6 +108,89 @@ export type Database = {
           },
         ]
       }
+      assets: {
+        Row: {
+          category: string | null
+          client_id: string
+          created_at: string
+          deleted_at: string | null
+          id: string
+          install_date: string | null
+          manufacturer: string | null
+          model: string | null
+          name: string
+          notes: string | null
+          organization_id: string
+          serial_number: string | null
+          site_id: string
+          updated_at: string
+          warranty_id: string | null
+        }
+        Insert: {
+          category?: string | null
+          client_id: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          install_date?: string | null
+          manufacturer?: string | null
+          model?: string | null
+          name: string
+          notes?: string | null
+          organization_id: string
+          serial_number?: string | null
+          site_id: string
+          updated_at?: string
+          warranty_id?: string | null
+        }
+        Update: {
+          category?: string | null
+          client_id?: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          install_date?: string | null
+          manufacturer?: string | null
+          model?: string | null
+          name?: string
+          notes?: string | null
+          organization_id?: string
+          serial_number?: string | null
+          site_id?: string
+          updated_at?: string
+          warranty_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assets_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assets_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assets_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assets_warranty_id_fkey"
+            columns: ["warranty_id"]
+            isOneToOne: false
+            referencedRelation: "warranties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: Database["public"]["Enums"]["audit_action"]
@@ -1103,6 +1186,97 @@ export type Database = {
           },
         ]
       }
+      handover_items: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          description: string | null
+          handed_over_at: string | null
+          handed_over_to: string | null
+          id: string
+          item_type: string
+          notes: string | null
+          organization_id: string
+          project_id: string
+          recorded_by: string
+          updated_at: string
+          zone_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          handed_over_at?: string | null
+          handed_over_to?: string | null
+          id?: string
+          item_type: string
+          notes?: string | null
+          organization_id: string
+          project_id: string
+          recorded_by: string
+          updated_at?: string
+          zone_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          handed_over_at?: string | null
+          handed_over_to?: string | null
+          id?: string
+          item_type?: string
+          notes?: string | null
+          organization_id?: string
+          project_id?: string
+          recorded_by?: string
+          updated_at?: string
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "handover_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "handover_items_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "handover_items_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "handover_items_recorded_by_fkey"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "handover_items_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_zone_progress"
+            referencedColumns: ["zone_id"]
+          },
+          {
+            foreignKeyName: "handover_items_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hold_point_templates: {
         Row: {
           created_at: string
@@ -1591,6 +1765,66 @@ export type Database = {
           },
         ]
       }
+      maintenance_plans: {
+        Row: {
+          asset_id: string
+          created_at: string
+          deleted_at: string | null
+          id: string
+          interval_days: number
+          is_active: boolean
+          last_completed_at: string | null
+          notes: string | null
+          organization_id: string
+          starts_at: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          asset_id: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          interval_days: number
+          is_active?: boolean
+          last_completed_at?: string | null
+          notes?: string | null
+          organization_id: string
+          starts_at: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          asset_id?: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          interval_days?: number
+          is_active?: boolean
+          last_completed_at?: string | null
+          notes?: string | null
+          organization_id?: string
+          starts_at?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_plans_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_plans_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       material_requests: {
         Row: {
           created_at: string
@@ -1974,8 +2208,10 @@ export type Database = {
           daily_log_id: string | null
           deleted_at: string | null
           file_size_bytes: number
+          handover_item_id: string | null
           id: string
           organization_id: string
+          photo_stage: Database["public"]["Enums"]["photo_stage"] | null
           project_id: string
           storage_path: string
           thumbnail_path: string
@@ -1990,8 +2226,10 @@ export type Database = {
           daily_log_id?: string | null
           deleted_at?: string | null
           file_size_bytes: number
+          handover_item_id?: string | null
           id?: string
           organization_id: string
+          photo_stage?: Database["public"]["Enums"]["photo_stage"] | null
           project_id: string
           storage_path: string
           thumbnail_path: string
@@ -2006,8 +2244,10 @@ export type Database = {
           daily_log_id?: string | null
           deleted_at?: string | null
           file_size_bytes?: number
+          handover_item_id?: string | null
           id?: string
           organization_id?: string
+          photo_stage?: Database["public"]["Enums"]["photo_stage"] | null
           project_id?: string
           storage_path?: string
           thumbnail_path?: string
@@ -2022,6 +2262,13 @@ export type Database = {
             columns: ["daily_log_id"]
             isOneToOne: false
             referencedRelation: "daily_logs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "photos_handover_item_id_fkey"
+            columns: ["handover_item_id"]
+            isOneToOne: false
+            referencedRelation: "handover_items"
             referencedColumns: ["id"]
           },
           {
@@ -2527,6 +2774,113 @@ export type Database = {
         }
         Relationships: []
       }
+      service_tickets: {
+        Row: {
+          asset_id: string
+          assigned_to: string | null
+          client_id: string
+          created_at: string
+          deleted_at: string | null
+          description: string | null
+          id: string
+          maintenance_plan_id: string | null
+          organization_id: string
+          reported_by: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          status: Database["public"]["Enums"]["service_ticket_status"]
+          title: string
+          updated_at: string
+          warranty_id: string | null
+        }
+        Insert: {
+          asset_id: string
+          assigned_to?: string | null
+          client_id: string
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          id?: string
+          maintenance_plan_id?: string | null
+          organization_id: string
+          reported_by?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          status?: Database["public"]["Enums"]["service_ticket_status"]
+          title: string
+          updated_at?: string
+          warranty_id?: string | null
+        }
+        Update: {
+          asset_id?: string
+          assigned_to?: string | null
+          client_id?: string
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          id?: string
+          maintenance_plan_id?: string | null
+          organization_id?: string
+          reported_by?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          status?: Database["public"]["Enums"]["service_ticket_status"]
+          title?: string
+          updated_at?: string
+          warranty_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_tickets_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_tickets_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_tickets_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_tickets_maintenance_plan_id_fkey"
+            columns: ["maintenance_plan_id"]
+            isOneToOne: false
+            referencedRelation: "maintenance_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_tickets_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_tickets_reported_by_fkey"
+            columns: ["reported_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_tickets_warranty_id_fkey"
+            columns: ["warranty_id"]
+            isOneToOne: false
+            referencedRelation: "warranties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sites: {
         Row: {
           address: string | null
@@ -2756,6 +3110,80 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      warranties: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          ends_at: string
+          handover_item_id: string | null
+          id: string
+          organization_id: string
+          project_id: string
+          starts_at: string
+          status: Database["public"]["Enums"]["warranty_status"]
+          terms: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          ends_at: string
+          handover_item_id?: string | null
+          id?: string
+          organization_id: string
+          project_id: string
+          starts_at: string
+          status?: Database["public"]["Enums"]["warranty_status"]
+          terms?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          ends_at?: string
+          handover_item_id?: string | null
+          id?: string
+          organization_id?: string
+          project_id?: string
+          starts_at?: string
+          status?: Database["public"]["Enums"]["warranty_status"]
+          terms?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "warranties_handover_item_id_fkey"
+            columns: ["handover_item_id"]
+            isOneToOne: false
+            referencedRelation: "handover_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "warranties_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "warranties_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "warranties_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -3174,6 +3602,7 @@ export type Database = {
         | "qs"
         | "procurement"
       organization_status: "active" | "suspended"
+      photo_stage: "before" | "after"
       project_role:
         | "site_coordinator"
         | "mandor"
@@ -3189,8 +3618,10 @@ export type Database = {
         | "cancelled"
       proposal_status: "draft" | "sent" | "accepted" | "rejected"
       role_scope: "organization" | "project"
+      service_ticket_status: "open" | "in_progress" | "resolved" | "cancelled"
       user_status: "invited" | "active" | "suspended"
       vendor_quote_status: "received" | "accepted" | "rejected"
+      warranty_status: "active" | "expired" | "claimed"
       work_package_status: "not_started" | "in_progress" | "completed"
     }
     CompositeTypes: {
@@ -3370,6 +3801,7 @@ export const Constants = {
       notification_status: ["pending", "sent", "read", "failed"],
       org_role: ["owner", "technical_director", "finance", "qs", "procurement"],
       organization_status: ["active", "suspended"],
+      photo_stage: ["before", "after"],
       project_role: [
         "site_coordinator",
         "mandor",
@@ -3387,8 +3819,10 @@ export const Constants = {
       ],
       proposal_status: ["draft", "sent", "accepted", "rejected"],
       role_scope: ["organization", "project"],
+      service_ticket_status: ["open", "in_progress", "resolved", "cancelled"],
       user_status: ["invited", "active", "suspended"],
       vendor_quote_status: ["received", "accepted", "rejected"],
+      warranty_status: ["active", "expired", "claimed"],
       work_package_status: ["not_started", "in_progress", "completed"],
     },
   },
