@@ -469,6 +469,73 @@ every org role (`[...ORG_ROLES]`) -- neither is role-restricted the way
 assessment is a workflow-progress action available to any staff member, not
 a money/approval gate.
 
+## Fase 8 — estimating (Wave 5-6, ADR 0018)
+
+Staff-only, same treatment as the rest of Fase 8 — no project role, field, or
+client-facing policy exists for any table in this section.
+
+| Table | Owner/TD/Finance/QS/Procurement | Any project role | Client |
+| --- | --- | --- | --- |
+| `estimates` | CRUD\* (org) | — | — |
+| `estimate_items` | CRUD\* (org) | — | — |
+| `proposals` | CRUD\* (org) | — | — |
+
+\* "CRUD" here means SELECT/INSERT/UPDATE — no DELETE policy exists for
+anyone, same as every other table in this document; soft delete
+(`deleted_at`) is the removal path.
+
+### Column-level and cross-row rules RLS cannot express
+
+| Rule | Enforced by |
+| --- | --- |
+| At most one estimate per `(project_id, version)` | `uq_estimates_project_version` |
+| At most one baseline estimate per project — a database fact, not application discipline | `uq_estimates_one_baseline_per_project` (partial unique index on `is_baseline where true`) |
+| Swapping which estimate is the baseline is atomic (unset the old one, set the new one, in one transaction) | `fn_set_baseline_estimate` — an RPC, not a plain PostgREST update, but it carries no security definer, so `estimates_update_staff` is still the policy actually gating who may call it |
+| At most one proposal per estimate | `uq_proposals_estimate_id` |
+| A non-draft proposal must have `sent_at` set | `ck_proposals_sent_requires_sent_at` |
+| A decided proposal (`accepted`/`rejected`) must have its decision tracking columns set | `ck_proposals_decision_requires_decided_at` |
+
+`requirePermission()` for `estimate.set_baseline`, `proposal.send`, and
+`proposal.decide` all list every org role (`[...ORG_ROLES]`) — none of these
+is a money/approval gate the way `invoice.issue` is; they are workflow-progress
+actions available to any staff member.
+
+## Fase 8 — procurement (Wave 2-3, 7-9, ADR 0018 SS6)
+
+Staff-only, same treatment as the rest of Fase 8. `vendors` already appears
+in the crm/assessment section above (it shipped in the same wave as
+`leads`/`cost_library`); the three tables below are what procurement itself
+owns on top of that master data.
+
+| Table | Owner/TD/Finance/QS/Procurement | Any project role | Client |
+| --- | --- | --- | --- |
+| `vendor_quotes` | CRUD\* (org) | — | — |
+| `purchase_orders` | SELECT, INSERT (org) | — | — |
+| `deliveries` | CRUD\* (org) | — | — |
+
+\* "CRUD" here means SELECT/INSERT/UPDATE — no DELETE policy exists for
+anyone, same as every other table in this document; soft delete
+(`deleted_at`) is the removal path. `purchase_orders` has no application-level
+`update` action (a PO is the issuance itself, ADR 0018 SS6, no status to
+transition) even though its RLS policy set includes UPDATE like every other
+table here — the matrix being stricter than the policy is the safe direction
+(CLAUDE.md law 0.3).
+
+### Column-level and cross-row rules RLS cannot express
+
+| Rule | Enforced by |
+| --- | --- |
+| A `purchase_orders` INSERT is blocked outright under a red/overdue Cash Gate unless a matching `cash_gate_overrides` row (`action = 'issue_po'`) exists from the last 5 minutes | `fn_purchase_orders_guard_cash_gate`, a `BEFORE INSERT` trigger mirroring `fn_work_packages_guard_cash_gate` (Wave 7) exactly |
+| Recording the override and issuing the PO happens atomically, in one transaction | `fn_override_and_issue_purchase_order` — no security definer, so RLS and `trg_cash_gate_overrides_guard_owner_only` both still apply to the calling user |
+
+`requirePermission()` for `purchase_order.create` lists every org role
+(`[...ORG_ROLES]`) — the DB trigger is what actually enforces the gate
+regardless of role (CLAUDE.md law 0.3's two independent layers), the same
+"coarse matrix, precise trigger" split as `work_package`. Issuing under a
+red/overdue gate goes through `cash_gate_override.create` instead (owner
+only), not a separate `purchase_order` action — identical to how
+`overrideOpenWorkPackageAction` is gated in modules/cash-gate.
+
 ## Later waves
 
 Added as their tables land. A table may not reach main without a row here, its

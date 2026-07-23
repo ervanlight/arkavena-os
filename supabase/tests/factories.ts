@@ -265,6 +265,15 @@ export async function cleanupOrganizations(orgIds: readonly string[]): Promise<v
       await run('delete from proposals where organization_id = any($1::uuid[])', [orgIds]);
       await run('delete from estimate_items where organization_id = any($1::uuid[])', [orgIds]);
       await run('delete from estimates where organization_id = any($1::uuid[])', [orgIds]);
+      // Wave 2-3/7-9 (Fase 8, modules/procurement): same class of gap --
+      // deliveries references purchase_orders, purchase_orders (nullably)
+      // references vendor_quotes, both reference vendors -- all with
+      // ON DELETE RESTRICT, so leaving any of them out blocks `projects` or
+      // `vendors` (deleted further below) once a test actually creates one.
+      await run('delete from deliveries where organization_id = any($1::uuid[])', [orgIds]);
+      await run('delete from purchase_orders where organization_id = any($1::uuid[])', [orgIds]);
+      await run('delete from vendor_quotes where organization_id = any($1::uuid[])', [orgIds]);
+      await run('delete from vendors where organization_id = any($1::uuid[])', [orgIds]);
       // Fase 1 (modules/crm, modules/projects): children before parents, even
       // though replica mode suspends the FK checks that would otherwise force
       // this order -- keeping it anyway is cheap and reads as documentation.

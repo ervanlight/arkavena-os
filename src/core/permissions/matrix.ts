@@ -439,6 +439,28 @@ export const PERMISSIONS = {
     send: [...ORG_ROLES],
     decide: [...ORG_ROLES],
   },
+
+  vendor_quote: {
+    view: [...ORG_ROLES],
+    create: [...ORG_ROLES],
+    update: [...ORG_ROLES],
+  },
+
+  /**
+   * No `update` here: a PO is the issuance itself (ADR 0018 SS6), no status
+   * to transition. The DB trigger enforces the Cash Gate regardless of role
+   * (CLAUDE.md 0.3) -- 'create' being open to every org role is the same
+   * "coarse matrix, precise trigger" split as work_package's own create/update.
+   */
+  purchase_order: {
+    view: [...ORG_ROLES],
+    create: [...ORG_ROLES],
+  },
+
+  delivery: {
+    view: [...ORG_ROLES],
+    create: [...ORG_ROLES],
+  },
 } as const satisfies PermissionMatrix;
 
 // ---------------------------------------------------------------------------

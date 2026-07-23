@@ -3029,6 +3029,37 @@ export type Database = {
         Args: { p_table: string }
         Returns: undefined
       }
+      fn_override_and_issue_purchase_order: {
+        Args: {
+          p_amount: number
+          p_description: string
+          p_organization_id: string
+          p_project_id: string
+          p_reason: string
+          p_vendor_id: string
+          p_vendor_quote_id?: string
+        }
+        Returns: {
+          amount: number
+          created_at: string
+          deleted_at: string | null
+          description: string
+          id: string
+          issued_by: string
+          notes: string | null
+          organization_id: string
+          project_id: string
+          updated_at: string
+          vendor_id: string
+          vendor_quote_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "purchase_orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       fn_override_and_open_work_package: {
         Args: { p_reason: string; p_work_package_id: string }
         Returns: {
