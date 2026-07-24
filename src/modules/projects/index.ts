@@ -81,4 +81,7 @@ export {
   updateWorkPackageAction,
 } from './actions/work-package-actions';
 
+export { listProjectActivityAction } from './actions/project-activity-actions';
+export type { ProjectActivityRow } from '@/core/audit/read.server';
+
 export { ZoneMap } from './components/zone-map';

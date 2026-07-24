@@ -1,9 +1,12 @@
 import 'server-only';
 import type { ServerSupabase } from '@/core/db/client.server';
 import { NotFoundError } from '@/core/errors/app-error';
-import type { NewPhoto, Photo, PhotoUpdate } from '../types';
+import type { NewPhoto, Photo, PhotoUpdate, ProjectPhoto } from '../types';
 
 /** All direct `photos` table access lives here (ARCHITECTURE.md 1.2). Uploading the actual bytes is core/storage's job, not this repository's. */
+
+/** One hour: long enough to browse a project gallery, short enough that a leaked URL expires. Same TTL the client portal's photo resolver uses. */
+const PHOTO_URL_TTL_SECONDS = 3600;
 
 export async function listPhotosForProject(supabase: ServerSupabase, projectId: string): Promise<Photo[]> {
   const { data, error } = await supabase
@@ -15,6 +18,23 @@ export async function listPhotosForProject(supabase: ServerSupabase, projectId: 
 
   if (error !== null) throw error;
   return data;
+}
+
+/**
+ * Same list, each row's `thumbnail_path` resolved to a time-limited signed
+ * URL so it can actually render (a storage path is not a viewable URL). Kept
+ * distinct from `listPhotosForProject` because signing costs a round trip per
+ * photo -- callers that only need the rows shouldn't pay it. Mirrors the
+ * client portal's own photo resolver (client-views-repository.ts).
+ */
+export async function listPhotosWithThumbnailUrls(supabase: ServerSupabase, projectId: string): Promise<ProjectPhoto[]> {
+  const photos = await listPhotosForProject(supabase, projectId);
+  return Promise.all(
+    photos.map(async (photo) => {
+      const { data: signed } = await supabase.storage.from('photos').createSignedUrl(photo.thumbnail_path, PHOTO_URL_TTL_SECONDS);
+      return { ...photo, thumbnailUrl: signed?.signedUrl ?? null };
+    }),
+  );
 }
 
 export async function getPhoto(supabase: ServerSupabase, id: string): Promise<Photo> {

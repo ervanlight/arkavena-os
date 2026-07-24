@@ -21,6 +21,7 @@ export type {
   PhotoUpdate,
   ProgressEntry,
   ProgressEntryUpdate,
+  ProjectPhoto,
 } from './types';
 
 export {
@@ -52,7 +53,12 @@ export {
   listProgressEntriesForDailyLogAction,
   updateProgressEntryAction,
 } from './actions/progress-entry-actions';
-export { createPhotoAction, listPhotosForProjectAction, updatePhotoAction } from './actions/photo-actions';
+export {
+  createPhotoAction,
+  listPhotosForProjectAction,
+  listProjectPhotosWithUrlsAction,
+  updatePhotoAction,
+} from './actions/photo-actions';
 export {
   createMaterialRequestAction,
   listMaterialRequestsForProjectAction,

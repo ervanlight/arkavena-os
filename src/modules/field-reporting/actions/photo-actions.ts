@@ -6,9 +6,15 @@ import { createAuditGateway } from '@/core/audit/gateway.server';
 import { getActionContext } from '@/core/auth/session';
 import { safeAction } from '@/core/actions/safe-action';
 import { createServerSupabase } from '@/core/db/client.server';
-import { getPhoto, insertPhoto, listPhotosForProject, updatePhoto } from '../data/photos-repository';
+import {
+  getPhoto,
+  insertPhoto,
+  listPhotosForProject,
+  listPhotosWithThumbnailUrls,
+  updatePhoto,
+} from '../data/photos-repository';
 import { createPhotoSchema, updatePhotoSchema } from '../schemas';
-import type { Photo } from '../types';
+import type { Photo, ProjectPhoto } from '../types';
 
 /**
  * Records a photo row. The bytes are already in Supabase Storage by the
@@ -96,5 +102,19 @@ export const listPhotosForProjectAction = safeAction(
   async (projectId): Promise<Photo[]> => {
     const supabase = await createServerSupabase();
     return listPhotosForProject(supabase, projectId);
+  },
+);
+
+/** Same list with rendered (signed-URL) thumbnails, for the staff project gallery. */
+export const listProjectPhotosWithUrlsAction = safeAction(
+  {
+    schema: z.string().uuid(),
+    permission: { resource: 'photo', action: 'view' },
+    loadContext: getActionContext,
+    name: 'fieldReporting.listProjectPhotosWithUrls',
+  },
+  async (projectId): Promise<ProjectPhoto[]> => {
+    const supabase = await createServerSupabase();
+    return listPhotosWithThumbnailUrls(supabase, projectId);
   },
 );
