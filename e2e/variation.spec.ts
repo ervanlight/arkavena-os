@@ -94,7 +94,7 @@ test('klien approve variation -> dana masuk -> paket kerja muncul di daftar kerj
 
     await test.step('the work package genuinely appears in the project work-packages list', async () => {
       await ownerPage.goto(`/cc/projects/${projectId}`);
-      const row = ownerPage.getByRole('row', { name: /Pemasangan kamar mandi lantai 2/ });
+      const row = ownerPage.getByRole('listitem').filter({ hasText: 'Pemasangan kamar mandi lantai 2' });
       await expect(row).toBeVisible();
       await expect(row.getByText('Dari variation')).toBeVisible();
       await expect(row.getByText('Belum mulai')).toBeVisible();
