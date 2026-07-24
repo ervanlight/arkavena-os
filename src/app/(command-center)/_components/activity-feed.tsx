@@ -77,11 +77,14 @@ function relativeTime(iso: string): string {
   return new Date(iso).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
+type ActivityEvent = ProjectActivityRow & { projectName?: string | null };
+
 /**
- * The project journal: every audited event as a readable row. Reused by the
- * project Aktivitas tab and (later) the dashboard's recent-activity strip.
+ * The activity journal: every audited event as a readable row. Used both for
+ * a single project's Aktivitas tab and (with `projectName` populated) the
+ * Command Center dashboard's cross-project recent-activity feed.
  */
-export function ActivityFeed({ events }: { events: ProjectActivityRow[] }) {
+export function ActivityFeed({ events }: { events: ActivityEvent[] }) {
   if (events.length === 0) {
     return <EmptyState title="Belum ada aktivitas" description="Aktivitas lapangan dan keputusan proyek akan muncul di sini." />;
   }
@@ -92,7 +95,7 @@ export function ActivityFeed({ events }: { events: ProjectActivityRow[] }) {
         const style = ENTITY_STYLE[event.entityTable] ?? DEFAULT_STYLE;
         const Icon = style.icon;
         const title = `${style.noun} ${ACTION_SUFFIX[event.action]}`;
-        const meta = [event.actorName, relativeTime(event.occurredAt)].filter(Boolean).join(' · ');
+        const meta = [event.projectName, event.actorName, relativeTime(event.occurredAt)].filter(Boolean).join(' · ');
         return (
           <li
             key={event.id}
@@ -106,7 +109,7 @@ export function ActivityFeed({ events }: { events: ProjectActivityRow[] }) {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-[14px] font-medium text-[color:var(--color-ink)]">{title}</p>
-              <p className="mt-0.5 text-xs text-[color:var(--color-ink-tertiary)]">{meta}</p>
+              <p className="mt-0.5 truncate text-xs text-[color:var(--color-ink-tertiary)]">{meta}</p>
               {event.reason !== null && event.reason !== '' && (
                 <p className="mt-1.5 rounded-[8px] bg-[color:var(--color-surface-secondary)] px-2.5 py-1.5 text-xs text-[color:var(--color-ink-secondary)]">
                   “{event.reason}”

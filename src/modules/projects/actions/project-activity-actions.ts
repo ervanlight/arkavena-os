@@ -4,8 +4,8 @@ import { z } from 'zod';
 import { getActionContext } from '@/core/auth/session';
 import { safeAction } from '@/core/actions/safe-action';
 import { createServerSupabase } from '@/core/db/client.server';
-import { listProjectActivity } from '@/core/audit/read.server';
-import type { ProjectActivityRow } from '@/core/audit/read.server';
+import { listOrgActivity, listProjectActivity } from '@/core/audit/read.server';
+import type { OrgActivityRow, ProjectActivityRow } from '@/core/audit/read.server';
 
 /**
  * The project's activity journal (audit_logs, staff-only). Owned by
@@ -25,5 +25,19 @@ export const listProjectActivityAction = safeAction(
   async (projectId): Promise<ProjectActivityRow[]> => {
     const supabase = await createServerSupabase();
     return listProjectActivity(supabase, projectId);
+  },
+);
+
+/** The Command Center dashboard's recent-activity feed -- every project the caller's org has, in one journal. */
+export const listOrgActivityAction = safeAction(
+  {
+    schema: z.void(),
+    permission: { resource: 'project', action: 'view' },
+    loadContext: getActionContext,
+    name: 'projects.listOrgActivity',
+  },
+  async (_input, ctx): Promise<OrgActivityRow[]> => {
+    const supabase = await createServerSupabase();
+    return listOrgActivity(supabase, ctx.organizationId);
   },
 );

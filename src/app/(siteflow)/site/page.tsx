@@ -2,7 +2,7 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { ClipboardList, TrendingUp, Camera, Boxes, TriangleAlert, History, type LucideIcon } from 'lucide-react';
 import { getCurrentUser } from '@/core/auth/session';
-import { listMyFieldProjectsAction } from '@/modules/projects';
+import { listMyFieldProjectsAction, listProjectActivityAction } from '@/modules/projects';
 import { Card } from '@/core/ui';
 
 export const metadata = { title: 'SiteFlow — BuildTrust OS' };
@@ -15,6 +15,36 @@ const MENU: { href: string; label: string; hint: string; icon: LucideIcon; tint:
   { href: 'masalah', label: 'Lapor Masalah', hint: 'Catat kendala di lapangan', icon: TriangleAlert, tint: '#ff453a' },
   { href: 'riwayat', label: 'Riwayat Laporan', hint: 'Lihat laporan yang sudah diinput', icon: History, tint: '#6e6e73' },
 ];
+
+const TODAY_ENTITY_LABEL: Record<string, string> = {
+  daily_logs: 'laporan harian',
+  photos: 'foto',
+  progress_entries: 'update progres',
+  material_requests: 'permintaan material',
+  issues: 'masalah dilaporkan',
+};
+
+/** Small "what's already logged today" summary -- so a mandor sees at a glance whether today's report is still missing before adding more. */
+function TodayActivitySummary({ counts }: { counts: Map<string, number> }) {
+  if (counts.size === 0) {
+    return (
+      <Card className="border border-dashed border-[color:var(--color-hairline)] shadow-none">
+        <p className="text-sm text-[color:var(--color-ink-tertiary)]">Belum ada aktivitas dicatat hari ini.</p>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--color-ink-tertiary)]">Hari ini</p>
+      <p className="mt-1.5 text-[14px] text-[color:var(--color-ink)]">
+        {[...counts.entries()]
+          .map(([table, count]) => `${count} ${TODAY_ENTITY_LABEL[table] ?? table}`)
+          .join(' · ')}
+      </p>
+    </Card>
+  );
+}
 
 export default async function SiteFlowHomePage({
   searchParams,
@@ -60,6 +90,16 @@ export default async function SiteFlowHomePage({
 
   const project = selectedProject ?? projects[0]!;
 
+  const activityResult = await listProjectActivityAction(project.id);
+  const todayCounts = new Map<string, number>();
+  if (activityResult.ok) {
+    const today = new Date().toDateString();
+    for (const event of activityResult.data) {
+      if (new Date(event.occurredAt).toDateString() !== today) continue;
+      todayCounts.set(event.entityTable, (todayCounts.get(event.entityTable) ?? 0) + 1);
+    }
+  }
+
   return (
     <div className="space-y-5">
       <Card>
@@ -71,6 +111,8 @@ export default async function SiteFlowHomePage({
           </Link>
         )}
       </Card>
+
+      <TodayActivitySummary counts={todayCounts} />
 
       <div className="grid grid-cols-2 gap-3.5">
         {MENU.map((item) => {

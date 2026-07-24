@@ -1,5 +1,5 @@
 import { listProjectActivityAction } from '@/modules/projects';
-import { ActivityFeed } from './activity-feed';
+import { ActivityFeed } from '../../../../_components/activity-feed';
 
 export const metadata = { title: 'Aktivitas proyek — BuildTrust OS' };
 
