@@ -33,6 +33,17 @@ NULL for them and any policy testing it excludes them.
 | `audit_logs` | SELECT (org) | SELECT (org) | SELECT (org) | SELECT (org) | SELECT (org) | — |
 | `notifications` | SELECT, UPDATE (self) | SELECT, UPDATE (self) | SELECT, UPDATE (self) | SELECT, UPDATE (self) | SELECT, UPDATE (self) | SELECT, UPDATE (self) |
 
+`notifications` existed since Wave 1 but had no writer until Phase 3 (F11):
+`core/notifications` (not a domain module -- cross-cutting, same shelf as
+`core/audit`) now activates it. No cron exists anywhere in this stack (ADR
+0019 §5), so `syncAttentionNotificationsAction` is called from an existing
+read a staff member already performs (the Command Center dashboard load),
+turning what that page already aggregates (Cash Gate red/overdue, overdue
+Decision Clock, open high-severity issues, overdue invoices) into
+persistent, per-recipient rows -- `in_app` channel only, idempotent per
+`(user_id, entity_table, entity_id)` so an unresolved item is never
+re-inserted while it stays open.
+
 ### What is deliberately absent
 
 Several gaps below are decisions, not omissions. They are listed so a reviewer

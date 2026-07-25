@@ -6,6 +6,7 @@ import { listIssuesForProjectAction } from '@/modules/field-reporting';
 import { listPendingClientDecisionsAction } from '@/modules/client-portal';
 import { listAgingDashboardAction } from '@/modules/billing';
 import { getGateStateAction, type CashGateStatus } from '@/modules/cash-gate';
+import { syncAttentionNotificationsAction, type AttentionItemInput } from '@/core/notifications';
 import { Card, PageHeader, StatusBadge, EmptyState } from '@/core/ui';
 import { ActivityFeed } from '../_components/activity-feed';
 
@@ -131,6 +132,53 @@ export default async function CommandCenterHome() {
       label: `${overdueInvoices.length} invoice jatuh tempo`,
       href: '/cc/billing',
     });
+  }
+
+  // F11: turn what this dashboard already computed into persistent, markable-
+  // read notifications for the viewer -- no cron exists (ADR 0019 §5), so this
+  // read is the trigger point. Fire-and-forget: a failure here should never
+  // block the dashboard itself from rendering.
+  const attentionNotificationItems: AttentionItemInput[] = [];
+  for (const s of summaries) {
+    if (s.gate !== null && (s.gate.status === 'red' || s.gate.status === 'overdue')) {
+      attentionNotificationItems.push({
+        entityTable: 'cash_gate_attention',
+        entityId: s.project.id,
+        title: `Cash Gate ${s.gate.status === 'red' ? 'merah' : 'jatuh tempo'} — ${s.project.name}`,
+        body: null,
+      });
+    }
+    if (s.overdueDecisions.length > 0) {
+      attentionNotificationItems.push({
+        entityTable: 'client_decision_attention',
+        entityId: s.project.id,
+        title: `${s.overdueDecisions.length} keputusan klien terlambat — ${s.project.name}`,
+        body: null,
+      });
+    }
+    if (s.openHighSeverityIssues.length > 0) {
+      attentionNotificationItems.push({
+        entityTable: 'issue_attention',
+        entityId: s.project.id,
+        title: `${s.openHighSeverityIssues.length} masalah berat terbuka — ${s.project.name}`,
+        body: null,
+      });
+    }
+  }
+  if (overdueInvoices.length > 0) {
+    attentionNotificationItems.push({
+      entityTable: 'invoice_aging_attention',
+      entityId: null,
+      title: `${overdueInvoices.length} invoice jatuh tempo`,
+      body: null,
+    });
+  }
+  if (attentionNotificationItems.length > 0) {
+    // Awaited, not fire-and-forget: a dangling promise from a Server
+    // Component isn't guaranteed to finish once the response is sent.
+    // safeAction() never throws (resolves to ActionResult either way), so
+    // this can't fail the page render.
+    await syncAttentionNotificationsAction(attentionNotificationItems);
   }
 
   return (
