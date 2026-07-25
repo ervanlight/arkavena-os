@@ -79,6 +79,9 @@ const RESOURCE_TABLES: Record<Resource, string> = {
   maintenance_plan: 'maintenance_plans',
   service_ticket: 'service_tickets',
   ai_generation: 'ai_generations',
+  evidence: 'evidence',
+  evidence_override: 'evidence_overrides',
+  client_status: 'client_status_updates',
 };
 
 /** Matrix actions that map onto a SQL command the policy list should cover. */
@@ -88,6 +91,10 @@ const ACTION_COMMANDS: Record<string, 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE'>
   mark_read: 'UPDATE',
   create: 'INSERT',
   add: 'INSERT',
+  // Publishing a Client Project Status update is, mechanically, inserting a
+  // new client_status_updates row (append-only, ADR 0026 §2.3) -- same
+  // "still just an INSERT policy underneath" pattern as create/add above.
+  publish: 'INSERT',
   remove: 'DELETE',
   // change_orders' lifecycle events are all, mechanically, an UPDATE of
   // status (+ tracking columns) -- change_orders_update_staff and

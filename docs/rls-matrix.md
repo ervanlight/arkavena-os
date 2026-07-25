@@ -647,6 +647,41 @@ service-role client (`core/auth/provision-external-user.ts`) to create the
 Auth requires a profile row to exist before a magic link can sign someone in
 (`shouldCreateUser: false`, `core/auth/magic-link.ts`).
 
+## Fase 12 — evidence + client_status (ADR 0026 Rev 2, ADR 0029)
+
+Adds `modules/evidence` (`evidence`, `evidence_overrides`) and the Client
+Project Status mechanism (`client_status_updates`, owned by
+`modules/client-portal`).
+
+| Table | Owner/TD/Finance/QS/Procurement | site_coordinator / mandor (own project) | `client_approver` / `client_viewer` |
+| --- | --- | --- | --- |
+| `evidence` | SELECT, INSERT, UPDATE (org) | SELECT, INSERT (own project) | SELECT, scoped to `visibility = 'client_visible'` (own project) |
+| `evidence_overrides` | SELECT (org); INSERT restricted to `technical_director` only (ADR 0029 Decision 1, amended from Owner-only) | — | — |
+| `client_status_updates` | SELECT (org); INSERT restricted to `owner`/`technical_director` (publish authority, ADR 0026 §7 item 3) | — | SELECT (own project, via `fn_has_project_role`) |
+
+`evidence_overrides_guard_td_only` (a BEFORE INSERT trigger on
+`evidence_overrides`) is a second, DB-layer enforcement of the
+`technical_director`-only rule — CLAUDE.md law §0.3, mirroring the two-layer
+pattern already used for Cash Gate and Quality Gate. `fn_override_evidence_gate`
+is the only path that can insert into `evidence_overrides`; it also flips the
+target `work_packages.status` to `completed` in the same transaction.
+
+`fn_work_packages_guard_evidence` (BEFORE INSERT OR UPDATE on `work_packages`)
+blocks a transition into `status = 'completed'` unless: the project isn't
+client-facing yet (`isProjectClientFacing`, ADR 0029 Decision 2 — no active
+contract), qualifying evidence already exists for that work package, or an
+`evidence_overrides` row exists. `fn_photos_sync_evidence` (AFTER INSERT on
+`photos`) auto-creates a matching `internal_only` evidence row, mapped by
+priority `work_package_id > daily_log_id > handover_item_id`, skipped entirely
+when only `zone_id` is set (ADR 0029 Decision 3).
+
+### Column-level and cross-row rules RLS cannot express
+
+| Rule | Enforced by |
+| --- | --- |
+| A `client_approver`/`client_viewer` never sees `evidence` rows below `visibility = 'client_visible'`, even on their own project | The `visibility` filter inside `evidence_select_client`, not a separate view |
+| An override can only ever be attempted by a `technical_director` | Two layers: `core/permissions/matrix.ts`'s `evidence_override` resource (UI/action layer) and `fn_evidence_overrides_guard_td_only` (DB trigger layer) — CLAUDE.md law §0.3 |
+
 ## Later waves
 
 Added as their tables land. A table may not reach main without a row here, its

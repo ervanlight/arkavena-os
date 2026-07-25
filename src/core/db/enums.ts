@@ -229,3 +229,36 @@ export const VENDOR_QUOTE_STATUS = {
   ACCEPTED: 'accepted',
   REJECTED: 'rejected',
 } satisfies Record<string, Enums<'vendor_quote_status'>>;
+
+// ---------------------------------------------------------------------------
+// Fase 12 (modules/evidence, modules/client-portal -- ADR 0026/0029)
+// ---------------------------------------------------------------------------
+
+export const EVIDENCE_TYPE = {
+  PHOTO: 'photo',
+  VIDEO: 'video',
+  DOCUMENT: 'document',
+} satisfies Record<string, Enums<'evidence_type'>>;
+
+/** ADR 0026 §3.2. Default is always internal_only -- client visibility is opt-in, never opt-out. */
+export const EVIDENCE_VISIBILITY = {
+  INTERNAL_ONLY: 'internal_only',
+  INTERNAL_MANAGEMENT: 'internal_management',
+  CLIENT_VISIBLE: 'client_visible',
+  VISIBLE_AFTER_APPROVAL: 'visible_after_approval',
+} satisfies Record<string, Enums<'evidence_visibility'>>;
+
+export const EVIDENCE_QC_RESULT = {
+  PASS: 'pass',
+  FAIL: 'fail',
+  NOT_APPLICABLE: 'not_applicable',
+} satisfies Record<string, Enums<'evidence_qc_result'>>;
+
+/** ADR 0026 §2.2's five human-language states -- never shown to a client without the accompanying headline/detail sentence. */
+export const CLIENT_PROJECT_STATUS = {
+  ON_TRACK: 'on_track',
+  WAITING_CLIENT_DECISION: 'waiting_client_decision',
+  EXTERNAL_DEPENDENCY: 'external_dependency',
+  SCHEDULE_ADJUSTMENT: 'schedule_adjustment',
+  COMPLETED: 'completed',
+} satisfies Record<string, Enums<'client_project_status'>>;

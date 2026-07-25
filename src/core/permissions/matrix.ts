@@ -519,6 +519,50 @@ export const PERMISSIONS = {
     view: [...ORG_ROLES],
     create: [...ORG_ROLES],
   },
+
+  // -------------------------------------------------------------------------
+  // Fase 12 (modules/evidence, modules/client-portal -- ADR 0026/0028/0029)
+  // -------------------------------------------------------------------------
+
+  /**
+   * `create` includes the same field roles as `photo` (ADR 0029 Decision 3:
+   * evidence rows are usually created automatically, server-side, by
+   * field-reporting's own photo-upload action acting on behalf of whichever
+   * role uploaded the photo -- not a separate user-facing form).
+   */
+  evidence: {
+    view: [...ORG_ROLES],
+    create: [...ORG_ROLES, 'site_coordinator', 'mandor'],
+  },
+
+  /**
+   * A separate resource from `evidence` itself, same pattern as
+   * `cash_gate_override` vs `cash_gate` -- RLS lets any staff member's insert
+   * attempt through; the real restriction is
+   * trg_evidence_overrides_guard_td_only, which raises unless the caller is
+   * a technical_director (ADR 0029 Decision 1, amended from Owner-only
+   * during design review). Listing only 'technical_director' here is what
+   * lets requirePermission() give a friendly Indonesian refusal instead of a
+   * bare Postgres exception.
+   */
+  evidence_override: {
+    view: [...ORG_ROLES],
+    create: ['technical_director'],
+  },
+
+  /**
+   * Client Project Status (ADR 0026 SS2). `publish` deliberately excludes
+   * finance -- Finance manages cash, not the client relationship
+   * (PRODUCT.md Target Users) -- and excludes qs/procurement for the same
+   * reason `PRODUCT.md`'s Owner/TD framing gives: keeping the tone of
+   * client-facing communication consistent needs a narrow, trusted set of
+   * authors, the same two roles already trusted with Cash Gate/Quality
+   * Gate overrides.
+   */
+  client_status: {
+    view: [...ORG_ROLES, 'client_approver', 'client_viewer'],
+    publish: ['owner', 'technical_director'],
+  },
 } as const satisfies PermissionMatrix;
 
 // ---------------------------------------------------------------------------

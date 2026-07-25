@@ -682,6 +682,74 @@ export type Database = {
           },
         ]
       }
+      client_status_updates: {
+        Row: {
+          created_at: string
+          detail: string | null
+          headline: string
+          id: string
+          organization_id: string
+          project_id: string
+          published_at: string
+          published_by: string
+          status: Database["public"]["Enums"]["client_project_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          detail?: string | null
+          headline: string
+          id?: string
+          organization_id: string
+          project_id: string
+          published_at?: string
+          published_by: string
+          status: Database["public"]["Enums"]["client_project_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          detail?: string | null
+          headline?: string
+          id?: string
+          organization_id?: string
+          project_id?: string
+          published_at?: string
+          published_by?: string
+          status?: Database["public"]["Enums"]["client_project_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_status_updates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_status_updates_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_status_updates_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "client_status_updates_published_by_fkey"
+            columns: ["published_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_users: {
         Row: {
           client_id: string
@@ -1187,6 +1255,174 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "vw_client_project_overview"
             referencedColumns: ["project_id"]
+          },
+        ]
+      }
+      evidence: {
+        Row: {
+          activity_id: string
+          activity_table: string
+          captured_at: string
+          created_at: string
+          created_by: string
+          deleted_at: string | null
+          evidence_type: Database["public"]["Enums"]["evidence_type"]
+          gps_lat: number | null
+          gps_lng: number | null
+          id: string
+          notes: string | null
+          organization_id: string
+          project_id: string
+          qc_result: Database["public"]["Enums"]["evidence_qc_result"] | null
+          responsible_user_id: string
+          storage_path: string
+          thumbnail_path: string | null
+          updated_at: string
+          visibility: Database["public"]["Enums"]["evidence_visibility"]
+        }
+        Insert: {
+          activity_id: string
+          activity_table: string
+          captured_at?: string
+          created_at?: string
+          created_by: string
+          deleted_at?: string | null
+          evidence_type: Database["public"]["Enums"]["evidence_type"]
+          gps_lat?: number | null
+          gps_lng?: number | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          project_id: string
+          qc_result?: Database["public"]["Enums"]["evidence_qc_result"] | null
+          responsible_user_id: string
+          storage_path: string
+          thumbnail_path?: string | null
+          updated_at?: string
+          visibility?: Database["public"]["Enums"]["evidence_visibility"]
+        }
+        Update: {
+          activity_id?: string
+          activity_table?: string
+          captured_at?: string
+          created_at?: string
+          created_by?: string
+          deleted_at?: string | null
+          evidence_type?: Database["public"]["Enums"]["evidence_type"]
+          gps_lat?: number | null
+          gps_lng?: number | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          project_id?: string
+          qc_result?: Database["public"]["Enums"]["evidence_qc_result"] | null
+          responsible_user_id?: string
+          storage_path?: string
+          thumbnail_path?: string | null
+          updated_at?: string
+          visibility?: Database["public"]["Enums"]["evidence_visibility"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evidence_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evidence_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evidence_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evidence_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "evidence_responsible_user_id_fkey"
+            columns: ["responsible_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evidence_overrides: {
+        Row: {
+          created_at: string
+          id: string
+          organization_id: string
+          overridden_by: string
+          project_id: string
+          reason: string
+          work_package_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          organization_id: string
+          overridden_by: string
+          project_id: string
+          reason: string
+          work_package_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          organization_id?: string
+          overridden_by?: string
+          project_id?: string
+          reason?: string
+          work_package_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evidence_overrides_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evidence_overrides_overridden_by_fkey"
+            columns: ["overridden_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evidence_overrides_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evidence_overrides_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "evidence_overrides_work_package_id_fkey"
+            columns: ["work_package_id"]
+            isOneToOne: false
+            referencedRelation: "work_packages"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -3809,6 +4045,29 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      fn_override_evidence_gate: {
+        Args: { p_reason: string; p_work_package_id: string }
+        Returns: {
+          change_order_id: string | null
+          created_at: string
+          deleted_at: string | null
+          id: string
+          milestone_id: string | null
+          name: string
+          organization_id: string
+          project_id: string
+          status: Database["public"]["Enums"]["work_package_status"]
+          updated_at: string
+          work_type: string | null
+          zone_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "work_packages"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       fn_record_audit: {
         Args: {
           p_action: Database["public"]["Enums"]["audit_action"]
@@ -3875,8 +4134,21 @@ export type Database = {
         | "rejected"
         | "completed"
       client_decision_outcome: "approved" | "rejected"
+      client_project_status:
+        | "on_track"
+        | "waiting_client_decision"
+        | "external_dependency"
+        | "schedule_adjustment"
+        | "completed"
       contract_status: "draft" | "active" | "completed" | "terminated"
       estimate_status: "draft" | "sent" | "accepted" | "rejected" | "superseded"
+      evidence_qc_result: "pass" | "fail" | "not_applicable"
+      evidence_type: "photo" | "video" | "document"
+      evidence_visibility:
+        | "internal_only"
+        | "internal_management"
+        | "client_visible"
+        | "visible_after_approval"
       inspection_status: "pending" | "passed" | "failed"
       invoice_status: "draft" | "issued" | "paid" | "cancelled"
       issue_severity: "low" | "medium" | "high"
@@ -4078,8 +4350,23 @@ export const Constants = {
         "completed",
       ],
       client_decision_outcome: ["approved", "rejected"],
+      client_project_status: [
+        "on_track",
+        "waiting_client_decision",
+        "external_dependency",
+        "schedule_adjustment",
+        "completed",
+      ],
       contract_status: ["draft", "active", "completed", "terminated"],
       estimate_status: ["draft", "sent", "accepted", "rejected", "superseded"],
+      evidence_qc_result: ["pass", "fail", "not_applicable"],
+      evidence_type: ["photo", "video", "document"],
+      evidence_visibility: [
+        "internal_only",
+        "internal_management",
+        "client_visible",
+        "visible_after_approval",
+      ],
       inspection_status: ["pending", "passed", "failed"],
       invoice_status: ["draft", "issued", "paid", "cancelled"],
       issue_severity: ["low", "medium", "high"],

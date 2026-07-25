@@ -17,3 +17,21 @@
 
 export { getWorkPackage } from './data/work-packages-repository';
 export { getMyProjectRole } from './data/project-members-repository';
+
+import type { ServerSupabase } from '@/core/db/client.server';
+import { listContractsForProject } from './data/contracts-repository';
+import { isProjectClientFacing } from './domain/client-facing';
+
+/**
+ * One-call convenience for modules/client-portal and modules/evidence, both
+ * of which need "does this project's client-facing layer activate" (ADR
+ * 0029) without wanting to separately load a project and its contracts
+ * themselves. Wraps the pure `isProjectClientFacing` domain function.
+ */
+export async function isProjectClientFacingForId(supabase: ServerSupabase, projectId: string): Promise<boolean> {
+  const contracts = await listContractsForProject(supabase, projectId);
+  return isProjectClientFacing(
+    projectId,
+    contracts.map((contract) => ({ projectId: contract.project_id, status: contract.status })),
+  );
+}
