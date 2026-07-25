@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { listVendorsAction } from '@/modules/procurement';
 import { Card, PageHeader, EmptyState } from '@/core/ui';
 
-export const metadata = { title: 'Vendor — BuildTrust OS' };
+export const metadata = { title: 'Vendor — Arkavena OS' };
 
 export default async function VendorsPage() {
   const result = await listVendorsAction(undefined);

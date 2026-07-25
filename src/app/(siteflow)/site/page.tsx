@@ -5,7 +5,7 @@ import { getCurrentUser } from '@/core/auth/session';
 import { listMyFieldProjectsAction, listProjectActivityAction } from '@/modules/projects';
 import { Card } from '@/core/ui';
 
-export const metadata = { title: 'SiteFlow — BuildTrust OS' };
+export const metadata = { title: 'SiteFlow — Arkavena OS' };
 
 const MENU: { href: string; label: string; hint: string; icon: LucideIcon; tint: string }[] = [
   { href: 'laporan-harian', label: 'Laporan Harian', hint: 'Cuaca, jumlah pekerja, catatan hari ini', icon: ClipboardList, tint: '#0a84ff' },

@@ -4,7 +4,7 @@ import { Card, StatusBadge } from '@/core/ui';
 import { FindingsForm } from './findings-form';
 import { CompleteAssessmentForm } from './complete-form';
 
-export const metadata = { title: 'Detail assessment — BuildTrust OS' };
+export const metadata = { title: 'Detail assessment — Arkavena OS' };
 
 const STATUS_LABEL_ID: Record<string, string> = {
   scheduled: 'Terjadwal',

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { listProjectsAction } from '@/modules/projects';
 import { PageHeader, Card, EmptyState } from '@/core/ui';
 
-export const metadata = { title: 'Proyek — BuildTrust OS' };
+export const metadata = { title: 'Proyek — Arkavena OS' };
 
 const STATUS_LABEL_ID: Record<string, string> = {
   planning: 'Perencanaan',

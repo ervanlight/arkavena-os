@@ -4,7 +4,7 @@ import { getChangeOrderAction } from '@/modules/scope-variation';
 import { ClientDecisionForm } from './client-decision-form';
 import { Card } from '@/core/ui';
 
-export const metadata = { title: 'Persetujuan Variation — BuildTrust OS' };
+export const metadata = { title: 'Persetujuan Variation — Arkavena OS' };
 
 /**
  * The "link aman" ARCHITECTURE.md 7 asks for -- reachable both as a

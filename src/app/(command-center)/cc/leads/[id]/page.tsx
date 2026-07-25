@@ -4,7 +4,7 @@ import { Card, StatusBadge } from '@/core/ui';
 import { LeadStatusForm } from './status-form';
 import { ConvertLeadForm } from './convert-form';
 
-export const metadata = { title: 'Detail lead — BuildTrust OS' };
+export const metadata = { title: 'Detail lead — Arkavena OS' };
 
 const STATUS_LABEL_ID: Record<string, string> = {
   new: 'Baru',

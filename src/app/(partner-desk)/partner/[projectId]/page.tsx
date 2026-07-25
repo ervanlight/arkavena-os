@@ -6,7 +6,7 @@ import {
 import { Card, PageHeader, StatusBadge, EmptyState } from '@/core/ui';
 import { formatRp, toRupiah } from '@/core/money/rupiah';
 
-export const metadata = { title: 'Partner Desk — BuildTrust OS' };
+export const metadata = { title: 'Partner Desk — Arkavena OS' };
 
 const QUOTE_STATUS_LABEL_ID: Record<string, string> = {
   received: 'Diterima',

@@ -6,7 +6,7 @@ import { RegisterServiceWorker } from '@/core/pwa/register-service-worker';
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 
 export const metadata: Metadata = {
-  title: 'BuildTrust OS',
+  title: 'Arkavena OS',
   description: 'Sistem pengendalian proyek konstruksi',
   manifest: '/manifest.json',
   icons: {

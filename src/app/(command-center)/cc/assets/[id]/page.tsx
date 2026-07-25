@@ -11,7 +11,7 @@ import { MarkPlanCompletedForm } from './mark-plan-completed-form';
 import { CreateServiceTicketForm } from './service-ticket-form';
 import { ServiceTicketStatusForm } from './service-ticket-status-form';
 
-export const metadata = { title: 'Detail aset — BuildTrust OS' };
+export const metadata = { title: 'Detail aset — Arkavena OS' };
 
 const SERVICE_TICKET_STATUS_LABEL_ID: Record<string, string> = {
   open: 'Terbuka',

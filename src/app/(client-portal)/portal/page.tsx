@@ -5,7 +5,7 @@ import { ChevronRight } from 'lucide-react';
 import { listMyClientProjectsAction } from '@/modules/projects';
 import { Card, PageHeader, EmptyState } from '@/core/ui';
 
-export const metadata = { title: 'Portal Klien — BuildTrust OS' };
+export const metadata = { title: 'Portal Klien — Arkavena OS' };
 
 /**
  * Landing page for a client with more than one project. Someone with

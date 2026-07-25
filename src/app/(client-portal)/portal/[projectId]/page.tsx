@@ -10,7 +10,7 @@ import { Card, StatusBadge } from '@/core/ui';
 import { PortalNav } from '../portal-nav';
 import { DecisionClockBadge } from '../decision-clock-badge';
 
-export const metadata = { title: 'Ringkasan Proyek — BuildTrust OS' };
+export const metadata = { title: 'Ringkasan Proyek — Arkavena OS' };
 
 const STATUS_LABEL_ID: Record<string, string> = {
   planning: 'Perencanaan',

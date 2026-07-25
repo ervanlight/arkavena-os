@@ -13,7 +13,7 @@ import { MarkFundedForm } from './mark-funded-form';
 import { CompleteForm } from './complete-form';
 import { OpenWorkPackageForm } from './open-work-package-form';
 
-export const metadata = { title: 'Detail Variation — BuildTrust OS' };
+export const metadata = { title: 'Detail Variation — Arkavena OS' };
 
 const STATUS_LABEL_ID: Record<string, string> = {
   draft: 'Draft',

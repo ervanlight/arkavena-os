@@ -2,7 +2,7 @@ import { listClientTimelineEventsAction } from '@/modules/client-portal';
 import { PortalNav } from '../../portal-nav';
 import { EmptyState } from '@/core/ui';
 
-export const metadata = { title: 'Timeline — BuildTrust OS' };
+export const metadata = { title: 'Timeline — Arkavena OS' };
 
 const STATUS_LABEL_ID: Record<string, string> = {
   pending: 'Menunggu',

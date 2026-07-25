@@ -29,7 +29,7 @@ export default async function ClientPortalLayout({ children }: { children: React
               B
             </div>
             <div>
-              <p className="text-[15px] font-semibold leading-tight text-[color:var(--color-ink)]">BuildTrust OS</p>
+              <p className="text-[15px] font-semibold leading-tight text-[color:var(--color-ink)]">Arkavena OS</p>
               <p className="text-[11px] leading-tight text-[color:var(--color-ink-tertiary)]">Portal Klien</p>
             </div>
           </div>

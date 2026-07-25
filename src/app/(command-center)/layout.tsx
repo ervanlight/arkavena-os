@@ -55,7 +55,7 @@ export default async function CommandCenterLayout({ children }: { children: Reac
           <div className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-[color:var(--color-ink)] text-sm font-bold text-white">
             B
           </div>
-          <span className="text-[15px] font-semibold text-[color:var(--color-ink)]">BuildTrust OS</span>
+          <span className="text-[15px] font-semibold text-[color:var(--color-ink)]">Arkavena OS</span>
         </Link>
 
         <nav className="flex-1 space-y-0.5">

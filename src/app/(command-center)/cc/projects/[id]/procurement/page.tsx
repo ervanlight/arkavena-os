@@ -13,7 +13,7 @@ import { OverridePurchaseOrderForm } from './override-purchase-order-form';
 import { CreateDeliveryForm } from './delivery-form';
 import { QuoteSummaryWidget } from './quote-summary-widget';
 
-export const metadata = { title: 'Prokuremen — BuildTrust OS' };
+export const metadata = { title: 'Prokuremen — Arkavena OS' };
 
 const QUOTE_STATUS_LABEL_ID: Record<string, string> = {
   received: 'Diterima',

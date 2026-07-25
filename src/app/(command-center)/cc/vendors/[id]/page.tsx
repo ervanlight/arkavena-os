@@ -4,7 +4,7 @@ import { listProjectsAction } from '@/modules/projects';
 import { Card } from '@/core/ui';
 import { InviteVendorUserForm } from './invite-vendor-user-form';
 
-export const metadata = { title: 'Detail vendor — BuildTrust OS' };
+export const metadata = { title: 'Detail vendor — Arkavena OS' };
 
 export default async function VendorDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

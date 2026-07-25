@@ -1,7 +1,7 @@
 import { listProjectActivityAction } from '@/modules/projects';
 import { ActivityFeed } from '../../../../_components/activity-feed';
 
-export const metadata = { title: 'Aktivitas proyek — BuildTrust OS' };
+export const metadata = { title: 'Aktivitas proyek — Arkavena OS' };
 
 /**
  * The project's activity journal (audit_logs). The one place field uploads

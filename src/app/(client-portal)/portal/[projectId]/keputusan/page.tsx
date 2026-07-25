@@ -4,7 +4,7 @@ import { PortalNav } from '../../portal-nav';
 import { DecisionClockBadge } from '../../decision-clock-badge';
 import { Card, EmptyState } from '@/core/ui';
 
-export const metadata = { title: 'Keputusan — BuildTrust OS' };
+export const metadata = { title: 'Keputusan — Arkavena OS' };
 
 const DECISION_LABEL_ID: Record<string, string> = {
   approved: 'Disetujui',

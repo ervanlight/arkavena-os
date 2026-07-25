@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { listAssetsAction } from '@/modules/maintenance-engine';
 import { Card, PageHeader, EmptyState } from '@/core/ui';
 
-export const metadata = { title: 'Aset — BuildTrust OS' };
+export const metadata = { title: 'Aset — Arkavena OS' };
 
 export default async function AssetsPage() {
   const result = await listAssetsAction(undefined);

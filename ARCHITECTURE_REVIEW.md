@@ -1,4 +1,4 @@
-# ARCHITECTURE_REVIEW.md — BuildTrust OS
+# ARCHITECTURE_REVIEW.md — Arkavena OS
 
 **Date:** 2026-07-25
 **Scope:** Design review only — no code changed, no migrations run. This document validates the *existing, shipped* architecture (Fase 0–11, all merged) against the revised product philosophy in `PRODUCT.md` and `ADR 0026`.

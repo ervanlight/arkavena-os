@@ -2,7 +2,7 @@ import { listClientZoneProgressAction } from '@/modules/client-portal';
 import { PortalNav } from '../../portal-nav';
 import { Card, EmptyState } from '@/core/ui';
 
-export const metadata = { title: 'Peta Zona — BuildTrust OS' };
+export const metadata = { title: 'Peta Zona — Arkavena OS' };
 
 export default async function ClientPortalZonePage({ params }: { params: Promise<{ projectId: string }> }) {
   const { projectId } = await params;

@@ -9,7 +9,7 @@ import { CreateInspectionForm } from './create-inspection-form';
 import { RecordInspectionResultForm } from './record-inspection-result-form';
 import { OverrideInspectionForm } from './override-inspection-form';
 
-export const metadata = { title: 'Quality Gate proyek — BuildTrust OS' };
+export const metadata = { title: 'Quality Gate proyek — Arkavena OS' };
 
 const INSPECTION_STATUS_LABEL_ID: Record<string, string> = {
   pending: 'Menunggu',

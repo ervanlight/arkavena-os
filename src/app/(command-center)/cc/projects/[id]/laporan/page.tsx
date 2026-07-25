@@ -2,7 +2,7 @@ import { CloudSun, Users } from 'lucide-react';
 import { listDailyLogsForProjectAction } from '@/modules/field-reporting';
 import { Card, EmptyState } from '@/core/ui';
 
-export const metadata = { title: 'Laporan harian — BuildTrust OS' };
+export const metadata = { title: 'Laporan harian — Arkavena OS' };
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });

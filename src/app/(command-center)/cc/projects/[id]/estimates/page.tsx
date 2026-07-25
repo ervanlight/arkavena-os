@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { listEstimatesForProjectAction } from '@/modules/estimating';
 import { Button, Card, EmptyState, StatusBadge } from '@/core/ui';
 
-export const metadata = { title: 'Estimasi — BuildTrust OS' };
+export const metadata = { title: 'Estimasi — Arkavena OS' };
 
 const STATUS_LABEL_ID: Record<string, string> = {
   draft: 'Draft',

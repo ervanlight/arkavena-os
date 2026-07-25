@@ -1,6 +1,6 @@
 import { NewEstimateForm } from './estimate-form';
 
-export const metadata = { title: 'Buat estimasi — BuildTrust OS' };
+export const metadata = { title: 'Buat estimasi — Arkavena OS' };
 
 export default async function NewEstimatePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

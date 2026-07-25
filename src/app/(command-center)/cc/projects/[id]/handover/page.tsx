@@ -2,7 +2,7 @@ import { listHandoverItemsForProjectAction, listWarrantiesForProjectAction } fro
 import { Card, EmptyState } from '@/core/ui';
 import { CreateHandoverItemForm } from './handover-item-form';
 
-export const metadata = { title: 'Handover & Garansi — BuildTrust OS' };
+export const metadata = { title: 'Handover & Garansi — Arkavena OS' };
 
 const WARRANTY_STATUS_LABEL_ID: Record<string, string> = {
   active: 'Aktif',

@@ -6,7 +6,7 @@ import { AddItemForm } from './add-item-form';
 import { SetBaselineForm } from './set-baseline-form';
 import { CreateProposalForm } from './create-proposal-form';
 
-export const metadata = { title: 'Detail estimasi — BuildTrust OS' };
+export const metadata = { title: 'Detail estimasi — Arkavena OS' };
 
 export default async function EstimateDetailPage({
   params,

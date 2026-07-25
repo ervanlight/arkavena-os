@@ -1,6 +1,6 @@
 import { ResetPasswordForm } from './reset-password-form';
 
-export const metadata = { title: 'Atur Ulang Kata Sandi — BuildTrust OS' };
+export const metadata = { title: 'Atur Ulang Kata Sandi — Arkavena OS' };
 
 /**
  * Reached only after /auth/callback has already exchanged a recovery link's

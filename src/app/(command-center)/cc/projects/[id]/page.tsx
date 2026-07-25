@@ -17,7 +17,7 @@ const WORK_PACKAGE_STATUS_TONE: Record<string, 'neutral' | 'info' | 'success'> =
   completed: 'success',
 };
 
-export const metadata = { title: 'Detail proyek — BuildTrust OS' };
+export const metadata = { title: 'Detail proyek — Arkavena OS' };
 
 const STATUS_LABEL_ID: Record<string, string> = {
   planning: 'Perencanaan',

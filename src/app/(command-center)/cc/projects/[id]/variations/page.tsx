@@ -6,7 +6,7 @@ import { listChangeOrdersForProjectAction } from '@/modules/scope-variation';
 import { Card, StatusBadge, EmptyState } from '@/core/ui';
 import { CreateVariationForm } from './create-variation-form';
 
-export const metadata = { title: 'Variation — BuildTrust OS' };
+export const metadata = { title: 'Variation — Arkavena OS' };
 
 const STATUS_LABEL_ID: Record<string, string> = {
   draft: 'Draft',

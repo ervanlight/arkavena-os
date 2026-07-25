@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { listAssessmentsAction } from '@/modules/assessment';
 import { Card, PageHeader, StatusBadge, EmptyState } from '@/core/ui';
 
-export const metadata = { title: 'Assessment — BuildTrust OS' };
+export const metadata = { title: 'Assessment — Arkavena OS' };
 
 const STATUS_LABEL_ID: Record<string, string> = {
   scheduled: 'Terjadwal',

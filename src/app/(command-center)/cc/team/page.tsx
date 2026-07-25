@@ -2,7 +2,7 @@ import { listStaffUsersAction } from '@/core/auth/invite-staff-user';
 import { Card, StatusBadge } from '@/core/ui';
 import { InviteStaffUserForm } from './invite-staff-user-form';
 
-export const metadata = { title: 'Tim — BuildTrust OS' };
+export const metadata = { title: 'Tim — Arkavena OS' };
 
 const ROLE_LABELS: Record<string, string> = {
   owner: 'Owner',

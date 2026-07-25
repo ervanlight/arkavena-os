@@ -5,7 +5,7 @@ import { formatRp } from '@/core/money/rupiah';
 import { getBillingPackAction } from '@/modules/billing';
 import { Card } from '@/core/ui';
 
-export const metadata = { title: 'Billing Pack — BuildTrust OS' };
+export const metadata = { title: 'Billing Pack — Arkavena OS' };
 
 const QC_STATUS_LABEL_ID: Record<string, string> = {
   pending: 'Menunggu',

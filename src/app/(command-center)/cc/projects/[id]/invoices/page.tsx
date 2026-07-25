@@ -17,7 +17,7 @@ import { IssueInvoiceForm } from './issue-invoice-form';
 import { CancelInvoiceForm } from './cancel-invoice-form';
 import { RecordPaymentForm } from './record-payment-form';
 
-export const metadata = { title: 'Invoice — BuildTrust OS' };
+export const metadata = { title: 'Invoice — Arkavena OS' };
 
 const INVOICE_STATUS_LABEL_ID: Record<string, string> = {
   draft: 'Draft',

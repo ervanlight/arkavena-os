@@ -1,6 +1,6 @@
-# PRODUCT.md — BuildTrust OS
+# PRODUCT.md — Arkavena OS
 
-> Ini dokumen *produk*, bukan dokumen teknis. `ARCHITECTURE.md` menjawab "bagaimana sistem ini dibangun". `CLAUDE.md` menjawab "aturan apa yang tidak boleh dilanggar". Dokumen ini menjawab satu pertanyaan yang lebih tinggi: **mengapa BuildTrust OS ada, dan untuk siapa.**
+> Ini dokumen *produk*, bukan dokumen teknis. `ARCHITECTURE.md` menjawab "bagaimana sistem ini dibangun". `CLAUDE.md` menjawab "aturan apa yang tidak boleh dilanggar". Dokumen ini menjawab satu pertanyaan yang lebih tinggi: **mengapa Arkavena OS ada, dan untuk siapa.**
 
 > **Riwayat revisi:** Revisi 1 (2026-07-25) memperkenalkan "Project Confidence Score" sebagai north star — sebuah skor numerik tunggal untuk klien. Revisi 2 (2026-07-25, hari yang sama) **membatalkan pendekatan itu atas keputusan Owner secara eksplisit**: skor numerik untuk klien dianggap mengundang klien menghakimi performa operasional tanpa memahami realita konstruksi, dan bertentangan dengan tujuan produk (mengurangi kecemasan, bukan mengundang pengawasan). Dicatat di sini secara visibel, bukan dihapus diam-diam, mengikuti konvensi ADR di `docs/decisions/`. Lihat [ADR 0026](docs/decisions/0026-trust-os-transformation.md) untuk riwayat lengkap dan rasionalnya.
 
@@ -10,16 +10,16 @@
 
 Mengurangi kecemasan klien terhadap proyek konstruksi mereka, **sambil melindungi kebebasan operasional kontraktor** untuk menjalankan proyek dengan caranya sendiri.
 
-Klien menyewa Arkavena justru supaya **mereka tidak perlu menjadi manajer proyek sendiri**. BuildTrust OS tidak boleh membalikkan itu — aplikasi ini tidak mengundang klien untuk mengawasi setiap aktivitas. Aplikasi ini membuat klien merasa **cukup terinformasi**, titik.
+Klien menyewa Arkavena justru supaya **mereka tidak perlu menjadi manajer proyek sendiri**. Arkavena OS tidak boleh membalikkan itu — aplikasi ini tidak mengundang klien untuk mengawasi setiap aktivitas. Aplikasi ini membuat klien merasa **cukup terinformasi**, titik.
 
-BuildTrust OS **BUKAN**:
+Arkavena OS **BUKAN**:
 - sistem monitoring klien,
 - dashboard transparansi,
 - ERP yang dibuka ke klien.
 
 ## Vision
 
-Dalam waktu 3 tahun, BuildTrust OS adalah standar cara kontraktor profesional berkomunikasi dengan klien mereka — bukan karena klien bisa melihat *semuanya*, tapi karena klien tidak pernah harus bertanya-tanya. Kontraktor yang memakainya menang bukan lewat "transparansi radikal", tapi lewat ketenangan yang konsisten: klien tahu proyek mereka hidup, tahu kapan mereka perlu bertindak, dan tidak pernah merasa diabaikan — tanpa pernah harus memahami bagaimana dapur mereka sungguh-sungguh dibangun.
+Dalam waktu 3 tahun, Arkavena OS adalah standar cara kontraktor profesional berkomunikasi dengan klien mereka — bukan karena klien bisa melihat *semuanya*, tapi karena klien tidak pernah harus bertanya-tanya. Kontraktor yang memakainya menang bukan lewat "transparansi radikal", tapi lewat ketenangan yang konsisten: klien tahu proyek mereka hidup, tahu kapan mereka perlu bertindak, dan tidak pernah merasa diabaikan — tanpa pernah harus memahami bagaimana dapur mereka sungguh-sungguh dibangun.
 
 ## Product Principles
 
@@ -80,7 +80,7 @@ Implikasi konkret terhadap desain:
 
 ## Competitive Advantage
 
-BuildTrust OS tidak bersaing lewat daftar fitur ERP, dan juga tidak bersaing lewat "transparansi radikal" (itu justru beban bagi klien yang tidak ingin, dan tidak seharusnya, menjadi manajer proyek mereka sendiri). Keunggulannya:
+Arkavena OS tidak bersaing lewat daftar fitur ERP, dan juga tidak bersaing lewat "transparansi radikal" (itu justru beban bagi klien yang tidak ingin, dan tidak seharusnya, menjadi manajer proyek mereka sendiri). Keunggulannya:
 
 1. **Ketenangan yang benar-benar berdasar, bukan sekadar UI yang menenangkan.** Di baliknya tetap ada Cash Gate dan Quality Gate yang literal — trigger database, bukan kebijakan yang bisa dilanggar diam-diam — sehingga kalimat "pendanaan mencukupi" atau "sudah lulus pemeriksaan independen" yang dibaca klien benar-benar berarti, bukan basa-basi hubungan masyarakat.
 2. **Evidence untuk akuntabilitas, bukan untuk pengawasan.** Setiap aktivitas terdokumentasi penuh secara internal — tapi klien tidak dibanjiri olehnya. Kontrol visibilitas per-level membuat kompleksitas operasional tetap menjadi urusan Arkavena, persis seperti yang klien harapkan saat menyewa kontraktor profesional.

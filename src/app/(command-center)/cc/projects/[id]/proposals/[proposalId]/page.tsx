@@ -5,7 +5,7 @@ import { Card, StatusBadge, Button } from '@/core/ui';
 import { SendProposalForm } from './send-form';
 import { DecideProposalForm } from './decide-form';
 
-export const metadata = { title: 'Detail proposal — BuildTrust OS' };
+export const metadata = { title: 'Detail proposal — Arkavena OS' };
 
 const STATUS_LABEL_ID: Record<string, string> = {
   draft: 'Draft',

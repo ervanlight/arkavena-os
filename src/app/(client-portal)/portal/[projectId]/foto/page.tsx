@@ -2,7 +2,7 @@ import { listClientProgressPhotosAction } from '@/modules/client-portal';
 import { PortalNav } from '../../portal-nav';
 import { EmptyState } from '@/core/ui';
 
-export const metadata = { title: 'Foto Progres — BuildTrust OS' };
+export const metadata = { title: 'Foto Progres — Arkavena OS' };
 
 export default async function ClientPortalPhotosPage({ params }: { params: Promise<{ projectId: string }> }) {
   const { projectId } = await params;

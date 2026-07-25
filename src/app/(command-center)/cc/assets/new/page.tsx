@@ -2,7 +2,7 @@ import { listSitesAction } from '@/modules/crm';
 import { PageHeader } from '@/core/ui';
 import { NewAssetForm } from './asset-form';
 
-export const metadata = { title: 'Tambah aset — BuildTrust OS' };
+export const metadata = { title: 'Tambah aset — Arkavena OS' };
 
 export default async function NewAssetPage() {
   const sitesResult = await listSitesAction(undefined);

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { listClientsAction } from '@/modules/crm';
 import { Card, PageHeader, EmptyState } from '@/core/ui';
 
-export const metadata = { title: 'Klien — BuildTrust OS' };
+export const metadata = { title: 'Klien — Arkavena OS' };
 
 export default async function ClientsPage() {
   const result = await listClientsAction(undefined);

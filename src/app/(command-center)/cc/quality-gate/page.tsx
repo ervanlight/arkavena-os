@@ -2,7 +2,7 @@ import { listHoldPointTemplatesAction } from '@/modules/quality-gate';
 import { Card, PageHeader, StatusBadge, EmptyState } from '@/core/ui';
 import { CreateHoldPointTemplateForm } from './create-hold-point-template-form';
 
-export const metadata = { title: 'Quality Gate — BuildTrust OS' };
+export const metadata = { title: 'Quality Gate — Arkavena OS' };
 
 export default async function QualityGatePage() {
   const result = await listHoldPointTemplatesAction(undefined);

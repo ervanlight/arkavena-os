@@ -17,7 +17,7 @@ import { CashForecastForm } from './cash-forecast-form';
 import { RiskReserveForm } from './risk-reserve-form';
 import { OverrideForm } from './override-form';
 
-export const metadata = { title: 'Cash Gate — BuildTrust OS' };
+export const metadata = { title: 'Cash Gate — Arkavena OS' };
 
 const STATUS_LABEL_ID: Record<string, string> = {
   green: 'Hijau',

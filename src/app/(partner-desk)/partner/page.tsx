@@ -5,7 +5,7 @@ import { ChevronRight } from 'lucide-react';
 import { listMyPartnerProjectsAction } from '@/modules/projects';
 import { Card, PageHeader, EmptyState } from '@/core/ui';
 
-export const metadata = { title: 'Partner Desk — BuildTrust OS' };
+export const metadata = { title: 'Partner Desk — Arkavena OS' };
 
 /**
  * Landing page for a supplier with more than one project -- same "skip

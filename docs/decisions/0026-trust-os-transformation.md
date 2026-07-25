@@ -2,7 +2,7 @@
 
 **Status:** PROPOSED — belum diimplementasikan, butuh keputusan Owner per item di bagian §6 sebelum Fase 12 dimulai.
 **Date:** 2026-07-25 (Revisi 2, hari yang sama dengan Revisi 1)
-**Trigger:** Instruksi eksplisit Owner untuk mengevaluasi ulang arsitektur produk sebagai "Trust Operating System" — lalu, di hari yang sama, koreksi arah eksplisit: BuildTrust OS bukan sistem monitoring klien atau dashboard transparansi, melainkan alat yang mengurangi kecemasan klien **sambil melindungi kebebasan operasional Arkavena**.
+**Trigger:** Instruksi eksplisit Owner untuk mengevaluasi ulang arsitektur produk sebagai "Trust Operating System" — lalu, di hari yang sama, koreksi arah eksplisit: Arkavena OS bukan sistem monitoring klien atau dashboard transparansi, melainkan alat yang mengurangi kecemasan klien **sambil melindungi kebebasan operasional Arkavena**.
 
 Dokumen pendamping: [PRODUCT.md](../../PRODUCT.md) (mission/vision/prinsip, sudah direvisi mengikuti ADR ini).
 

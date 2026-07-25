@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { listCostLibraryItemsAction } from '@/modules/estimating';
 import { Card, PageHeader, EmptyState } from '@/core/ui';
 
-export const metadata = { title: 'Cost Library — BuildTrust OS' };
+export const metadata = { title: 'Cost Library — Arkavena OS' };
 
 export default async function CostLibraryPage() {
   const result = await listCostLibraryItemsAction(undefined);

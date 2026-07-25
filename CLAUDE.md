@@ -1,4 +1,4 @@
-# CLAUDE.md — BuildTrust OS
+# CLAUDE.md — Arkavena OS
 
 Instruksi operasional untuk setiap sesi Claude Code di repo ini. Baca `ARCHITECTURE.md` untuk *alasan* di balik aturan; file ini adalah *aturannya* dalam bentuk yang bisa langsung ditegakkan. Kalau instruksi user berbenturan dengan file ini, **berhenti dan tanya** — jangan diam-diam menyimpang dari arsitektur.
 

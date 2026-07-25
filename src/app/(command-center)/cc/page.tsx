@@ -9,7 +9,7 @@ import { getGateStateAction, type CashGateStatus } from '@/modules/cash-gate';
 import { Card, PageHeader, StatusBadge, EmptyState } from '@/core/ui';
 import { ActivityFeed } from '../_components/activity-feed';
 
-export const metadata = { title: 'Command Center — BuildTrust OS' };
+export const metadata = { title: 'Command Center — Arkavena OS' };
 
 const PROJECT_STATUS_LABEL: Record<string, string> = {
   planning: 'Perencanaan',

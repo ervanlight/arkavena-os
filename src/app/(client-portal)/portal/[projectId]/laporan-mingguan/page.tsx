@@ -7,7 +7,7 @@ import {
 import { PortalNav } from '../../portal-nav';
 import { Card } from '@/core/ui';
 
-export const metadata = { title: 'Laporan Mingguan — BuildTrust OS' };
+export const metadata = { title: 'Laporan Mingguan — Arkavena OS' };
 
 const STATUS_LABEL_ID: Record<string, string> = {
   planning: 'Perencanaan',

@@ -1,4 +1,4 @@
-# BuildTrust OS
+# Arkavena OS
 
 Controlled construction delivery system. Next.js App Router · TypeScript ·
 Tailwind · Supabase (Postgres/Auth/Storage).

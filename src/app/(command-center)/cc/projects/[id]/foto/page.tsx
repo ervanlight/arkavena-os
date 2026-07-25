@@ -1,7 +1,7 @@
 import { listProjectPhotosWithUrlsAction } from '@/modules/field-reporting';
 import { EmptyState } from '@/core/ui';
 
-export const metadata = { title: 'Foto proyek — BuildTrust OS' };
+export const metadata = { title: 'Foto proyek — Arkavena OS' };
 
 const STAGE_LABEL: Record<string, string> = {
   before: 'Sebelum',

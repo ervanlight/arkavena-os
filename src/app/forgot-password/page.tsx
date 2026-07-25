@@ -1,6 +1,6 @@
 import { ForgotPasswordForm } from './forgot-password-form';
 
-export const metadata = { title: 'Lupa Kata Sandi — BuildTrust OS' };
+export const metadata = { title: 'Lupa Kata Sandi — Arkavena OS' };
 
 export default function ForgotPasswordPage() {
   return (

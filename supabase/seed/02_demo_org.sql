@@ -19,7 +19,7 @@
 -- ---------------------------------------------------------------------------
 
 insert into organizations (id, name, slug) values
-  ('00000000-0000-4000-8000-000000000001', 'BuildTrust Demo', 'buildtrust-demo'),
+  ('00000000-0000-4000-8000-000000000001', 'Arkavena Demo', 'buildtrust-demo'),
   -- Exists to be the organisation you must never be able to see from the first.
   ('00000000-0000-4000-8000-000000000002', 'Kontraktor Sebelah', 'kontraktor-sebelah')
 on conflict (id) do nothing;

@@ -4,7 +4,7 @@ import { formatRp } from '@/core/money/rupiah';
 import { listAgingDashboardAction, type InvoiceAgingTier } from '@/modules/billing';
 import { Card, PageHeader, StatusBadge, EmptyState } from '@/core/ui';
 
-export const metadata = { title: 'Aging Dashboard — BuildTrust OS' };
+export const metadata = { title: 'Aging Dashboard — Arkavena OS' };
 
 const TIER_LABEL_ID: Record<InvoiceAgingTier, string> = {
   current: 'Belum jatuh tempo',

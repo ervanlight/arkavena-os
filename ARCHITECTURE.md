@@ -1,4 +1,4 @@
-# ARCHITECTURE.md — BuildTrust OS
+# ARCHITECTURE.md — Arkavena OS
 
 > **Controlled Construction Delivery System**
 > Dokumen ini adalah kontrak arsitektur. Semua sesi pengembangan (termasuk sesi Claude Code) WAJIB mengikuti dokumen ini. Perubahan arsitektur dicatat sebagai revisi dokumen ini, bukan diputuskan diam-diam di tengah coding.

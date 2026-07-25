@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { listLeadsAction } from '@/modules/crm';
 import { Card, PageHeader, StatusBadge, EmptyState } from '@/core/ui';
 
-export const metadata = { title: 'Leads — BuildTrust OS' };
+export const metadata = { title: 'Leads — Arkavena OS' };
 
 const STATUS_LABEL_ID: Record<string, string> = {
   new: 'Baru',
