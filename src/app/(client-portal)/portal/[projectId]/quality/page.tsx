@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getClientProjectOverviewAction } from '@/modules/client-portal';
-import { PortalNav } from '../portal-nav';
+import { PortalNav } from '../../portal-nav';
 import { Activity, ShieldCheck, Award, FileCheck2 } from 'lucide-react';
 
 export const metadata = { title: 'Quality — Arkavena OS' };

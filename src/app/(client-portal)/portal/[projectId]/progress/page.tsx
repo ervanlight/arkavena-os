@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getClientProjectOverviewAction, listClientTimelineEventsAction } from '@/modules/client-portal';
 import { listClientVisibleEvidenceWithUrlsForProjectAction } from '@/modules/evidence';
-import { PortalNav } from '../portal-nav';
+import { PortalNav } from '../../portal-nav';
 import { Activity, BarChart2, CheckCircle2, Clock, Image as ImageIcon } from 'lucide-react';
 
 export const metadata = { title: 'Progress — Arkavena OS' };

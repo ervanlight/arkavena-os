@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { getClientProjectOverviewAction } from '@/modules/client-portal';
 import { listInvoicesForProjectAction } from '@/modules/billing';
 import { formatRp } from '@/core/money/rupiah';
-import { PortalNav } from '../portal-nav';
+import { PortalNav } from '../../portal-nav';
 import { Activity, Wallet, Receipt, CheckCircle } from 'lucide-react';
 
 export const metadata = { title: 'Financial — Arkavena OS' };
