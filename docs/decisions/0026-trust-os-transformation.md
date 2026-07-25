@@ -1,132 +1,122 @@
-# ADR 0026 — Trust OS transformation: Project Confidence Score, Evidence domain, module reframing
+# ADR 0026 — Trust OS transformation: Client Status, Evidence visibility, module classification
 
-**Status:** PROPOSED — belum diimplementasikan, butuh keputusan Owner per item di bagian "Keputusan yang dibutuhkan Owner" sebelum Fase 12 dimulai.
-**Date:** 2026-07-25
-**Trigger:** Instruksi eksplisit Owner untuk mengevaluasi ulang arsitektur produk sebagai "Trust Operating System", bukan menambah fitur ERP.
+**Status:** PROPOSED — belum diimplementasikan, butuh keputusan Owner per item di bagian §6 sebelum Fase 12 dimulai.
+**Date:** 2026-07-25 (Revisi 2, hari yang sama dengan Revisi 1)
+**Trigger:** Instruksi eksplisit Owner untuk mengevaluasi ulang arsitektur produk sebagai "Trust Operating System" — lalu, di hari yang sama, koreksi arah eksplisit: BuildTrust OS bukan sistem monitoring klien atau dashboard transparansi, melainkan alat yang mengurangi kecemasan klien **sambil melindungi kebebasan operasional Arkavena**.
 
-Dokumen pendamping: [PRODUCT.md](../../PRODUCT.md) (mission/vision/prinsip). ADR ini adalah desain teknisnya.
+Dokumen pendamping: [PRODUCT.md](../../PRODUCT.md) (mission/vision/prinsip, sudah direvisi mengikuti ADR ini).
 
 ---
 
-## 1. Ringkasan keputusan yang diusulkan
+## 0. Riwayat revisi — dicatat visibel, tidak dihapus diam-diam
 
-1. Modul baru **`modules/evidence`** — domain baru yang menghubungkan bukti (foto/video/QC/GPS/penanggung jawab) ke aktivitas apa pun di sistem, memakai pola polymorphic reference yang **sudah ada preseden**-nya di `audit_logs` (`entity_table`/`entity_id`) — bukan pola baru yang harus dipelajari ulang.
-2. Modul baru **`modules/trust-score`** — menghitung **Project Confidence Score** dari 8 sinyal yang masing-masing sudah dimiliki modul lain (tidak ada modul yang kehilangan kepemilikan datanya).
-3. **Evidence-gating pada penyelesaian pekerjaan** — perpanjangan pola yang sudah terbukti di Cash Gate/Quality Gate (aturan ditegakkan di domain *dan* trigger DB) — diterapkan ke work package/milestone completion.
-4. **Reframing Client Portal → Project Journey** — perubahan IA (information architecture), bukan penggantian modul; `modules/client-portal` tetap pemilik datanya.
-5. Audit tiap modul yang ada: mana yang condong ERP, dan saran konkret untuk membuatnya lebih client-centric tanpa merusak batas modul yang sudah bersih.
+**Revisi 1** (dokumen asli, hari yang sama) mengusulkan **Project Confidence Score**: skor numerik 0–100 dari 8 sinyal berbobot, ditampilkan ke klien sebagai north star metric.
+
+**Revisi 2 (ini) membatalkan pendekatan itu sepenuhnya**, atas keputusan Owner secara eksplisit:
+
+> Skor numerik mengundang diskusi yang tidak perlu dan mendorong klien menghakimi performa operasional tanpa memahami realita konstruksi. Metrik internal boleh tetap ada untuk tim Arkavena, tapi tidak boleh menjadi pengalaman utama klien.
+
+**Apa yang berubah:**
+- `modules/trust-score` dan seluruh §2 (arsitektur Confidence Score) di Revisi 1 **dibatalkan** — tidak dibangun.
+- Digantikan oleh **Client Project Status**: 5 kondisi berbahasa manusia + penjelasan singkat, tanpa angka apa pun (§2 baru di dokumen ini).
+- Domain Evidence (Revisi 1 §3) **dipertahankan**, tapi diperkaya dengan **tingkat visibilitas per-record** — karena "evidence exists primarily for accountability, client visibility is selective" (§3 baru).
+- Reframing Client Portal (Revisi 1 §4) **dipertahankan dan diperjelas** menjadi Client Timeline dengan struktur konkret (§4 baru).
+- Audit modul (Revisi 1 §6, klasifikasi "ERP vs Trust-centric") **diganti total** dengan klasifikasi 4 kategori yang lebih tajam dan actionable: Internal Only / Internal + Management / Client Visible / Client Decision Required (§5 baru).
+
+**Kenapa dicatat begini, bukan file dihapus dan ditulis ulang tanpa jejak**: ADR ini masih berstatus PROPOSED (belum Accepted, belum ada kode dibangun di atasnya) — jadi secara teknis boleh diedit bebas. Tapi karena PRODUCT.md Revisi 1 sempat di-commit dan di-push sebagai dokumen resmi, riwayat ini dicatat supaya siapa pun yang membaca commit history paham *kenapa* arah berubah dalam hari yang sama, bukan cuma melihat file berbeda tanpa konteks.
+
+---
+
+## 1. Ringkasan keputusan yang diusulkan (Revisi 2)
+
+1. **Tidak ada skor numerik untuk klien** — dibatalkan total, lihat §0.
+2. **Client Project Status** — 5 kondisi berbahasa manusia + penjelasan naratif, dikurasi manusia (dengan bantuan draft AI), bukan dihitung otomatis dari formula (§2).
+3. **Evidence tetap dibangun sebagai domain**, dengan tambahan penting: **tingkat visibilitas per-record** (Internal Only / Internal + Management / Visible to Client / Visible After Approval) — evidence untuk akuntabilitas dulu, visibilitas klien itu keputusan sadar per item (§3).
+4. **Client Timeline** menggantikan struktur tab lama — beranda klien berbentuk jurnal (Hari Ini / Minggu Ini / Akan Datang / Menunggu Anda / Update Terbaru), bukan dashboard (§4).
+5. **Klasifikasi 4 kategori untuk setiap modul** — Internal Only / Internal + Management / Client Visible / Client Decision Required, dengan alasan eksplisit (§5).
+6. **Peran AI diperjelas**: mengurangi kerja komunikasi manual (draft ringkasan/penjelasan), **tidak pernah** menghasilkan skor, persentase risiko, atau rating (§7).
 
 Tidak ada satu pun dari ini yang mengubah D1–D10 (ARCHITECTURE.md §9). Tidak ada tabel lama yang di-drop. Tidak ada modul yang pindah kepemilikan tabel.
 
 ---
 
-## 2. Project Confidence Score — arsitektur
+## 2. Client Project Status — pengganti Confidence Score
 
-### 2.1 Prinsip desain
+### 2.1 Prinsip
 
-Skor **dihitung, bukan disimpan sebagai sumber kebenaran** — persis seperti `GateState` di Cash Gate (`computeFundingCoverage`, dihitung ulang setiap dibaca, bukan kolom yang di-`UPDATE`). Ini menghindari kelas bug "skor basi karena lupa di-refresh setelah mutasi" yang sama yang sudah dihindari Cash Gate.
+Status proyek yang dilihat klien **bukan hasil formula otomatis**. Ini keputusan editorial manusia (dengan bantuan draft AI), persis karena menerjemahkan realita operasional menjadi ketenangan klien butuh penilaian — sistem otomatis yang langsung mengubah status begitu satu angka internal berubah adalah versi lain dari "skor" yang justru ingin dihindari (contoh: Cash Gate sempat kuning selama sehari lalu pulih — klien tidak perlu tahu itu terjadi sama sekali kalau tidak berdampak nyata ke mereka).
 
-Untuk kebutuhan tren historis (North Star metric butuh grafik mingguan), skor **di-snapshot** ke tabel baru `confidence_score_snapshots` oleh proses terjadwal (lihat §2.4) — snapshot adalah *catatan sejarah*, bukan sumber kebenaran saat ini.
+### 2.2 Lima kondisi
 
-### 2.2 Delapan komponen & bobot
-
-| # | Komponen | Sumber (modul pemilik) | Bobot | Cara hitung (ringkas) |
-|---|----------|------------------------|-------|------------------------|
-| 1 | **Cash Gate** | `cash-gate` (`getGateStateAction`) | 20% | `green`→100, `yellow`→60, `red`→20, `overdue`→0 |
-| 2 | **QC Completion** | `quality-gate` (inspections + nonconformities) | 15% | % hold point wajib yang `passed` dari yang seharusnya sudah diperiksa pada tahap ini, dikurangi penalti per nonconformity `open` (bobot lebih berat untuk severity tinggi) |
-| 3 | **Schedule Performance** | `projects` (milestones/work_packages) + `ai-scribe` (delay detection yang sudah ada) | 15% | 100 dikurangi penalti non-linear dari jumlah hari keterlambatan ter-normalisasi terhadap durasi total proyek |
-| 4 | **Documentation Completeness** | `evidence` (baru, §3) | 15% | % aktivitas yang *seharusnya* py punya evidence (work package/milestone yang sudah `completed`) yang benar-benar punya ≥1 evidence lengkap (foto + QC + penanggung jawab + timestamp) |
-| 5 | **Budget Health** | `billing` (`listAgingDashboardAction`) | 10% | 100 dikurangi penalti dari % invoice yang berada di tier `overdue_*`, tertimbang durasi keterlambatan |
-| 6 | **Open Issues** | `field-reporting` (issues) | 10% | 100 dikurangi penalti dari jumlah issue `open`, tertimbang `severity` dan usia (issue lama lebih berat) |
-| 7 | **Client Approvals** | `client-portal` (Decision Clock) | 10% | 100 dikurangi penalti dari distribusi `clockTier` pending decisions (`aging`/`overdue` menurunkan skor) |
-| 8 | **Variation Status** | `scope-variation` (change orders) | 5% | 100 dikurangi penalti dari change order yang macet (`submitted_for_review`/`awaiting_client_approval` melebihi ambang waktu wajar) |
-
-Total 100%. Skor akhir = jumlah tertimbang, dibulatkan ke integer 0–100.
-
-**Kenapa bobot ini** (indikatif, bukan final — perlu divalidasi dengan data proyek nyata, sama seperti Cash Gate's FCR formula divalidasi di CHECKPOINT #2): Cash Gate dan QC dapat bobot tertinggi karena keduanya sudah punya *hard gate* di sistem — kalau keduanya buruk, risiko sudah bersifat struktural, bukan sekadar administratif. Documentation Completeness sengaja diberi bobot signifikan (15%, setara Schedule) supaya prinsip "status tanpa bukti = belum selesai" (PRODUCT.md prinsip #2) benar-benar tercermin di angka yang dilihat semua orang, bukan cuma jadi slogan.
-
-### 2.3 Pita warna (mengikuti pola `StatusBadge`/Cash Gate yang sudah ada)
-
-| Rentang | Label | Tone |
+| Status | Kapan dipakai | Contoh kalimat penjelasan |
 |---|---|---|
-| 90–100 | Sangat sehat | `success` |
-| 75–89 | Sehat | `success` (redup) atau `info` |
-| 60–74 | Perlu perhatian | `warning` |
-| 40–59 | Berisiko | `warning`/`danger` |
-| 0–39 | Kritis | `danger` |
+| **Berjalan Normal** | Tidak ada yang perlu diketahui klien saat ini | *(biasanya tanpa penjelasan tambahan — keadaan default yang tenang)* |
+| **Menunggu Keputusan Anda** | Ada `client_decision` berstatus pending yang genuinely butuh input klien | "Pemilihan meja dapur sedang menunggu konfirmasi Anda." |
+| **Menunggu Pihak Eksternal** | Delay yang sumbernya di luar kendali langsung tim (cuaca, izin, pengiriman vendor) | "Produksi kabinet dapur sudah dimulai. Pemasangan dijadwalkan minggu depan." |
+| **Penyesuaian Jadwal** | Ada pergeseran target, tapi terkendali/dijelaskan | "Hujan deras menunda pekerjaan cor selama dua hari. Target penyelesaian saat ini tidak berubah." |
+| **Selesai** | Proyek sudah handover | — |
 
-### 2.4 Implementasi teknis (mengikuti pola yang sudah ada, bukan pola baru)
+Setiap status **wajib** disertai kalimat penjelasan singkat (1–2 kalimat), bukan status kosong — status tanpa penjelasan terasa seperti label administratif, bukan komunikasi manusia.
+
+### 2.3 Implementasi teknis
+
+Dimiliki `modules/client-portal` (bukan modul baru — ini genuinely bagian dari permukaan klien yang sudah dimiliki modul itu):
 
 ```
-modules/trust-score/
-  domain/
-    compute-confidence-score.ts   # pure function: ConfidenceInputs -> ConfidenceScore
-    compute-confidence-score.test.ts
-  types.ts                        # ConfidenceScore, ConfidenceBreakdown, ConfidenceInputs
+modules/client-portal/
+  types.ts                          # + ClientProjectStatus enum, ClientStatusUpdate row type
+  data/
+    client-status-repository.ts     # baca/tulis client_status_updates
   actions/
-    get-project-confidence-score-action.ts   # orchestrator: panggil 8 modul lain via index.ts masing-masing,
-                                              # rakit ConfidenceInputs, panggil domain function
-    snapshot-confidence-scores-action.ts     # dipanggil scheduled job harian, tulis ke confidence_score_snapshots
-  index.ts
+    publish-client-status-action.ts # staff action: pilih status + tulis/edit penjelasan, publish
+    get-current-client-status-action.ts
 ```
 
-`trust-score` **tidak memiliki tabel bisnis apa pun** kecuali `confidence_score_snapshots` (riwayat, bukan sumber kebenaran) — persis pola yang sudah dipakai `/cc/page.tsx` hari ini untuk merakit kartu proyek dari `cash-gate` + `client-portal` + `field-reporting` secara paralel, hanya sekarang dirapikan jadi satu domain function yang bisa diuji unit test-nya secara terisolasi (memenuhi CLAUDE.md §8: modul dengan logic bercabang butuh test cakupan tinggi terhadap nilai batas).
+Migration baru: `client_status_updates(id, organization_id, project_id, status client_project_status, headline text, detail text, published_by uuid references users, published_at timestamptz, created_at, updated_at)` — RLS: staff menulis, klien membaca via `vw_client_project_status` (hanya baris terbaru per proyek + field yang memang untuk klien).
 
-Migration baru yang dibutuhkan (Wave berikutnya setelah Wave 10, mengikuti urutan §2.1 ARCHITECTURE.md): `confidence_score_snapshots(id, organization_id, project_id, score, breakdown jsonb, computed_at)` — RLS staff-only (klien tidak melihat angka mentah breakdown internal seperti margin/cash reserve; klien melihat versi yang disederhanakan, lihat §4).
+**AI membantu menulis draft** `headline`/`detail` dari sinyal internal (mis. cuaca dari daily log, delay flag dari `ai-scribe`, milestone yang baru pindah tahap) — tapi publikasi selalu aksi manusia (`published_by` wajib terisi, tidak pernah `system`). Ini konsisten dengan hukum AI di CLAUDE.md §9: AI menghasilkan draft, manusia menyimpan lewat action modul pemilik yang sudah ada.
 
-### 2.5 Apa yang klien lihat vs yang tidak
+### 2.4 Yang secara sadar TIDAK dibangun
 
-Sesuai D2.6 (data sensitif tidak bocor ke klien): breakdown mentah (misalnya angka cash reserve) **tidak pernah** dikirim ke `vw_client_*`. Klien melihat **skor tunggal + label 5 kategori di atas + satu kalimat penjelasan per kategori dalam bahasa non-teknis** (misalnya "Kas proyek: sehat" bukan "Cash Gate: green, ratio 142%"), dirakit oleh view klien baru `vw_client_confidence_summary` yang membaca dari action yang sama tapi memfilter field sensitif di lapisan SQL — pola yang identik dengan `vw_client_project_overview` yang sudah ada.
+- Tidak ada kolom skor/persentase di `client_status_updates`.
+- Tidak ada logic yang otomatis mengubah status tanpa staf mempublikasikannya — bahkan kalau semua sinyal internal (cash gate, QC, issues) berubah, status klien **tidak bergerak** sampai staf secara sadar memutuskan itu relevan diketahui klien. Ini bukan celah, ini **fitur** — persis prinsip "does this help the client decide."
 
 ---
 
-## 3. Domain Evidence
+## 3. Domain Evidence — akuntabilitas dulu, visibilitas klien itu pilihan
 
-### 3.1 Hierarki yang diminta, dipetakan ke realita skema yang ada
+### 3.1 Hierarki (tidak berubah dari Revisi 1)
 
 ```
-Project        (sudah ada: projects)
-  ↓
-Milestone      (sudah ada: milestones, di bawah contracts)
-  ↓
-Activity       (KONSEP LOGIS, bukan tabel baru — lihat §3.2)
-  ↓
-Evidence       (TABEL BARU — modules/evidence)
-  ↓
-Approval       (sudah ada, tersebar: inspections, client_decisions, TD override —
-                dihubungkan ke Evidence via FK opsional, bukan tabel approval baru)
-  ↓
-Knowledge      (TABEL BARU, opsional/Fase lanjutan — lihat §3.5)
+Project → Milestone → Activity (konsep logis) → Evidence → Approval → Knowledge (Fase lanjutan)
 ```
 
-### 3.2 Kenapa "Activity" TIDAK jadi tabel baru
+Alasan "Activity" tetap konsep logis, bukan tabel baru, dan alasan `evidence` sebagai lapisan indeks lintas-modul (bukan pengganti `photos`) — **tidak berubah dari Revisi 1**, tetap berlaku penuh (lihat riwayat commit ADR ini untuk detail penalaran itu kalau dibutuhkan).
 
-Opsi yang dipertimbangkan dan ditolak: membuat tabel `activities` sebagai lapisan wajib di antara milestone dan bukti, lalu memigrasikan `work_packages`, `daily_logs`, `progress_entries`, `inspections` supaya semuanya mereferensi baris `activities`. Ini **ditolak** karena:
-
-- Melanggar prinsip "jangan over-engineer" — empat tabel yang sudah stabil dan sudah punya RLS/test/audit sendiri harus dimigrasi ulang murni supaya ada satu lapisan abstraksi baru.
-- Setiap tabel itu **sudah** merepresentasikan sebuah "aktivitas" secara natural: satu baris `work_packages` = satu paket kerja; satu baris `daily_logs` = satu hari kerja; satu baris `inspections` = satu pemeriksaan. "Activity" tidak butuh identitas fisik terpisah untuk berfungsi sebagai konsep.
-
-**Activity diperlakukan sebagai konsep logis**: baris apa pun di tabel manapun yang merepresentasikan "sesuatu yang dikerjakan" (work package, daily log, progress entry, inspection, issue resolution). Evidence menempel ke Activity lewat pasangan polymorphic `(activity_table, activity_id)` — pola yang **identik** dengan `audit_logs.entity_table`/`entity_id` yang sudah dipakai di seluruh sistem sejak Fase 0. Tidak ada konsep baru yang harus dipelajari tim.
-
-### 3.3 Skema `evidence` (diusulkan)
+### 3.2 Yang BARU di Revisi 2: `visibility` sebagai kolom wajib
 
 ```sql
-create type evidence_type as enum ('photo', 'video', 'document');
-create type evidence_qc_result as enum ('pass', 'fail', 'not_applicable');
+create type evidence_visibility as enum (
+  'internal_only',        -- default. staf mana pun (org role apa pun) bisa lihat.
+  'internal_management',  -- staf tier manajemen saja (owner, technical_director, finance).
+  'client_visible',       -- langsung tampil di Client Timeline begitu dibuat.
+  'visible_after_approval' -- tersembunyi dari klien sampai sebuah Approval (§3.3) membukanya.
+);
 
 create table evidence (
   id uuid primary key default gen_random_uuid(),
   organization_id uuid not null references organizations(id),
   project_id uuid not null references projects(id),
-  activity_table text not null,      -- 'work_packages' | 'daily_logs' | 'progress_entries' | 'inspections' | 'issues' | 'handover_items'
-  activity_id uuid not null,         -- polymorphic, sama pola dengan audit_logs
-  evidence_type evidence_type not null,
+  activity_table text not null,
+  activity_id uuid not null,
+  evidence_type evidence_type not null,         -- 'photo' | 'video' | 'document'
+  visibility evidence_visibility not null default 'internal_only',
   storage_path text not null,
   thumbnail_path text,
   captured_at timestamptz not null default now(),
-  gps_lat double precision,          -- nullable, opsional per PRODUCT.md prinsip #2
+  gps_lat double precision,
   gps_lng double precision,
-  qc_result evidence_qc_result,      -- nullable: tidak semua evidence butuh hasil QC (mis. foto progres harian)
+  qc_result evidence_qc_result,                 -- 'pass' | 'fail' | 'not_applicable', nullable
   responsible_user_id uuid not null references users(id),
   notes text,
   created_by uuid not null references users(id),
@@ -134,81 +124,128 @@ create table evidence (
   updated_at timestamptz not null default now(),
   deleted_at timestamptz
 );
--- + index (project_id, activity_table, activity_id), trigger updated_at, trigger audit, RLS staff-write/client-read-via-view
 ```
 
-Catatan penting: ini **bukan pengganti** `photos` yang sudah ada di `field-reporting` — `photos` tetap dimiliki `field-reporting` dan tetap jadi cara staf mengunggah foto harian. `evidence` adalah **lapisan indeks lintas-modul** yang mencatat "bukti apa menempel ke aktivitas mana, dengan kelengkapan apa" — bisa merujuk balik ke sebuah baris `photos` (lewat `storage_path` yang sama) atau berdiri sendiri untuk jenis bukti yang belum ada tabelnya (video, dokumen serah terima). Detail migrasi (apakah `evidence` menyerap `photos` sepenuhnya di masa depan, atau tetap dua tabel paralel) adalah keputusan implementasi Fase 12, dicatat sebagai **keputusan terbuka** di §5, bukan diputuskan sepihak di ADR ini.
+**Default-nya `internal_only`** — evidence baru tidak otomatis terlihat klien. Menaikkan visibilitas adalah keputusan sadar (staf memilih saat upload, atau mengubahnya kemudian), bukan opt-out. Ini menegakkan prinsip produk "klien tidak perlu tahu semuanya" secara struktural di skema, bukan cuma di UI.
 
-### 3.4 Evidence-gating: "status tanpa bukti = belum selesai", ditegakkan dua lapis
+### 3.3 `visible_after_approval` — Approval sebagai gerbang visibilitas, bukan cuma gerbang status
 
-Meniru pola Cash Gate/Quality Gate persis (CLAUDE.md hukum §0.3): **domain layer** *dan* **trigger DB**.
+Ini pengayaan baru terhadap hierarki: **Approval** (tahap ke-5 di hierarki) sekarang punya dua fungsi berbeda yang keduanya valid:
+1. Fungsi lama: menyetujui aktivitas itu sendiri (inspeksi lulus, klien approve variation).
+2. Fungsi baru: **membuka visibilitas evidence yang menunggu** — mis. foto before/after ditahan (`visible_after_approval`) sampai QC menyetujui hasil pekerjaan, baru muncul di Client Timeline sebagai satu paket "before → sesudah diperiksa → sesudah" yang meyakinkan, bukan foto mentah yang bisa disalahpahami sebelum benar-benar selesai.
 
-- **Domain**: `modules/evidence/domain/evaluate-completion-readiness.ts` — pure function `canMarkComplete(activityTable, activityId, evidenceRows) -> Result` yang menolak transisi ke status selesai kalau tidak ada evidence yang memenuhi syarat minimum (evidence_type foto/video + qc_result bukan null jika aktivitas itu tergolong hold-point-relevant + responsible_user_id terisi).
-- **DB trigger**: trigger `BEFORE UPDATE` di `work_packages` (dan tabel completion-bearing lain yang disepakati) yang menolak `status = 'completed'` kalau tidak ada baris `evidence` terkait — jaring pengaman terakhir persis seperti `fn_cash_gate_status` menolak PO saat gate merah.
+Tidak butuh tabel approval baru — perubahan status `evidence.visibility` dari `visible_after_approval` ke `client_visible` terjadi sebagai efek samping dari action approval yang **sudah ada** (mis. `recordInspectionResultAction` di `quality-gate`, atau `clientApproveChangeOrderAction`), dipanggil lewat `evidence`'s public API (`modules/evidence` mengekspos `releaseEvidenceAction`, dipanggil dari modul lain yang mengalami approval-nya sendiri — bukan modul lain menulis langsung ke tabel `evidence`, tetap menghormati satu-tabel-satu-modul).
 
-**Ini adalah keputusan Owner yang butuh CHECKPOINT**, bukan sesuatu yang boleh diam-diam diaktifkan: mengaktifkan trigger ini mengubah perilaku yang sudah berjalan (hari ini, work package bisa ditandai selesai tanpa evidence apa pun). Lihat §5.
+### 3.4 Evidence-gating pada completion — tetap diusulkan, dengan catatan
 
-### 3.5 Knowledge — lapisan terjauh, diusulkan sebagai Fase lanjutan (bukan sekarang)
+Prinsip "status tanpa evidence dianggap belum selesai" (PRODUCT.md prinsip #2 versi lama, sekarang jadi bagian dari akuntabilitas internal) tetap diusulkan, ditegakkan dua lapis (domain + trigger DB) seperti Cash Gate/Quality Gate — **tapi ini murni soal disiplin internal (Internal Only/Internal+Management), sama sekali tidak tentang mengekspos apa pun ke klien.** Evidence yang mengunci completion tidak perlu berstatus `client_visible` — foto dokumentasi rutin cukup `internal_only`, tetap menegakkan akuntabilitas tanpa membanjiri klien. Ini keputusan Owner terpisah (§6.2), tidak berubah substansinya dari Revisi 1.
 
-`knowledge_entries`: ringkasan yang disarikan (dengan bantuan AI, tetap draft-direview-manusia per hukum AI di CLAUDE.md §9) dari pola evidence + resolusi berulang — misalnya "3 nonconformity waterproofing berulang di 2 proyek berbeda dengan vendor material yang sama, layak jadi item perhatian di `hold_point_templates` proyek berikutnya." Ini bukan kebutuhan mendesak (tidak ada klien yang menunggu ini), dan implementasinya bergantung pada `evidence` sudah terisi cukup data nyata dulu. Diusulkan sebagai **Fase 13+**, dicatat di sini supaya hierarki lengkap terlihat, tapi **tidak masuk rencana kerja Fase 12**.
+### 3.5 Knowledge — tidak berubah dari Revisi 1
 
----
-
-## 4. Reframing Client Portal → Project Journey (IA, bukan modul baru)
-
-`modules/client-portal` **tetap pemilik** `client_decisions` dan semua `vw_client_*` views — ini perubahan *information architecture* di lapisan `src/app/(client-portal)/`, bukan migrasi kepemilikan data.
-
-Perubahan yang diusulkan:
-
-- **Dari tab datar (Ringkasan/Timeline/Zona/Foto/Keputusan) → satu linimasa vertikal** yang mencampur semuanya secara kronologis-emosional: foto progres, keputusan yang perlu diambil, insight QC dalam bahasa awam, dan (baru) skor confidence yang disederhanakan — semua dalam satu aliran cerita, bukan lima laci terpisah yang harus diklik satu-satu.
-- **Bahasa status ditulis ulang** di lapisan presentasi (bukan di database — enum tetap teknis di DB, terjemahan terjadi di komponen UI, sama seperti `STATUS_LABEL_ID` yang sudah dipakai di banyak halaman) — misalnya `awaiting_client_approval` tampil sebagai "Menunggu keputusan Anda", bukan istilah state-machine mentah.
-- **Bukti tampil sebagai konten utama**: setiap entri linimasa yang punya evidence menampilkan foto/video langsung di kartu, bukan di balik link "lihat foto".
-- Halaman `keputusan` (approve/reject variation) tetap ada sebagai aksi, tapi dipromosikan ke linimasa utama, bukan halaman terpisah yang harus dicari.
-
-Ini adalah pekerjaan UI/UX murni terhadap struktur yang sudah bersih — risiko rendah, tidak menyentuh RLS atau skema.
+Tetap diusulkan sebagai Fase 13+, tidak masuk rencana kerja Fase 12. Lihat Revisi 1 untuk detail (dipertahankan, tidak perlu ditulis ulang di sini).
 
 ---
 
-## 5. Keputusan yang dibutuhkan Owner sebelum implementasi
+## 4. Client Timeline — beranda klien
 
-Mengikuti pola CHECKPOINT yang sudah dipakai di setiap fase besar (Cash Gate FCR formula, Quality Gate hold points, dsb.) — ini bukan hal yang boleh diputuskan diam-diam oleh Claude:
+### 4.1 Struktur (menggantikan tab Ringkasan/Timeline/Zona/Foto/Keputusan)
 
-1. **Bobot 8 komponen Confidence Score** (§2.2) — angka di atas indikatif, perlu divalidasi dengan intuisi bisnis Owner sebelum di-lock, sama seperti FCR Cash Gate dulu.
-2. **Evidence-gating hard block** (§3.4) — apakah trigger DB benar-benar menolak completion tanpa evidence sejak hari pertama Fase 12, atau dimulai sebagai *warning* (skor turun, tapi tidak diblokir) selama periode transisi supaya tim lapangan terbiasa dulu.
-3. **Cakupan awal Evidence**: semua project baru, atau hanya milestone yang client-facing (lebih murah, dampak trust lebih langsung)?
-4. **Hubungan `evidence` vs `photos`**: dua tabel paralel untuk sekarang (lebih aman, tidak mengubah `field-reporting`), atau `evidence` menyerap `photos` sepenuhnya (lebih bersih jangka panjang, tapi migrasi berisiko lebih tinggi)?
-5. **Fase 12 dimulai kapan** relatif terhadap Fase 11 (Partner Desk) yang baru saja selesai dan belum lulus pre-launch checklist penuh (lihat `docs/PRE-LAUNCH-CHECKLIST.md`) — apakah Trust Transformation ini menyela urutan Build Sequence atau menunggu giliran resminya (CLAUDE.md hukum §0.7: jangan lompati Build Sequence).
+```
+┌─────────────────────────────────────┐
+│  [Client Project Status saat ini]    │  ← §2, selalu di atas, 1-2 kalimat
+├─────────────────────────────────────┤
+│  Menunggu Anda                       │  ← client_decisions pending, bahasa awam
+├─────────────────────────────────────┤
+│  Hari Ini                            │  ← evidence client_visible hari ini + status update baru
+├─────────────────────────────────────┤
+│  Minggu Ini                          │  ← ringkasan naratif (bisa draft AI), evidence minggu berjalan
+├─────────────────────────────────────┤
+│  Akan Datang                         │  ← milestone/work package terjadwal, diterjemahkan
+│                                       │     ("Pemasangan kabinet dapur minggu depan")
+├─────────────────────────────────────┤
+│  Update Terbaru                      │  ← linimasa kronologis mundur, evidence + status history
+└─────────────────────────────────────┘
+```
 
-Sampai kelima hal ini diputuskan, ADR ini berstatus **PROPOSED**, bukan **Accepted** — konsisten dengan bagaimana ADR 0012 (Scope Variation) dan lainnya menunggu review Owner sebelum kode ditulis.
+### 4.2 Sumber data per bagian (semua lewat public API modul pemilik, tidak ada query lintas-modul langsung)
 
----
+- **Menunggu Anda**: `client-portal.listPendingClientDecisionsAction` (sudah ada) — judul teknis (`change_order.title`) **tidak** ditampilkan mentah; ditambahkan field baru `client_summary` (opsional) di `client_decisions` untuk kalimat awam yang staf isi saat mempresentasikan keputusan ("Pemilihan meja dapur menunggu konfirmasi Anda") — fallback ke template generik kalau kosong, tidak pernah menampilkan judul internal.
+- **Hari Ini / Update Terbaru**: `evidence` dengan `visibility IN ('client_visible')` (setelah difilter RLS/view klien), digabung dengan `client_status_updates` (§2).
+- **Minggu Ini**: bisa berisi narasi hasil draft AI (§7) yang staf setujui — tidak wajib evidence terlampir, boleh murni teks ("Tim mulai finishing dinding kamar utama minggu ini").
+- **Akan Datang**: `projects.listWorkPackagesForProjectAction`/milestone yang statusnya belum mulai tapi terjadwal dekat — diterjemahkan lewat lapisan presentasi (mis. nama paket kerja teknis → kalimat awam), **tanpa tanggal pasti kalau berisiko meleset** (cukup "minggu depan", bukan tanggal presisi yang bisa terasa seperti janji kaku).
 
-## 6. Audit modul yang ada: ERP-oriented vs Trust-centric
+### 4.3 Yang TIDAK ada di beranda ini
 
-| Modul | Kondisi saat ini | Klasifikasi | Saran konkret (tanpa merusak batas modul) |
-|---|---|---|---|
-| `crm` | Pipeline lead + scoring, gaya CRM murni | ERP, dengan satu titik trust tersembunyi | Assessment report adalah *first trust touchpoint* sebelum kontrak ada — jadikan tampilan itu setara kualitas dengan Project Journey (bukan cuma laporan internal), karena ini kesan pertama calon klien terhadap seberapa serius perusahaan ini. |
-| `projects` | Fondasi netral (zona, kontrak, milestone) | Netral/infrastruktur | Tidak perlu diubah — tapi jadi tempat alami untuk field `confidence_score` ditampilkan di level Ringkasan proyek. |
-| `cash-gate` | Dashboard owner-only, sangat teknis (rasio, cadangan) | ERP secara tampilan, **paling trust-critical secara substansi** | Data mentah tetap internal (benar, per D2.6) — tapi klien berhak tahu *bahwa* mekanisme ini ada dan melindungi uang mereka. Surfacing versi sederhana lewat Confidence Score (§2.5) menyelesaikan ini tanpa membocorkan angka. |
-| `scope-variation` | Sudah client-facing (approve/reject) — salah satu modul paling matang secara trust | Trust-centric, perlu polish | Tautkan foto "penyebab" variation langsung di layar approval (evidence linking) — klien memutuskan berdasarkan bukti visual, bukan cuma deskripsi teks. |
-| `field-reporting` | Alat internal (SiteFlow) — tapi ini **pabrik bukti** seluruh sistem | Infrastruktur trust, tersembunyi dari klien | Sudah benar secara arsitektur (Pillar 1-2 baru saja menambah Aktivitas/Foto/Laporan feed). Perluasan: field GPS opsional saat capture, caption wajib untuk foto yang menempel ke milestone client-facing. |
-| `quality-gate` | Kosakata sangat teknis (hold point, nonconformity) | ERP dalam bahasa, trust-critical dalam substansi | Terjemahkan ke linimasa klien sebagai "lencana" trust ("Lulus pemeriksaan independen sebelum ditutup") — bukan istilah gate/hold point mentah. |
-| `client-portal` | Struktur tab admin-style | Trust-centric tapi IA-nya masih terasa software | Reframing linimasa vertikal, §4. |
-| `billing` | Modul paling "ERP-rasa" (invoice, aging, DSO) | ERP, dengan mekanisme trust tersembunyi yang bagus (billing pack) | Billing pack (bukti+QC+variation summary sebelum invoice terbit) sudah pola yang benar — pastikan klien *selalu* melihat bundel ini otomatis di linimasa saat invoice terbit, bukan dokumen terpisah yang harus diminta. |
-| `estimating` | Internal murni, margin sengaja disembunyikan (benar, D2.6) | ERP by design, correctly hidden | Proposal yang klien terima (bukan estimate internal) harus terasa seperti dokumen komitmen personal, bukan print-out spreadsheet. |
-| `procurement` | ERP murni, RFQ/PO/delivery — benar-benar tidak perlu klien lihat detailnya | ERP, correctly hidden | Momen "material tiba di lokasi" bisa jadi entri linimasa client-facing ringan ("Material untuk dapur Anda sudah tiba") tanpa membocorkan harga/vendor — evidence delivery photo cukup. |
-| `assessment` | Langkah CRM/pra-kontrak | Perlu diangkat jadi bagian journey, bukan langkah backend | Sama seperti poin `crm` — ini pengalaman pertama klien, perlakukan sebagai awal Project Journey, bukan tahap sales internal. |
-| `maintenance-engine` | Dimodelkan sebagai asset registry (ERP: Facility Passport) | Trust moment besar yang under-presented | Reframe sebagai "Catatan Perawatan Rumah Anda" client-facing (warranty + service ticket history) — ini titik kepercayaan pasca-serah-terima yang paling menentukan repeat business/referral. |
-| `partner-desk` | B2B/supplier-facing, bukan bagian journey klien | ERP, correctly out of scope | Tidak perlu reframing — bukan permukaan trust klien, tidak melanggar prinsip apa pun dengan tetap ERP. |
-| `ai-scribe` | Reaktif & scope dikurangi (ADR 0021) | Justru peluang terbesar untuk prinsip #4 (AI proaktif) | Perluasan langsung: ringkasan mingguan, ringkasan harian lapangan, analisis keterlambatan, prediksi risiko, draft update klien, ringkasan eksekutif, insight QC — semua sebagai draft yang direview manusia (hukum AI di CLAUDE.md §9 tidak berubah, hanya cakupannya bertambah). |
-
-**Pola yang konsisten muncul**: modul yang murni ERP (`procurement`, `estimating`, `partner-desk`) tidak perlu diubah — mereka *seharusnya* tetap ERP dan tersembunyi dari klien (itu justru menjaga D2.6). Modul yang bermasalah adalah yang **secara substansi trust-critical tapi tampil sebagai ERP** (`cash-gate`, `quality-gate`, `billing`) — solusinya bukan mengubah modul itu sendiri, tapi membangun lapisan penerjemah (Confidence Score, evidence linking, bahasa linimasa) yang menyaring sinyal trust-nya ke permukaan klien tanpa membocorkan detail internal yang memang harus tetap tersembunyi.
+Tidak ada angka isu terbuka, tidak ada rasio kas, tidak ada progress bar persentase generik, tidak ada tabel/daftar module teknis apa pun. Kalau sebuah data butuh terjemahan lebih dari satu kalimat untuk masuk akal ke klien, itu sinyal data itu **tidak seharusnya** ada di sini (lihat §5 untuk klasifikasi per modul).
 
 ---
 
-## 7. Yang TIDAK berubah
+## 5. Klasifikasi modul: Internal Only / Internal + Management / Client Visible / Client Decision Required
+
+**Definisi kategori:**
+- **Internal Only** — staf mana pun (role organisasi apa pun) boleh akses; klien tidak pernah melihat apa pun dari modul ini, bahkan tidak tahu modul ini ada.
+- **Internal + Management** — dibatasi ke tier manajemen (owner, technical_director, finance) bahkan di antara staf; substansinya trust-critical tapi kompleksitasnya justru yang dibayar klien supaya tidak perlu mereka pikirkan.
+- **Client Visible** — muncul di Client Timeline, selalu dalam bentuk sudah diterjemahkan (bahasa awam), tidak pernah sebagai cermin modul internal.
+- **Client Decision Required** — klien harus bertindak (approve/reject/pilih/konfirmasi); ini kategori paling langka secara sengaja, karena setiap butir di sini menambah beban keputusan klien.
+
+| Modul | Klasifikasi | Kenapa |
+|---|---|---|
+| `crm` | **Internal Only** | Skor lead, tahap pipeline, catatan sales adalah mekanisme internal Arkavena mendapatkan klien — tidak membantu klien (yang sudah jadi klien) memutuskan apa pun. |
+| `assessment` | **Internal Only** (proses) / **Client Decision Required** (laporan hasil) | Proses skoring/checklist internal murni internal. Tapi laporan assessment yang diterima calon klien adalah momen mereka memutuskan lanjut atau tidak — itu artefak keputusan, bukan sekadar laporan yang dibaca. |
+| `projects` | **Internal + Management** | Data mentah zona/kontrak/paket kerja adalah alat operasional tim menjalankan proyek. Klien tidak perlu tahu ada 40 paket kerja dengan status masing-masing — cukup terjemahan yang muncul di Client Timeline. |
+| `cash-gate` | **Internal + Management** | Ini persis kompleksitas yang klien bayar Arkavena untuk menyerapnya. Rasio kas, cadangan risiko, status gate mentah tidak pernah membantu klien memutuskan apa pun — malah berisiko mereka menghakimi keputusan finansial teknis tanpa konteks penuh. Yang sampai ke klien hanya lewat Client Project Status, kalau memang relevan ("pendanaan mencukupi untuk tahap ini") — dan itu pun cuma kalau staf memutuskan itu perlu dikatakan. |
+| `scope-variation` | **Client Decision Required** (titik approval) / **Internal + Management** (mekanisme) | Variation genuinely butuh keputusan klien (mengubah biaya/desain) — tapi disajikan sebagai pertanyaan bisnis sederhana ("pemilihan meja dapur menunggu konfirmasi"), bukan "Variation Request #24" dengan tabel dampak biaya. Nomor, state machine, dan cost impact tetap Internal + Management. |
+| `field-reporting` | **Internal Only** | SiteFlow, daily log, permintaan material, issue — ini pabrik data operasional harian. Tidak satu pun perlu dilihat klien apa adanya; ini murni bahan baku bagi Evidence dan Client Status, bukan permukaan klien itu sendiri. |
+| `quality-gate` | **Internal + Management** | Hold point, nonconformity, hasil inspeksi adalah *tepat* jenis kompleksitas yang klien serahkan ke Arkavena. Klien tidak perlu tahu detail "Hold Point Pending" — paling jauh, dampaknya terasa sebagai kalimat singkat di linimasa kalau memang menyebabkan penyesuaian jadwal. |
+| `client-portal` | **Client Visible** & **Client Decision Required** | Ini secara definisi permukaan klien — sekarang direstrukturisasi jadi Client Timeline (§4) alih-alih tab admin-style. |
+| `billing` | **Internal + Management** (mekanisme) / **Client Visible** terbatas (tagihan yang jatuh tempo) | Aging dashboard, DSO, analitik koleksi murni internal. Tapi "ada tagihan yang perlu dibayar, jatuh tempo tanggal X" adalah informasi yang genuinely relevan buat klien bertindak — itu satu-satunya irisan billing yang boleh muncul di Client Timeline, dan hanya sebagai notifikasi sederhana, bukan laporan aging. |
+| `estimating` | **Internal Only** | Margin, harga beli, breakdown biaya internal — dilindungi secara struktural (D2.6), tidak berubah. Proposal yang klien terima adalah keluaran `assessment`/kontrak, bukan permukaan `estimating` itu sendiri. |
+| `procurement` | **Internal Only** | RFQ, perbandingan quote vendor, PO — seratus persen urusan operasional Arkavena. Kalau ada nilai untuk klien, itu cuma "material sudah tiba di lokasi" — dan itu representasinya lewat evidence `client_visible`, bukan lewat modul ini secara langsung. |
+| `maintenance-engine` | **Internal + Management** (perencanaan aset) / **Client Visible** (info garansi & status tiket servis milik klien) / **Client Decision Required** (jadwalkan kunjungan servis) | Facility Passport dan rencana pemeliharaan internal murni operasional. Tapi status garansi rumah mereka dan tiket servis yang *mereka* laporkan genuinely perlu klien tahu — dan menjadwalkan waktu kunjungan teknisi genuinely butuh konfirmasi mereka. |
+| `partner-desk` | **Internal Only** | Modul B2B ke supplier/subkontraktor — di luar hubungan klien sepenuhnya, bukan soal disembunyikan, memang bukan bagian dari pengalaman klien sama sekali. |
+| `ai-scribe` | **Internal Only** (sebagai modul) | Alat drafting staf — prompt, draft, log biaya tidak pernah dilihat klien. Keluarannya (setelah disetujui staf) bisa menjadi konten Client Visible lewat `client-portal`/Client Timeline, tapi modul `ai-scribe` itu sendiri tidak pernah jadi permukaan klien. |
+| `evidence` (domain baru) | **Bervariasi per baris** (lihat §3.2) | Satu-satunya domain yang klasifikasinya bukan di level modul, melainkan di level record (`visibility` enum) — karena tujuan intinya justru memisahkan "evidence untuk akuntabilitas" (mayoritas, Internal Only/Internal+Management) dari "evidence untuk ketenangan klien" (minoritas yang sengaja dipilih, Client Visible/Visible After Approval). |
+| ~~`trust-score`~~ | **Dibatalkan** | Lihat §0 — tidak dibangun. Kebutuhan visibilitas kesehatan proyek untuk staf (Owner/TD/Finance) sudah terlayani oleh dashboard Command Center yang ada (`/cc`, kartu proyek + strip "Perlu perhatian", dibangun Pillar 2) — **Internal + Management**, tidak pernah jadi angka yang ditampilkan ke klien. |
+
+**Pola yang konsisten:** hampir semua modul teknis inti (cash-gate, quality-gate, procurement, estimating, field-reporting) memang seharusnya **Internal Only** atau **Internal + Management** — ini bukan kekurangan, ini justru produk yang bekerja sesuai mission-nya (klien tidak perlu jadi manajer proyek). Satu-satunya kategori yang butuh perhatian desain aktif adalah **Client Visible** dan **Client Decision Required** — dan keduanya sekarang punya rumah yang jelas: Client Timeline (§4) dan mekanisme visibilitas Evidence (§3.2).
+
+---
+
+## 6. Peran AI — diperjelas, bukan diperluas tanpa batas
+
+Sesuai instruksi: AI mengurangi kerja komunikasi manual, **tidak pernah menghasilkan skor, persentase risiko, atau kepastian buatan.**
+
+**Dibangun sebagai draft (direview manusia, hukum AI CLAUDE.md §9 tidak berubah):**
+- Update Klien Mingguan (draft `client_status_updates`/ringkasan Minggu Ini)
+- Ringkasan Harian Lapangan (untuk konsumsi internal — staf memutuskan mana yang layak diringkas jadi Client Visible)
+- Ringkasan Rapat
+- Pengingat Approval (untuk staf: "3 keputusan klien menunggu > 5 hari, pertimbangkan follow-up") — **bukan** untuk klien
+- Ringkasan Progres (bahan draft entri "Minggu Ini"/"Akan Datang")
+- Penjelasan Keterlambatan (draft kalimat untuk status "Penyesuaian Jadwal"/"Menunggu Pihak Eksternal")
+
+**Secara eksplisit TIDAK dibangun:**
+- Skor risiko/prediksi persentase apa pun (mis. "80% kemungkinan selesai tepat waktu") — ini persis jenis kepastian buatan yang dilarang prinsip produk.
+- AI tidak pernah mempublikasikan langsung ke klien — `published_by` di `client_status_updates` selalu user staf, tidak pernah proses otomatis.
+
+`ai-scribe`'s delay-detection yang sudah ada (Fase 10) tetap boleh dipakai **secara internal** untuk membantu staf memutuskan kapan status "Penyesuaian Jadwal" relevan dipublikasikan — tapi keluarannya tidak pernah berupa angka/persentase yang sampai ke klien, hanya sinyal internal yang memicu staf menulis (dibantu draft AI) kalimat manusia.
+
+---
+
+## 7. Keputusan yang dibutuhkan Owner sebelum implementasi
+
+1. **Definisi tier "Management"** untuk kategori Internal + Management — owner + technical_director + finance, atau perlu disesuaikan (misalnya QS ikut serta untuk modul tertentu)?
+2. **Default visibility Evidence** — dikonfirmasi `internal_only` sebagai default (rekomendasi kuat, konsisten dengan prinsip "klien tidak perlu tahu semuanya"), bukan opt-out?
+3. **Siapa yang berwenang mempublikasikan Client Project Status** — semua staf internal, atau dibatasi ke role tertentu (mis. hanya Owner/TD/PM) supaya nada komunikasi ke klien tetap konsisten?
+4. **Evidence-gating completion** (§3.4) — tetap diusulkan sebagai hard block dua lapis, tapi murni internal; perlu konfirmasi timing (langsung aktif, atau masa transisi sebagai warning dulu) — sama seperti Revisi 1.
+5. **Timing Fase 12** relatif terhadap Fase 11 (Partner Desk) yang belum lulus pre-launch checklist penuh — apakah Trust Transformation menyela urutan Build Sequence atau menunggu giliran (CLAUDE.md hukum §0.7).
+
+Sampai kelima hal ini diputuskan, ADR ini tetap **PROPOSED**.
+
+---
+
+## 8. Yang TIDAK berubah
 
 - D1–D10 tetap terkunci.
 - Tidak ada tabel yang di-drop atau modul yang kehilangan kepemilikan data.
-- Pola `safeAction`, `ActionResult`, audit dua-kanal, RLS-per-tabel — semua dipertahankan penuh; Evidence dan Trust Score dibangun *mengikuti* pola ini, bukan menggantinya.
+- Pola `safeAction`, `ActionResult`, audit dua-kanal, RLS-per-tabel — semua dipertahankan penuh; Evidence dan Client Status dibangun *mengikuti* pola ini, bukan menggantinya.
 - Build Sequence tetap berlaku — ADR ini mengusulkan kerja sebagai Fase 12 setelah Fase 11 (Partner Desk) benar-benar tuntas, bukan menyela fase yang sedang berjalan.
