@@ -6,9 +6,10 @@ import { getActionContext } from '@/core/auth/session';
 import { safeAction } from '@/core/actions/safe-action';
 import { z } from 'zod';
 import { createServerSupabase } from '@/core/db/client.server';
-import { getClient, insertClient, listClients, updateClient } from '../data/clients-repository';
+import { getClient, insertClient, listClients, updateClient, insertClientUser } from '../data/clients-repository';
 import { createClientSchema, updateClientSchema } from '../schemas';
 import type { Client } from '../types';
+import { provisionExternalUser, type ProvisionedUser } from '@/core/auth/provision-external-user';
 
 /**
  * A plain create/update has no reason, no override semantics -- nothing the
@@ -93,5 +94,46 @@ export const listClientsAction = safeAction(
   async (): Promise<Client[]> => {
     const supabase = await createServerSupabase();
     return listClients(supabase);
+  },
+);
+
+export const provisionClientAccountAction = safeAction(
+  {
+    schema: z.object({ clientId: z.string().uuid() }),
+    permission: { resource: 'client', action: 'update' },
+    loadContext: getActionContext,
+    name: 'crm.provisionClientAccount',
+  },
+  async (input, ctx): Promise<ProvisionedUser> => {
+    const supabase = await createServerSupabase();
+    const client = await getClient(supabase, input.clientId);
+    
+    if (!client.email) {
+      throw new Error('Klien harus memiliki alamat email untuk dapat dibuatkan akun.');
+    }
+
+    const provisionResult = await provisionExternalUser({
+      organizationId: ctx.organizationId,
+      email: client.email,
+      fullName: client.contact_name ?? client.name,
+    });
+
+    if (provisionResult.temporaryPassword !== null) {
+      const { data: existingLink } = await supabase
+        .from('client_users')
+        .select('*')
+        .eq('client_id', client.id)
+        .eq('user_id', provisionResult.userId)
+        .maybeSingle();
+
+      if (!existingLink) {
+        await insertClientUser(supabase, {
+          client_id: client.id,
+          user_id: provisionResult.userId,
+        });
+      }
+    }
+
+    return provisionResult;
   },
 );

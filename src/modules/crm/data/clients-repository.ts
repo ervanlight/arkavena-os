@@ -1,7 +1,7 @@
 import 'server-only';
 import type { ServerSupabase } from '@/core/db/client.server';
 import { NotFoundError } from '@/core/errors/app-error';
-import type { Client, ClientUpdate, NewClient } from '../types';
+import type { Client, ClientUpdate, NewClient, ClientUser, NewClientUser } from '../types';
 
 /**
  * All direct `clients` table access lives here -- ARCHITECTURE.md 1.2's
@@ -57,5 +57,11 @@ export async function updateClient(supabase: ServerSupabase, id: string, patch: 
   if (data === null) {
     throw new NotFoundError(`Client ${id} not found`, { meta: { clientId: id } });
   }
+  return data;
+}
+
+export async function insertClientUser(supabase: ServerSupabase, input: NewClientUser): Promise<ClientUser> {
+  const { data, error } = await supabase.from('client_users').insert(input).select().single();
+  if (error !== null) throw error;
   return data;
 }

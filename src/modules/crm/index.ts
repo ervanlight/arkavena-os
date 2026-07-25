@@ -40,7 +40,7 @@ export {
   type UpdateSiteInput,
 } from './schemas';
 
-export { createClientAction, listClientsAction, updateClientAction } from './actions/client-actions';
+export { createClientAction, listClientsAction, updateClientAction, provisionClientAccountAction } from './actions/client-actions';
 export { createSiteAction, getSiteAction, listSitesAction, listSitesForClientAction, updateSiteAction } from './actions/site-actions';
 export {
   convertLeadToProjectAction,

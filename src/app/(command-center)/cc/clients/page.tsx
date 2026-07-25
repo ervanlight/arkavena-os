@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { listClientsAction } from '@/modules/crm';
 import { Card, PageHeader, EmptyState } from '@/core/ui';
+import { ClientAccountProvisioner } from './client-account-provisioner';
 
 export const metadata = { title: 'Klien — Arkavena OS' };
 
@@ -39,9 +40,12 @@ export default async function ClientsPage() {
                   <p className="truncate text-[15px] font-medium text-[color:var(--color-ink)]">{client.name}</p>
                   <p className="mt-0.5 text-xs text-[color:var(--color-ink-tertiary)]">{client.contact_name ?? '—'}</p>
                 </div>
-                <div className="shrink-0 text-right text-xs text-[color:var(--color-ink-tertiary)]">
-                  <p>{client.email ?? '—'}</p>
-                  <p>{client.phone ?? '—'}</p>
+                <div className="flex shrink-0 items-center gap-6">
+                  <div className="text-right text-xs text-[color:var(--color-ink-tertiary)]">
+                    <p>{client.email ?? '—'}</p>
+                    <p>{client.phone ?? '—'}</p>
+                  </div>
+                  <ClientAccountProvisioner clientId={client.id} hasEmail={!!client.email} />
                 </div>
               </li>
             ))}
