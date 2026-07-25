@@ -118,6 +118,11 @@ core        → boleh impor: lib SAJA (tidak boleh impor modules)
 
 **Ownership tabel bersifat eksklusif.** Setiap tabel dimiliki tepat satu modul; modul lain mengaksesnya lewat fungsi di `index.ts` modul pemilik, bukan query langsung. Contoh: `cash-gate` butuh data milestone → panggil `projects.getMilestoneFunding(projectId)`, bukan `supabase.from('milestones')` sendiri.
 
+**Dua aturan batas tambahan** (dikunci di `ARCHITECTURE_REVIEW.md` §B, ditegakkan sebagai bagian dari Fase 12 Trust OS — IMPLEMENTATION_PLAN.md Fase 1, F25/F26), keduanya belum pernah dilanggar tapi belum pernah ditulis eksplisit sebelum ini:
+
+1. **`client-portal` tidak boleh mengimpor `cash-gate` atau `estimating` secara langsung, sekalipun untuk satu field yang "sudah diterjemahkan".** Setiap data yang sampai ke klien dari kedua modul ini wajib lewat `vw_client_*` view atau lapisan terjemahan eksplisit (Client Project Status, ADR 0026 §2) — tidak pernah lewat pemanggilan fungsi modul secara langsung. Ini menjaga agar data sensitif (margin, rasio kas, cadangan risiko) tidak pernah bisa bocor lewat "tambah satu field kecil" yang dilakukan tergesa-gesa.
+2. **`partner-desk` dan `client-portal` tidak boleh saling berkomunikasi, dalam bentuk apa pun.** Keduanya melayani hubungan eksternal yang berbeda (supplier/subkontraktor vs klien pemilik proyek) — mencampur jalur data keduanya berisiko membocorkan data satu pihak eksternal ke pihak eksternal lain. Sampai saat ini belum pernah terjadi (tidak ada coupling di antara keduanya), aturan ini menuliskannya secara sadar sebelum Fase 12 mulai menyentuh area client-facing lebih dalam.
+
 ### 1.3 Kenapa struktur ini, dan trade-off-nya
 
 **Kenapa domain-module, bukan layer teknis (components/utils/pages):**
