@@ -16,7 +16,8 @@ import {
   listProjectMembers,
   listMyProjectRoles,
 } from '../data/project-members-repository';
-import { addProjectMemberSchema, removeProjectMemberSchema } from '../schemas';
+import { provisionExternalUser } from '@/core/auth/provision-external-user';
+import { addProjectMemberSchema, inviteProjectMemberSchema, removeProjectMemberSchema } from '../schemas';
 import type { ProjectMember } from '../types';
 import type { Enums } from '@/core/db/database.types';
 
@@ -45,6 +46,54 @@ export const addProjectMemberAction = safeAction(
     });
 
     return member;
+  },
+);
+
+/**
+ * Onboards someone who has no account yet: provisions the auth/users rows
+ * (core/auth/provision-external-user), then assigns them the project role.
+ * Written because addProjectMemberAction alone requires a `userId` that must
+ * already exist, and until now nothing in the UI ever created one for a
+ * client or field worker -- inviteVendorUserAction (modules/procurement) was
+ * the only flow that had ever called provisionExternalUser, so suppliers
+ * could be onboarded through the app while client_approver/client_viewer and
+ * site_coordinator/mandor could not be onboarded at all.
+ *
+ * Returns the temporary password so the inviter can pass it on out-of-band;
+ * it is null when the email already had an account, since re-inviting must
+ * never silently reset someone's existing password.
+ */
+export const inviteProjectMemberAction = safeAction(
+  {
+    schema: inviteProjectMemberSchema,
+    permission: { resource: 'project_member', action: 'add' },
+    loadContext: getActionContext,
+    name: 'projects.inviteProjectMember',
+  },
+  async (input, ctx): Promise<ProjectMember & { temporaryPassword: string | null }> => {
+    const { userId, temporaryPassword } = await provisionExternalUser({
+      organizationId: ctx.organizationId,
+      email: input.email,
+      fullName: input.fullName,
+    });
+
+    const supabase = await createServerSupabase();
+    const member = await insertProjectMember(supabase, {
+      project_id: input.projectId,
+      user_id: userId,
+      project_role: input.projectRole,
+    });
+
+    await recordAudit(createAuditGateway(supabase), {
+      entityTable: 'project_members',
+      entityId: member.id,
+      action: 'insert',
+      newValue: member,
+      projectId: input.projectId,
+      requestId: ctx.requestId,
+    });
+
+    return { ...member, temporaryPassword };
   },
 );
 

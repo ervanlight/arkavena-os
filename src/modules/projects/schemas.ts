@@ -45,6 +45,20 @@ export const removeProjectMemberSchema = z.object({
 });
 export type RemoveProjectMemberInput = z.infer<typeof removeProjectMemberSchema>;
 
+/**
+ * Onboarding a person who has no account yet -- unlike addProjectMemberSchema,
+ * which assigns a role to a `userId` that must already exist. Mirrors
+ * inviteVendorUserSchema (modules/procurement), the only prior flow that ever
+ * called core/auth/provision-external-user.
+ */
+export const inviteProjectMemberSchema = z.object({
+  projectId: z.string().uuid(),
+  email: z.string().trim().email('Format email tidak valid'),
+  fullName: z.string().trim().min(1, 'Nama wajib diisi').max(200),
+  projectRole: z.enum([...PROJECT_ROLES]),
+});
+export type InviteProjectMemberInput = z.infer<typeof inviteProjectMemberSchema>;
+
 export const createZoneSchema = z.object({
   projectId: z.string().uuid(),
   name: z.string().trim().min(1, 'Nama zona wajib diisi').max(200),

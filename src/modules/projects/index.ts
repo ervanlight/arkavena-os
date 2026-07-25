@@ -33,6 +33,7 @@ export {
   createProjectSchema,
   createWorkPackageSchema,
   createZoneSchema,
+  inviteProjectMemberSchema,
   removeProjectMemberSchema,
   updateContractSchema,
   updateMilestoneSchema,
@@ -45,6 +46,7 @@ export {
   type CreateProjectInput,
   type CreateWorkPackageInput,
   type CreateZoneInput,
+  type InviteProjectMemberInput,
   type RemoveProjectMemberInput,
   type UpdateContractInput,
   type UpdateMilestoneInput,
@@ -57,6 +59,7 @@ export { createProjectAction, getProjectAction, listProjectsAction, updateProjec
 export {
   addProjectMemberAction,
   getMyProjectRolesAction,
+  inviteProjectMemberAction,
   listMyClientProjectsAction,
   listMyFieldProjectsAction,
   listMyPartnerProjectsAction,

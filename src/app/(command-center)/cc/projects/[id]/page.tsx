@@ -1,9 +1,17 @@
 import { notFound } from 'next/navigation';
-import { getProjectAction, listWorkPackagesForProjectAction, listZonesForProjectAction, ZoneMap } from '@/modules/projects';
+import {
+  getProjectAction,
+  listProjectMembersAction,
+  listWorkPackagesForProjectAction,
+  listZonesForProjectAction,
+  ZoneMap,
+} from '@/modules/projects';
+import { listStaffUsersAction } from '@/core/auth/invite-staff-user';
 import { Card, StatusBadge, EmptyState } from '@/core/ui';
 import { AddZoneForm } from './add-zone-form';
 import { StartWorkPackageForm } from './start-work-package-form';
 import { DelayDetectionWidget } from './delay-detection-widget';
+import { ProjectMembersPanel } from './project-members-panel';
 
 const WORK_PACKAGE_STATUS_LABEL_ID: Record<string, string> = {
   not_started: 'Belum mulai',
@@ -38,10 +46,12 @@ const STATUS_TONE: Record<string, 'neutral' | 'info' | 'warning' | 'success'> = 
 export default async function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
-  const [projectResult, zonesResult, workPackagesResult] = await Promise.all([
+  const [projectResult, zonesResult, workPackagesResult, membersResult, usersResult] = await Promise.all([
     getProjectAction(id),
     listZonesForProjectAction(id),
     listWorkPackagesForProjectAction(id),
+    listProjectMembersAction(id),
+    listStaffUsersAction(undefined),
   ]);
 
   if (!projectResult.ok) {
@@ -56,6 +66,10 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   const project = projectResult.data;
   const zones = zonesResult.ok ? zonesResult.data : [];
   const workPackages = workPackagesResult.ok ? workPackagesResult.data : [];
+  const members = membersResult.ok ? membersResult.data : [];
+  const nameByUserId = Object.fromEntries(
+    (usersResult.ok ? usersResult.data : []).map((u) => [u.id, u.full_name] as const),
+  );
 
   return (
     <div className="space-y-6">
@@ -79,6 +93,16 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
       </div>
 
       <DelayDetectionWidget projectId={project.id} />
+
+      <Card className="space-y-3">
+        <div>
+          <h2 className="text-[17px] font-semibold text-[color:var(--color-ink)]">Tim proyek</h2>
+          <p className="mt-0.5 text-xs text-[color:var(--color-ink-tertiary)]">
+            Klien yang diundang di sini bisa membuka Portal Klien; mandor/koordinator bisa memakai SiteFlow.
+          </p>
+        </div>
+        <ProjectMembersPanel projectId={project.id} members={members} nameByUserId={nameByUserId} />
+      </Card>
 
       <div className="space-y-3">
         <h2 className="text-[17px] font-semibold text-[color:var(--color-ink)]">Zona</h2>
