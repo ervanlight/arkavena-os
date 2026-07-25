@@ -58,4 +58,26 @@ Not shown: `estimate_id`, any cost/margin figure, `estimate_items`, `cost_librar
 RLS (`proposals_select_client`) hides `draft` proposals entirely — a client never
 sees a proposal still being prepared.
 
-## F3 — invoice/payment-due visibility — milestone 2.4, not yet built
+## F3 — invoice/payment-due visibility (`portal/[projectId]/page.tsx`, milestone 2.4)
+
+`billing` stays **Internal + Management** for its mechanism (aging dashboard, DSO,
+collections analytics — untouched). ADR 0026 §5's own wording names the one
+allowed slice: *"ada tagihan yang perlu dibayar, jatuh tempo tanggal X"* — a plain
+notification inside "Menunggu Anda", not a billing surface of its own.
+
+RLS (`invoices_select_client`) and `core/permissions/matrix.ts`'s `invoice.view`
+already included `client_approver`/`client_viewer` before this milestone (built
+ahead of the UI, Wave 8/9) — F3 needed no new migration or permission-matrix
+change, only wiring `listInvoicesForProjectAction` (already client-callable) into
+the Timeline shell, filtered to `status = 'issued'`.
+
+| Field shown | Source | Why safe |
+| --- | --- | --- |
+| `amount` (formatted Rupiah) | `invoices.amount` | No margin/cost column exists on this table at all |
+| `due_date` | `invoices.due_date` | A real date is appropriate here (unlike "Akan Datang"'s milestones) — a payment due date is a commitment already made, not a schedule estimate that could slip |
+
+Not shown: aging tier, DSO, `milestone_id`/`change_order_id` linkage, `payments`
+history. A `draft` invoice is invisible (RLS `status <> 'draft'`); a `paid` or
+`cancelled` invoice simply stops appearing in "Menunggu Anda" (filtered client-side
+to `status = 'issued'`), same "settled, no longer an action item" reasoning as a
+decided `client_decision`.
