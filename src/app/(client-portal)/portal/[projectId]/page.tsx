@@ -210,6 +210,14 @@ export default async function ClientPortalHomePage({ params }: { params: Promise
                     Lihat &amp; putuskan
                   </Link>
                 )}
+                {decision.handover_signoff && (
+                  <Link
+                    href={`/handover/${decision.id}/accept`}
+                    className="inline-flex items-center justify-center gap-2 rounded-[var(--radius-control)] bg-[color:var(--color-accent)] px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-[color:var(--color-accent-hover)]"
+                  >
+                    Lihat &amp; putuskan
+                  </Link>
+                )}
               </li>
             ))}
             {invoicesDue.map((invoice) => (

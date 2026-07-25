@@ -24,6 +24,19 @@ export async function listAssetsForSite(supabase: ServerSupabase, siteId: string
   return data;
 }
 
+/** Phase 3 (F4): the Client Timeline's own read -- lets a client see which assets on their project they can report a service ticket against. assets_select_client RLS is the real gate. */
+export async function listAssetsForClient(supabase: ServerSupabase, clientId: string): Promise<Asset[]> {
+  const { data, error } = await supabase
+    .from('assets')
+    .select('*')
+    .eq('client_id', clientId)
+    .is('deleted_at', null)
+    .order('name', { ascending: true });
+
+  if (error !== null) throw error;
+  return data;
+}
+
 export async function getAsset(supabase: ServerSupabase, id: string): Promise<Asset> {
   const { data, error } = await supabase.from('assets').select('*').eq('id', id).is('deleted_at', null).maybeSingle();
 

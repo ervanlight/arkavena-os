@@ -59,3 +59,16 @@ export async function getClientDecisionForProposal(
   if (error !== null) throw error;
   return data;
 }
+
+/**
+ * Phase 3 (F6): the /handover/[id]/accept page's own read. Keyed by the
+ * client_decisions row's own id, not a separate source id -- unlike
+ * change_order_id/proposal_id, a handover sign-off has no single source row
+ * to key by (a project-level decision, not a per-row one).
+ */
+export async function getClientDecision(supabase: ServerSupabase, id: string): Promise<ClientDecision | null> {
+  const { data, error } = await supabase.from('client_decisions').select('*').eq('id', id).is('deleted_at', null).maybeSingle();
+
+  if (error !== null) throw error;
+  return data;
+}

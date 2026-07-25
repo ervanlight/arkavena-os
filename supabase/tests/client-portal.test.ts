@@ -322,6 +322,100 @@ describe('fn_client_decide_proposal -- the RPC client-portal calls instead of im
   });
 });
 
+/**
+ * Phase 3 milestone 3.1 (F6): client sign-off/acceptance record at
+ * handover. A handover has no single source row the way change_order_id/
+ * proposal_id point to one -- handover_signoff is a boolean discriminator
+ * against the row's own project_id instead, opened by
+ * fn_projects_sync_handover_signoff_decision the moment a project first
+ * reaches 'completed' (the same trigger point fn_projects_sync_warranties_on_completion
+ * already fires on).
+ */
+describe('fn_projects_sync_handover_signoff_decision -- opens a pending handover sign-off on project completion', () => {
+  it('opens a pending handover_signoff decision the moment a project first reaches completed, never re-fires', async () => {
+    const project = await createProjectWithClientAndSite(org.id);
+
+    await sql(`update projects set status = 'completed' where id = $1`, [project.id]);
+
+    const rows = await sql<{ decided_at: string | null; decision: string | null; client_summary: string | null }>(
+      'select decided_at, decision, client_summary from client_decisions where project_id = $1 and handover_signoff = true',
+      [project.id],
+    );
+    expect(rows).toHaveLength(1);
+    expect(rows[0]!.decided_at).toBeNull();
+    expect(rows[0]!.decision).toBeNull();
+    expect(rows[0]!.client_summary).not.toBeNull();
+
+    await sql(`update projects set name = 'Renamed after completion' where id = $1`, [project.id]);
+    const stillOne = await sql('select id from client_decisions where project_id = $1 and handover_signoff = true', [
+      project.id,
+    ]);
+    expect(stillOne).toHaveLength(1);
+  });
+});
+
+describe('fn_client_accept_handover -- the RPC client-portal calls for its own handover_signoff rows', () => {
+  it('lets a client_approver accept, recording their own decision', async () => {
+    const project = await createProjectWithClientAndSite(org.id);
+    const clientApprover = await createUser({ organizationId: org.id, orgRole: null });
+    await addProjectMember(project.id, clientApprover.id, 'client_approver');
+    await sql(`update projects set status = 'completed' where id = $1`, [project.id]);
+    const [decision] = await sql<{ id: string }>(
+      'select id from client_decisions where project_id = $1 and handover_signoff = true',
+      [project.id],
+    );
+
+    // asUser's transaction is rolled back once its callback returns
+    // (db.ts), so the RPC's own effect can only be observed here, on the
+    // same connection, before that rollback happens.
+    await asUser(clientApprover.id, async (run) => {
+      const rows = await run(
+        `select decision, decided_by from fn_client_accept_handover($1, 'approved', 'Diterima, semua sesuai')`,
+        [decision!.id],
+      );
+      expect(rows[0]!.decision).toBe('approved');
+      expect(rows[0]!.decided_by).toBe(clientApprover.id);
+    });
+  });
+
+  it('rejects a client from a different project attempting to decide (client_decisions_update_client RLS)', async () => {
+    const project = await createProjectWithClientAndSite(org.id);
+    const otherProject = await createProjectWithClientAndSite(org.id);
+    const clientViewerOther = await createUser({ organizationId: org.id, orgRole: null });
+    await addProjectMember(otherProject.id, clientViewerOther.id, 'client_viewer');
+    await sql(`update projects set status = 'completed' where id = $1`, [project.id]);
+    const [decision] = await sql<{ id: string }>(
+      'select id from client_decisions where project_id = $1 and handover_signoff = true',
+      [project.id],
+    );
+
+    // client_viewer is read-only (client_decisions_update_client requires
+    // client_approver specifically) and belongs to a different project
+    // either way -- the RPC's own UPDATE affects zero rows and raises.
+    await expectRejection(
+      asUser(clientViewerOther.id, (run) => run(`select fn_client_accept_handover($1, 'approved', 'Mencoba')`, [decision!.id])),
+    );
+  });
+
+  it('fn_client_decisions_guard_client_columns blocks a client_approver from touching client_summary or project_id', async () => {
+    const project = await createProjectWithClientAndSite(org.id);
+    const clientApprover = await createUser({ organizationId: org.id, orgRole: null });
+    await addProjectMember(project.id, clientApprover.id, 'client_approver');
+    await sql(`update projects set status = 'completed' where id = $1`, [project.id]);
+    const [decision] = await sql<{ id: string }>(
+      'select id from client_decisions where project_id = $1 and handover_signoff = true',
+      [project.id],
+    );
+
+    const error = await expectRejection(
+      asUser(clientApprover.id, (run) =>
+        run(`update client_decisions set client_summary = 'saya ubah sendiri' where id = $1`, [decision!.id]),
+      ),
+    );
+    expect(error.message).toMatch(/only record their own accept\/reject decision/);
+  });
+});
+
 describe('contracts/milestones/photos -- new client-scoped read policies this wave adds', () => {
   it("lets Project A's client see Project A's contract, hides it from Project B's client", async () => {
     const contractId = await insertContract(projectA.id);

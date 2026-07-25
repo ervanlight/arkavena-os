@@ -403,14 +403,41 @@ user:
 | --- | --- |
 | `client_decisions.decision` is set if and only if `decided_at` is set | `ck_client_decisions_decision_requires_decided_at` |
 | `client_decisions` stays in sync with `change_orders.status` without a second state machine | `fn_change_orders_sync_client_decision` |
-| Exactly one of `change_order_id`/`proposal_id` is set — never both, never neither | `ck_client_decisions_exactly_one_source` (post-implementation review fix, C1) |
+| Exactly one of `change_order_id`/`proposal_id`/`handover_signoff` is set — never more than one, never none | `ck_client_decisions_exactly_one_source` (post-implementation review fix, C1; extended to 3-way, Phase 3 F6) |
 | `client_decisions` stays in sync with `proposals.status` the same way it mirrors `change_orders.status` | `fn_proposals_sync_client_decision` (post-implementation review fix, C1 — see Fase 8 below) |
+| A pending handover sign-off opens the moment a project first reaches `status = 'completed'` | `fn_projects_sync_handover_signoff_decision` (Phase 3, F6 — fires on the same event `fn_projects_sync_warranties_on_completion` already does) |
+| A client_approver's UPDATE of a `handover_signoff` row may only touch `decision`/`decided_at`/`decided_by`/`decision_reason` | `fn_client_decisions_guard_client_columns` (Phase 3, F6) |
 
 ### Post-implementation review fix — proposal decisions also mirror through `client_decisions` (C1, ADR 0026 §7 item 7)
 
 F1 originally had client-portal's app routes import `@/modules/estimating` directly (`getProposalAction`, `listProposalsForProjectAction`, `clientDecideProposalAction`) — a direct violation of ARCHITECTURE.md 1.2's F25 rule ("client-portal tidak boleh mengimpor cash-gate atau estimating secara langsung"), found in a post-implementation review. `client_decisions.proposal_id` (nullable FK, mirroring `change_order_id` exactly — Wave 8's own comment on that column anticipated this) plus `fn_proposals_sync_client_decision` (mirroring `fn_change_orders_sync_client_decision`) close the read side: client-portal now only ever reads `client_decisions`, never `proposals`.
 
 For the one write client-portal must still cause (a client's own accept/reject), `fn_client_decide_proposal` (Fase 8, see below) is a plain (non-`security definer`) RPC — a named database procedure called by string identifier, not a TypeScript import across the boundary. `proposals_update_client` RLS and `trg_proposals_guard_transition`/`trg_proposals_guard_client_columns` (all built for F1) keep enforcing exactly as before, checked against the calling client's own session, completely unchanged.
+
+### Phase 3 (F6) — handover sign-off, `client_decisions`' first client-writable row shape
+
+A handover has no single source row the way `change_order_id`/`proposal_id`
+point to one (a project's handover is one moment, not one row per
+`handover_items` entry) — `handover_signoff` is a boolean discriminator
+against the row's own `project_id` instead of a fourth nullable FK.
+`decided_by`/`decision_reason` are new columns on `client_decisions` itself
+(populated only for `handover_signoff` rows) because, unlike change_order/
+proposal decisions, there is no source table already storing who decided
+and why.
+
+`client_decisions_update_client` is `client_decisions`' first-ever
+client-writable RLS policy — every other row is closed by a source-table
+sync trigger, never by a direct client UPDATE of `client_decisions` itself.
+Scoped narrowly: `handover_signoff` rows only, `client_approver` only.
+`fn_client_decisions_guard_client_columns` is the column-level restriction
+underneath (same "coarse RLS + precise trigger" split as
+`fn_proposals_guard_client_columns`). `fn_client_accept_handover` is the
+plain (non-`security definer`) RPC `modules/client-portal`'s own action
+calls — mirroring `fn_client_decide_proposal` exactly, since
+`client_decisions` is already owned by `client-portal`, there is no other
+module to avoid importing here; the RPC exists purely so the action never
+issues a raw `.from('client_decisions').update(...)` for a row shape this
+narrow and security-sensitive.
 
 ## Fase 7 — billing (Wave 8/9)
 
@@ -590,17 +617,17 @@ only), not a separate `purchase_order` action — identical to how
 
 ## Fase 9 — maintenance-engine (Wave 9-10, ADR 0019)
 
-Staff-only, same treatment as every other Fase 8/9 table — no project role,
-field, or client-portal surface reaches any of these five tables yet
-(no Facility Passport client view in this phase, ADR 0019 SS4).
+Staff-only through Fase 9 itself (no Facility Passport client view in that
+phase, ADR 0019 SS4). **Phase 3 milestone 3.1 (F4) adds client policies to
+four of the five tables** — see the amendment below.
 
 | Table | Owner/TD/Finance/QS/Procurement | Any project role | Client |
 | --- | --- | --- | --- |
-| `handover_items` | SELECT, INSERT (org) | — | — |
-| `warranties` | CRUD\* (org) | — | — |
-| `assets` | CRUD\* (org) | — | — |
+| `handover_items` | SELECT, INSERT (org) | — | `client_approver`/`client_viewer`: SELECT (own project, Phase 3) |
+| `warranties` | CRUD\* (org) | — | `client_approver`/`client_viewer`: SELECT (own project, Phase 3) |
+| `assets` | CRUD\* (org) | — | `client_approver`/`client_viewer`: SELECT (own client, Phase 3) |
 | `maintenance_plans` | CRUD\* (org) | — | — |
-| `service_tickets` | CRUD\* (org) | — | — |
+| `service_tickets` | CRUD\* (org) | — | `client_approver`/`client_viewer`: SELECT (own client); `client_approver` also INSERT (Phase 3) |
 
 \* "CRUD" here means SELECT/INSERT/UPDATE — no DELETE policy exists for
 anyone, same as every other table in this document; soft delete
@@ -625,6 +652,33 @@ direction (CLAUDE.md law 0.3).
 gates the way Cash Gate or invoice issuance are; `next_due_date`/`overdue`
 (ADR 0019 SS5) are computed advisory values, not something RLS or a trigger
 enforces.
+
+### Phase 3 amendment — client visibility + client-originated service tickets (F4)
+
+`warranties`/`handover_items` carry `project_id` — their client policies
+(`warranties_select_client`, `handover_items_select_client`) mirror
+`proposals_select_client` exactly. `assets`/`service_tickets` carry no
+`project_id` at all (Facility Passport deliberately outlives a single
+project, Wave 9's own header comment) — `fn_client_has_role_for_client(client_id,
+roles)` is the client_id-scoped equivalent of `fn_has_project_role`, checking
+`project_members` joined through `projects.client_id` instead of a project a
+client is a member of directly.
+
+`service_tickets_insert_client`'s `with check` is the column-level
+restriction RLS alone cannot express for an INSERT: a client-reported ticket
+must land `status = 'open'`, `reported_by = auth.uid()`, and
+`assigned_to`/`maintenance_plan_id`/`warranty_id` all null — a client can
+never claim their own ticket is already assigned, scheduled, or linked to a
+warranty at creation time. `service_ticket.client_create` (`requirePermission`,
+`client_approver` only) is the matching application-layer check —
+`client_viewer` may read but not report.
+
+None of these four tables needed a `client_decisions`-style mirror table the
+way `proposals`/`change_orders` did — `maintenance-engine` is not one of the
+two modules ARCHITECTURE.md 1.2 (F25) forbids client-portal from importing
+directly (only `cash-gate`/`estimating` are), so client-portal reads these
+through `modules/maintenance-engine`'s own public API directly, the same
+shape `modules/billing`'s invoice visibility (F3) already uses.
 
 ## Fase 10 — ai-scribe (Wave 10, ADR 0020)
 

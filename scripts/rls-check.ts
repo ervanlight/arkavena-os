@@ -139,6 +139,14 @@ const ACTION_COMMANDS: Record<string, 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE'>
   // precise check (ADR 0026 §5 amendment), same split as change_orders'
   // client_approve/client_reject above.
   client_decide: 'UPDATE',
+  // Phase 3 (F6): a client_approver's own handover accept/reject --
+  // client_decisions_update_client is the policy underneath, with
+  // trg_client_decisions_guard_client_columns as the precise check, same
+  // split as proposal's client_decide above.
+  accept_handover: 'UPDATE',
+  // Phase 3 (F4): a client_approver reporting their own service ticket --
+  // service_tickets_insert_client is the policy underneath.
+  client_create: 'INSERT',
   // change_role and invite are deliberately absent. Neither has, or should
   // ever have, a matching RLS policy: change_role is enforced by
   // fn_users_guard_privileged_columns (a trigger, not a policy), and invite

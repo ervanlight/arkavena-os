@@ -167,6 +167,123 @@ describe('fn_projects_sync_warranties_on_completion -- the trigger actually crea
   });
 });
 
+/**
+ * Phase 3 milestone 3.1 (F4): client-facing warranty/handover/asset/
+ * service-ticket visibility, plus a client-originated service ticket.
+ * warranties/handover_items carry project_id -- their client policies mirror
+ * proposals_select_client exactly. assets/service_tickets carry no
+ * project_id at all (Facility Passport outlives a single project, ADR 0019
+ * SS1) -- fn_client_has_role_for_client is the client_id-scoped equivalent.
+ */
+describe('RLS -- warranties/handover_items/assets/service_tickets client visibility (Phase 3, F4)', () => {
+  it("lets a project's client_approver/client_viewer see its own warranty and handover item, hides another project's", async () => {
+    const projectA = await newProject();
+    const projectB = await newProject();
+    const clientApproverA = await createUser({ organizationId: org.id, orgRole: null });
+    await addProjectMember(projectA.id, clientApproverA.id, 'client_approver');
+    const clientViewerB = await createUser({ organizationId: org.id, orgRole: null });
+    await addProjectMember(projectB.id, clientViewerB.id, 'client_viewer');
+
+    const [handoverItem] = await sql<{ id: string }>(
+      `insert into handover_items (organization_id, project_id, item_type, recorded_by) values ($1, $2, 'ac_unit', $3) returning id`,
+      [org.id, projectA.id, owner.id],
+    );
+    const [warranty] = await sql<{ id: string }>(
+      `insert into warranties (organization_id, project_id, handover_item_id, title, starts_at, ends_at)
+       values ($1, $2, $3, 'Garansi AC', current_date, current_date + interval '1 year') returning id`,
+      [org.id, projectA.id, handoverItem!.id],
+    );
+
+    await asUser(clientApproverA.id, async (run) => {
+      expect(await run('select id from handover_items where id = $1', [handoverItem!.id])).toHaveLength(1);
+      expect(await run('select id from warranties where id = $1', [warranty!.id])).toHaveLength(1);
+    });
+    await asUser(clientViewerB.id, async (run) => {
+      expect(await run('select id from handover_items where id = $1', [handoverItem!.id])).toHaveLength(0);
+      expect(await run('select id from warranties where id = $1', [warranty!.id])).toHaveLength(0);
+    });
+  });
+
+  it("lets a client see their own client's assets and service tickets, hides another client's", async () => {
+    const projectA = await newProject();
+    const projectC = await newProject();
+    const clientApproverA = await createUser({ organizationId: org.id, orgRole: null });
+    await addProjectMember(projectA.id, clientApproverA.id, 'client_approver');
+    const clientViewerC = await createUser({ organizationId: org.id, orgRole: null });
+    await addProjectMember(projectC.id, clientViewerC.id, 'client_viewer');
+
+    const assetId = await newAsset(projectA.siteRow.id, projectA.clientRow.id);
+    const [ticket] = await sql<{ id: string }>(
+      `insert into service_tickets (organization_id, asset_id, client_id, title, reported_by)
+       values ($1, $2, $3, 'AC bocor', $4) returning id`,
+      [org.id, assetId, projectA.clientRow.id, owner.id],
+    );
+
+    await asUser(clientApproverA.id, async (run) => {
+      expect(await run('select id from assets where id = $1', [assetId])).toHaveLength(1);
+      expect(await run('select id from service_tickets where id = $1', [ticket!.id])).toHaveLength(1);
+    });
+    await asUser(clientViewerC.id, async (run) => {
+      expect(await run('select id from assets where id = $1', [assetId])).toHaveLength(0);
+      expect(await run('select id from service_tickets where id = $1', [ticket!.id])).toHaveLength(0);
+    });
+  });
+
+  it('lets a client_approver report a new service ticket for their own asset, correctly shaped', async () => {
+    const project = await newProject();
+    const clientApprover = await createUser({ organizationId: org.id, orgRole: null });
+    await addProjectMember(project.id, clientApprover.id, 'client_approver');
+    const assetId = await newAsset(project.siteRow.id, project.clientRow.id);
+
+    await asUser(clientApprover.id, async (run) => {
+      const rows = await run(
+        `insert into service_tickets (organization_id, asset_id, client_id, title, reported_by)
+         values ($1, $2, $3, 'AC tidak dingin', $4) returning status, reported_by, assigned_to, maintenance_plan_id`,
+        [org.id, assetId, project.clientRow.id, clientApprover.id],
+      );
+      expect(rows).toHaveLength(1);
+      expect(rows[0]!.status).toBe('open');
+      expect(rows[0]!.reported_by).toBe(clientApprover.id);
+      expect(rows[0]!.assigned_to).toBeNull();
+      expect(rows[0]!.maintenance_plan_id).toBeNull();
+    });
+  });
+
+  it('rejects a client_viewer attempting to report a ticket (read-only role)', async () => {
+    const project = await newProject();
+    const clientViewer = await createUser({ organizationId: org.id, orgRole: null });
+    await addProjectMember(project.id, clientViewer.id, 'client_viewer');
+    const assetId = await newAsset(project.siteRow.id, project.clientRow.id);
+
+    await expectRejection(
+      asUser(clientViewer.id, (run) =>
+        run(
+          `insert into service_tickets (organization_id, asset_id, client_id, title, reported_by)
+           values ($1, $2, $3, 'Coba lapor', $4)`,
+          [org.id, assetId, project.clientRow.id, clientViewer.id],
+        ),
+      ),
+    );
+  });
+
+  it('rejects a client_approver trying to report a ticket claiming to be assigned/resolved already (service_tickets_insert_client with check)', async () => {
+    const project = await newProject();
+    const clientApprover = await createUser({ organizationId: org.id, orgRole: null });
+    await addProjectMember(project.id, clientApprover.id, 'client_approver');
+    const assetId = await newAsset(project.siteRow.id, project.clientRow.id);
+
+    await expectRejection(
+      asUser(clientApprover.id, (run) =>
+        run(
+          `insert into service_tickets (organization_id, asset_id, client_id, title, reported_by, assigned_to)
+           values ($1, $2, $3, 'Coba assign sendiri', $4, $5)`,
+          [org.id, assetId, project.clientRow.id, clientApprover.id, owner.id],
+        ),
+      ),
+    );
+  });
+});
+
 describe('fn_service_tickets_guard_transition -- the trigger actually blocks, not just the domain layer', () => {
   it('refuses skipping straight from open to resolved', async () => {
     const project = await newProject();

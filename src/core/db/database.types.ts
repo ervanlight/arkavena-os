@@ -617,10 +617,13 @@ export type Database = {
           client_summary: string | null
           created_at: string
           decided_at: string | null
+          decided_by: string | null
           decision:
             | Database["public"]["Enums"]["client_decision_outcome"]
             | null
+          decision_reason: string | null
           deleted_at: string | null
+          handover_signoff: boolean
           id: string
           organization_id: string
           presented_at: string
@@ -633,10 +636,13 @@ export type Database = {
           client_summary?: string | null
           created_at?: string
           decided_at?: string | null
+          decided_by?: string | null
           decision?:
             | Database["public"]["Enums"]["client_decision_outcome"]
             | null
+          decision_reason?: string | null
           deleted_at?: string | null
+          handover_signoff?: boolean
           id?: string
           organization_id: string
           presented_at?: string
@@ -649,10 +655,13 @@ export type Database = {
           client_summary?: string | null
           created_at?: string
           decided_at?: string | null
+          decided_by?: string | null
           decision?:
             | Database["public"]["Enums"]["client_decision_outcome"]
             | null
+          decision_reason?: string | null
           deleted_at?: string | null
+          handover_signoff?: boolean
           id?: string
           organization_id?: string
           presented_at?: string
@@ -666,6 +675,13 @@ export type Database = {
             columns: ["change_order_id"]
             isOneToOne: false
             referencedRelation: "change_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_decisions_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
           {
@@ -3997,6 +4013,38 @@ export type Database = {
         Args: { p_project_id: string }
         Returns: Database["public"]["Enums"]["cash_gate_status"]
       }
+      fn_client_accept_handover: {
+        Args: {
+          p_client_decision_id: string
+          p_decision: Database["public"]["Enums"]["client_decision_outcome"]
+          p_reason: string
+        }
+        Returns: {
+          change_order_id: string | null
+          client_summary: string | null
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision:
+            | Database["public"]["Enums"]["client_decision_outcome"]
+            | null
+          decision_reason: string | null
+          deleted_at: string | null
+          handover_signoff: boolean
+          id: string
+          organization_id: string
+          presented_at: string
+          project_id: string
+          proposal_id: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "client_decisions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       fn_client_decide_proposal: {
         Args: {
           p_decision: Database["public"]["Enums"]["proposal_status"]
@@ -4024,6 +4072,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      fn_client_has_role_for_client: {
+        Args: { p_client_id: string; p_roles: string[] }
+        Returns: boolean
       }
       fn_current_org_id: { Args: never; Returns: string }
       fn_current_org_role: {

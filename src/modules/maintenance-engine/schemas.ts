@@ -92,6 +92,21 @@ export const createServiceTicketSchema = z.object({
 });
 export type CreateServiceTicketInput = z.infer<typeof createServiceTicketSchema>;
 
+/**
+ * Phase 3 (F4): a client_approver reporting their own issue
+ * (WORKFLOW_REVIEW.md 8.2) -- deliberately narrower than
+ * createServiceTicketSchema above: no warrantyId/maintenancePlanId/
+ * assignedTo, all staff-only concepts. service_tickets_insert_client RLS's
+ * own `with check` independently enforces the same restriction at the DB
+ * layer regardless of what this schema allows.
+ */
+export const createServiceTicketAsClientSchema = z.object({
+  assetId: z.string().uuid(),
+  title: z.string().trim().min(1, 'Judul wajib diisi').max(200),
+  description: z.string().trim().max(2000).optional(),
+});
+export type CreateServiceTicketAsClientInput = z.infer<typeof createServiceTicketAsClientSchema>;
+
 const SERVICE_TICKET_STATUSES = ['open', 'in_progress', 'resolved', 'cancelled'] as const;
 
 export const updateServiceTicketStatusSchema = z.object({

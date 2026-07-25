@@ -8,15 +8,17 @@ import { safeAction } from '@/core/actions/safe-action';
 import { createServerSupabase } from '@/core/db/client.server';
 import { DomainRuleError } from '@/core/errors/app-error';
 import { ERROR_CODES } from '@/core/errors/codes';
+import { getProjectClientId } from '@/modules/projects/server';
 import { transition } from '../domain/service-ticket-transition';
 import { getAsset } from '../data/assets-repository';
 import {
   getServiceTicket,
   insertServiceTicket,
   listServiceTicketsForAsset,
+  listServiceTicketsForClient,
   updateServiceTicket,
 } from '../data/service-tickets-repository';
-import { createServiceTicketSchema, updateServiceTicketStatusSchema } from '../schemas';
+import { createServiceTicketAsClientSchema, createServiceTicketSchema, updateServiceTicketStatusSchema } from '../schemas';
 import type { ServiceTicket } from '../types';
 
 export const createServiceTicketAction = safeAction(
@@ -42,6 +44,49 @@ export const createServiceTicketAction = safeAction(
       // (ADR 0019 SS7), in which case there is no reporter to name.
       reported_by: input.maintenancePlanId === undefined ? ctx.userId : null,
       assigned_to: input.assignedTo ?? null,
+    });
+
+    await recordAudit(createAuditGateway(supabase), {
+      entityTable: 'service_tickets',
+      entityId: ticket.id,
+      action: 'insert',
+      newValue: ticket,
+      requestId: ctx.requestId,
+    });
+
+    return ticket;
+  },
+);
+
+/**
+ * Phase 3 (F4): a client_approver reporting their own issue
+ * (WORKFLOW_REVIEW.md 8.2's "duplicate entry" gap -- client calls the
+ * office, staff re-keys it). Deliberately separate from
+ * createServiceTicketAction above: no warrantyId/maintenancePlanId/
+ * assignedTo input, status/reported_by/assigned_to/maintenance_plan_id/
+ * warranty_id/resolved_at all fixed server-side to the one shape
+ * service_tickets_insert_client RLS's own `with check` independently
+ * requires (Phase 3 migration).
+ */
+export const createServiceTicketAsClientAction = safeAction(
+  {
+    schema: createServiceTicketAsClientSchema,
+    permission: { resource: 'service_ticket', action: 'client_create' },
+    loadContext: getActionContext,
+    name: 'maintenanceEngine.createServiceTicketAsClient',
+    audience: 'external',
+  },
+  async (input, ctx): Promise<ServiceTicket> => {
+    const supabase = await createServerSupabase();
+    const asset = await getAsset(supabase, input.assetId);
+
+    const ticket = await insertServiceTicket(supabase, {
+      organization_id: asset.organization_id,
+      asset_id: input.assetId,
+      client_id: asset.client_id,
+      title: input.title,
+      description: input.description ?? null,
+      reported_by: ctx.userId,
     });
 
     await recordAudit(createAuditGateway(supabase), {
@@ -99,6 +144,22 @@ export const updateServiceTicketStatusAction = safeAction(
     });
 
     return after;
+  },
+);
+
+/** Phase 3 (F4): the Client Timeline's own read -- a client's own reported/tracked tickets, resolved via their project's client_id (modules/projects/server's getProjectClientId). */
+export const listServiceTicketsForClientAction = safeAction(
+  {
+    schema: z.string().uuid(),
+    permission: { resource: 'service_ticket', action: 'view' },
+    loadContext: getActionContext,
+    name: 'maintenanceEngine.listServiceTicketsForClient',
+    audience: 'external',
+  },
+  async (projectId): Promise<ServiceTicket[]> => {
+    const supabase = await createServerSupabase();
+    const clientId = await getProjectClientId(supabase, projectId);
+    return listServiceTicketsForClient(supabase, clientId);
   },
 );
 

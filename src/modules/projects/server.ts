@@ -20,7 +20,20 @@ export { getMyProjectRole } from './data/project-members-repository';
 
 import type { ServerSupabase } from '@/core/db/client.server';
 import { listContractsForProject } from './data/contracts-repository';
+import { getProject } from './data/projects-repository';
 import { isProjectClientFacing } from './domain/client-facing';
+
+/**
+ * Phase 3 (F4): modules/maintenance-engine's client-facing reads are scoped
+ * by client_id (assets/service_tickets outlive a single project, ADR 0019
+ * SS1, so they carry no project_id at all) -- but the Client Timeline itself
+ * is per-project. This resolves the one hop between them without
+ * modules/maintenance-engine ever querying `projects` directly.
+ */
+export async function getProjectClientId(supabase: ServerSupabase, projectId: string): Promise<string> {
+  const project = await getProject(supabase, projectId);
+  return project.client_id;
+}
 
 /**
  * One-call convenience for modules/client-portal and modules/evidence, both

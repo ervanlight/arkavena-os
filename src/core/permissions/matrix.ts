@@ -354,6 +354,12 @@ export const PERMISSIONS = {
 
   client_decision: {
     view: [...ORG_ROLES, 'client_approver', 'client_viewer'],
+    // Phase 3 (F6): a client_approver's own handover accept/reject, distinct
+    // from staff never deciding this on the client's behalf (there is no
+    // staff-side equivalent action -- unlike proposal/change_order, nobody
+    // else can make this decision). RLS (client_decisions_update_client) and
+    // fn_client_decisions_guard_client_columns are the real enforcement.
+    accept_handover: ['client_approver'],
   },
 
   // -------------------------------------------------------------------------
@@ -483,20 +489,26 @@ export const PERMISSIONS = {
   // Fase 9 (modules/maintenance-engine, ADR 0019)
   // -------------------------------------------------------------------------
 
+  // Phase 3 (F4): client_approver/client_viewer added to view -- ADR 0026 §5
+  // "info garansi & status tiket servis milik klien". RLS
+  // (handover_items_select_client/warranties_select_client/
+  // assets_select_client/service_tickets_select_client) is the real gate;
+  // these entries are what let a client's own call pass requirePermission()
+  // at all, same shape as evidence.view/proposal.view before it.
   handover_item: {
-    view: [...ORG_ROLES],
+    view: [...ORG_ROLES, 'client_approver', 'client_viewer'],
     create: [...ORG_ROLES],
   },
 
   /** No `create` gate needed beyond staff-only: most rows come from fn_projects_sync_warranties_on_completion, not a user action (ADR 0019 SS3). */
   warranty: {
-    view: [...ORG_ROLES],
+    view: [...ORG_ROLES, 'client_approver', 'client_viewer'],
     create: [...ORG_ROLES],
     update: [...ORG_ROLES],
   },
 
   asset: {
-    view: [...ORG_ROLES],
+    view: [...ORG_ROLES, 'client_approver', 'client_viewer'],
     create: [...ORG_ROLES],
     update: [...ORG_ROLES],
   },
@@ -508,9 +520,14 @@ export const PERMISSIONS = {
   },
 
   service_ticket: {
-    view: [...ORG_ROLES],
+    view: [...ORG_ROLES, 'client_approver', 'client_viewer'],
     create: [...ORG_ROLES],
     update: [...ORG_ROLES],
+    // A client_approver reporting their own issue (WORKFLOW_REVIEW.md 8.2) --
+    // distinct from staff `create` (which allows assignedTo/maintenancePlanId,
+    // never client-settable). service_tickets_insert_client RLS is the real
+    // gate, restricted further to client_approver only (not client_viewer).
+    client_create: ['client_approver'],
   },
 
   // -------------------------------------------------------------------------

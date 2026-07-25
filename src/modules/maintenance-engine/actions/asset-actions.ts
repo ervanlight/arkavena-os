@@ -7,7 +7,8 @@ import { getActionContext } from '@/core/auth/session';
 import { safeAction } from '@/core/actions/safe-action';
 import { createServerSupabase } from '@/core/db/client.server';
 import { getSiteAction } from '@/modules/crm';
-import { getAsset, insertAsset, listAssets, listAssetsForSite, updateAsset } from '../data/assets-repository';
+import { getProjectClientId } from '@/modules/projects/server';
+import { getAsset, insertAsset, listAssets, listAssetsForClient, listAssetsForSite, updateAsset } from '../data/assets-repository';
 import { createAssetSchema, updateAssetSchema } from '../schemas';
 import type { Asset } from '../types';
 
@@ -110,6 +111,30 @@ export const listAssetsForSiteAction = safeAction(
   async (siteId): Promise<Asset[]> => {
     const supabase = await createServerSupabase();
     return listAssetsForSite(supabase, siteId);
+  },
+);
+
+/**
+ * Phase 3 (F4): lets a client see which of their own assets they can report
+ * a service ticket against. Takes a projectId (what the Client Timeline
+ * actually has) rather than a clientId directly -- assets/service_tickets
+ * carry no project_id at all (Facility Passport outlives a single project,
+ * ADR 0019 SS1), resolved here via modules/projects/server's
+ * getProjectClientId rather than app/ ever needing to know that hop exists.
+ * assets_select_client RLS is the real gate.
+ */
+export const listAssetsForClientAction = safeAction(
+  {
+    schema: z.string().uuid(),
+    permission: { resource: 'asset', action: 'view' },
+    loadContext: getActionContext,
+    name: 'maintenanceEngine.listAssetsForClient',
+    audience: 'external',
+  },
+  async (projectId): Promise<Asset[]> => {
+    const supabase = await createServerSupabase();
+    const clientId = await getProjectClientId(supabase, projectId);
+    return listAssetsForClient(supabase, clientId);
   },
 );
 

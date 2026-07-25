@@ -111,3 +111,53 @@ history. A `draft` invoice is invisible (RLS `status <> 'draft'`); a `paid` or
 `cancelled` invoice simply stops appearing in "Menunggu Anda" (filtered client-side
 to `status = 'issued'`), same "settled, no longer an action item" reasoning as a
 decided `client_decision`.
+
+## F4 — warranty/handover/service-ticket visibility (`portal/[projectId]/garansi-servis/page.tsx`, Phase 3 milestone 3.1)
+
+`maintenance-engine` stays **Internal + Management** for Facility Passport
+planning (`maintenance_plans`, asset install/serial detail beyond name).
+ADR 0026 §5's own wording names the two allowed slices: *"status garansi
+rumah mereka dan tiket servis yang mereka laporkan"* — Client Visible — plus
+a genuine Client Decision Required action, reporting a new issue.
+
+Unlike F1/proposals, this page reads `modules/maintenance-engine` directly —
+it is not one of the two modules ARCHITECTURE.md 1.2 (F25) forbids
+client-portal from importing (only `cash-gate`/`estimating` are).
+
+| Field shown | Source | Why safe |
+| --- | --- | --- |
+| Warranty `title`, `status` (mapped to a sentence), `ends_at` | `warranties` via `warranties_select_client` | No cost/vendor-pricing column exists on this table at all |
+| Asset `name` (for the report-ticket picker only) | `assets` via `assets_select_client` | `manufacturer`/`model`/`serial_number`/`notes` fetched but never rendered — the picker only ever shows `name` |
+| Service ticket `title`, `status` (mapped to a sentence), `created_at` | `service_tickets` via `service_tickets_select_client` | `resolution_notes`/`assigned_to`/internal identifiers never rendered |
+
+Not shown: `maintenance_plans` (any of it — Internal + Management, no client
+policy exists), `warranties.terms` (free text, not currently surfaced —
+could be added later without a schema change), asset technical detail
+beyond name, which staff member is assigned to a ticket.
+
+**Client-originated write:** `createServiceTicketAsClientAction` lets a
+`client_approver` report a new issue directly (WORKFLOW_REVIEW.md 8.2's
+"duplicate entry" gap — a client called the office, staff re-keyed it).
+`service_tickets_insert_client`'s own `with check` (not just the action
+schema) fixes `status = 'open'`, `reported_by = auth.uid()`,
+`assigned_to`/`maintenance_plan_id`/`warranty_id` all null — a client can
+never report a ticket that claims to already be assigned, scheduled, or
+warranty-linked.
+
+## F6 — handover sign-off (`handover/[id]/accept/page.tsx`, Phase 3 milestone 3.1)
+
+WORKFLOW_REVIEW.md 7.4: *"there's no in-system equivalent of a signed
+handover/acceptance document."* Modeled as a third `client_decisions` row
+shape (`handover_signoff`), mirroring the `client_summary`-only pattern F1/F2
+already established — never a technical breakdown, just one sentence
+("Proyek Anda telah selesai — mohon konfirmasi serah terima.") plus the
+client's own accept/reject.
+
+| Field shown | Source | Why safe |
+| --- | --- | --- |
+| `client_summary` | `client_decisions.client_summary`, set once by `fn_projects_sync_handover_signoff_decision` | Fixed generic text, not derived from any internal handover-item detail |
+| Status (mapped to "Anda konfirmasi"/"Anda tolak") | `client_decisions.decision`/`decided_at` | Raw enum never interpolated |
+
+Not shown, ever: the underlying `handover_items` rows this decision is
+about (that detail lives in the Garansi & Servis tab above, read
+separately, not joined into this decision at all).

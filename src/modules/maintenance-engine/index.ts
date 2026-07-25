@@ -32,6 +32,7 @@ export {
   createHandoverItemSchema,
   createMaintenancePlanSchema,
   createServiceTicketSchema,
+  createServiceTicketAsClientSchema,
   createWarrantySchema,
   markMaintenancePlanCompletedSchema,
   updateAssetSchema,
@@ -42,6 +43,7 @@ export {
   type CreateHandoverItemInput,
   type CreateMaintenancePlanInput,
   type CreateServiceTicketInput,
+  type CreateServiceTicketAsClientInput,
   type CreateWarrantyInput,
   type MarkMaintenancePlanCompletedInput,
   type UpdateAssetInput,
@@ -67,6 +69,7 @@ export {
   createAssetAction,
   getAssetAction,
   listAssetsAction,
+  listAssetsForClientAction,
   listAssetsForSiteAction,
   updateAssetAction,
 } from './actions/asset-actions';
@@ -83,7 +86,9 @@ export {
 
 export {
   createServiceTicketAction,
+  createServiceTicketAsClientAction,
   getServiceTicketAction,
   listServiceTicketsForAssetAction,
+  listServiceTicketsForClientAction,
   updateServiceTicketStatusAction,
 } from './actions/service-ticket-actions';

@@ -20,6 +20,19 @@ export async function listServiceTicketsForAsset(
   return data;
 }
 
+/** Phase 3 (F4): the Client Timeline's own read -- a client sees their own reported/tracked tickets. service_tickets_select_client RLS is the real gate. */
+export async function listServiceTicketsForClient(supabase: ServerSupabase, clientId: string): Promise<ServiceTicket[]> {
+  const { data, error } = await supabase
+    .from('service_tickets')
+    .select('*')
+    .eq('client_id', clientId)
+    .is('deleted_at', null)
+    .order('created_at', { ascending: false });
+
+  if (error !== null) throw error;
+  return data;
+}
+
 export async function getServiceTicket(supabase: ServerSupabase, id: string): Promise<ServiceTicket> {
   const { data, error } = await supabase
     .from('service_tickets')

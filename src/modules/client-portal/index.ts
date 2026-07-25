@@ -21,11 +21,14 @@ export type { DecisionClockTier } from './domain/decision-clock';
 export {
   publishClientStatusSchema,
   clientDecideProposalSchema,
+  clientAcceptHandoverSchema,
   type PublishClientStatusInput,
   type ClientDecideProposalInput,
+  type ClientAcceptHandoverInput,
 } from './schemas';
 
 export {
+  getClientDecisionAction,
   getClientDecisionForProposalAction,
   getClientProjectOverviewAction,
   listClientDecisionsAction,
@@ -38,3 +41,5 @@ export {
 export { publishClientStatusAction, listClientStatusUpdatesForProjectAction } from './actions/client-status-actions';
 
 export { clientDecideProposalAction } from './actions/client-proposal-decision-actions';
+
+export { clientAcceptHandoverAction } from './actions/client-handover-decision-actions';

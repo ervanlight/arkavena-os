@@ -4,6 +4,7 @@ import Link from 'next/link';
 const TABS = [
   { href: '', label: 'Beranda' },
   { href: '/laporan-mingguan', label: 'Laporan Mingguan' },
+  { href: '/garansi-servis', label: 'Garansi & Servis' },
 ] as const;
 
 /** An iOS-style segmented scroller rather than a plain underlined tab row. */

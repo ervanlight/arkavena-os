@@ -6,6 +6,7 @@ import { safeAction } from '@/core/actions/safe-action';
 import { createServerSupabase } from '@/core/db/client.server';
 import { decisionClockTier, type DecisionClockTier } from '../domain/decision-clock';
 import {
+  getClientDecision,
   getClientDecisionForProposal,
   listClientDecisionsForProject,
   listPendingClientDecisionsForProject,
@@ -115,6 +116,21 @@ export const getClientDecisionForProposalAction = safeAction(
   async (proposalId): Promise<ClientDecision | null> => {
     const supabase = await createServerSupabase();
     return getClientDecisionForProposal(supabase, proposalId);
+  },
+);
+
+/** Phase 3 (F6): the /handover/[id]/accept page's own read, keyed by the client_decisions row's own id. */
+export const getClientDecisionAction = safeAction(
+  {
+    schema: z.string().uuid(),
+    permission: { resource: 'client_decision', action: 'view' },
+    loadContext: getActionContext,
+    name: 'clientPortal.getClientDecision',
+    audience: 'external',
+  },
+  async (id): Promise<ClientDecision | null> => {
+    const supabase = await createServerSupabase();
+    return getClientDecision(supabase, id);
   },
 );
 
