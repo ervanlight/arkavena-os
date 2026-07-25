@@ -1,4 +1,4 @@
-import { Activity, BarChart2, Clock } from 'lucide-react';
+import { BarChart2, Clock } from 'lucide-react';
 
 export default function ClientPortalLoading() {
   return (
