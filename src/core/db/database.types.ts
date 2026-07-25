@@ -779,6 +779,7 @@ export type Database = {
           id: string
           organization_id: string
           project_id: string
+          proposal_id: string | null
           signed_date: string | null
           status: Database["public"]["Enums"]["contract_status"]
           title: string
@@ -791,6 +792,7 @@ export type Database = {
           id?: string
           organization_id: string
           project_id: string
+          proposal_id?: string | null
           signed_date?: string | null
           status?: Database["public"]["Enums"]["contract_status"]
           title: string
@@ -803,6 +805,7 @@ export type Database = {
           id?: string
           organization_id?: string
           project_id?: string
+          proposal_id?: string | null
           signed_date?: string | null
           status?: Database["public"]["Enums"]["contract_status"]
           title?: string
@@ -829,6 +832,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "vw_client_project_overview"
             referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "contracts_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
           },
         ]
       }

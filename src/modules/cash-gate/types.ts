@@ -1,5 +1,6 @@
 import type { Rupiah } from '@/core/money/rupiah';
 import type { Tables, TablesInsert } from '@/core/db/database.types';
+import type { WorkPackage } from '@/modules/projects';
 
 export type { CashGateAction, CashGateStatus, GateAllowed, GateBlocked, GateOverride, GateState } from './domain/types';
 
@@ -24,4 +25,4 @@ export type ProjectRiskReserve = Omit<Tables<'project_risk_reserves'>, 'risk_res
   risk_reserve_amount: Rupiah;
 };
 
-export type WorkPackage = Tables<'work_packages'>;
+export type { WorkPackage };

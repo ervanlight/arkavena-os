@@ -101,6 +101,20 @@ export default async function CashGatePage({ params }: { params: Promise<{ id: s
             Cash Gate {STATUS_LABEL_ID[gate!.status]?.toLowerCase()} -- paket kerja berikut tidak bisa dibuka sampai kas
             mencukupi, atau di-override oleh Owner dengan alasan.
           </p>
+          {/*
+            IMPLEMENTATION_PRIORITIES.md F10 / WORKFLOW_REVIEW.md's own finding:
+            Cash Gate's accuracy depends entirely on someone promptly logging a
+            funding_receipt after money actually arrives -- nothing in the
+            system used to create urgency around that specific action. This is
+            exactly the moment (gate red/overdue) that urgency matters most.
+          */}
+          <p className="mt-2 text-sm text-[color:var(--color-danger)]">
+            Sudah menerima pembayaran untuk proyek ini? Pastikan sudah dicatat di{' '}
+            <a href="#catat-termin" className="font-medium underline">
+              Catat termin masuk
+            </a>{' '}
+            di bawah -- gate hanya membaca termin yang sudah tercatat di sistem.
+          </p>
           {blockedWorkPackages.length > 0 && (
             <ul className="mt-3 list-inside list-disc text-sm text-[color:var(--color-danger)]">
               {blockedWorkPackages.map((wp) => (
@@ -125,7 +139,7 @@ export default async function CashGatePage({ params }: { params: Promise<{ id: s
           <RiskReserveForm projectId={project.id} currentAmount={riskReserveAmount} />
         </Card>
 
-        <Card className="space-y-4">
+        <Card id="catat-termin" className="space-y-4">
           <h2 className="text-[17px] font-semibold text-[color:var(--color-ink)]">Catat termin masuk</h2>
           <FundingReceiptForm projectId={project.id} />
         </Card>
