@@ -71,7 +71,7 @@ test('klien approve variation -> dana masuk -> paket kerja muncul di daftar kerj
       await clientPage.getByLabel('Catatan persetujuan').fill('Setuju, silakan lanjutkan.');
       await clientPage.getByRole('button', { name: 'Setujui variation ini' }).click();
 
-      await expect(clientPage.getByText(/sudah diputuskan sebelumnya/)).toBeVisible();
+      await expect(clientPage.getByText(/Anda setujui/)).toBeVisible();
     });
 
     await test.step('owner marks the funding received', async () => {

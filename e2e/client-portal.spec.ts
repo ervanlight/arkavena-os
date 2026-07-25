@@ -92,7 +92,7 @@ test('klien melihat portal proyeknya, memutuskan variation dari dalam portal, da
 
       await clientPage.getByLabel('Catatan persetujuan').fill('Setuju, silakan lanjutkan.');
       await clientPage.getByRole('button', { name: 'Setujui variation ini' }).click();
-      await expect(clientPage.getByText(/sudah diputuskan sebelumnya/)).toBeVisible();
+      await expect(clientPage.getByText(/Anda setujui/)).toBeVisible();
     });
 
     await test.step('the Keputusan page now shows it decided, not pending', async () => {
