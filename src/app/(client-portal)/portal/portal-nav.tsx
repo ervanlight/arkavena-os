@@ -1,29 +1,35 @@
 import type { Route } from 'next';
 import Link from 'next/link';
+import { Activity, BarChart2, ShieldCheck, Wallet } from 'lucide-react';
 
 const TABS = [
-  { href: '', label: 'Beranda' },
-  { href: '/laporan-mingguan', label: 'Laporan Mingguan' },
-  { href: '/garansi-servis', label: 'Garansi & Servis' },
+  { href: '', label: 'Overview', icon: Activity },
+  { href: '/progress', label: 'Progress', icon: BarChart2 },
+  { href: '/quality', label: 'Quality', icon: ShieldCheck },
+  { href: '/financial', label: 'Financial', icon: Wallet },
 ] as const;
 
-/** An iOS-style segmented scroller rather than a plain underlined tab row. */
-export function PortalNav({ projectId, active }: { projectId: string; active: (typeof TABS)[number]['href'] }) {
+export function PortalNav({ projectId, active }: { projectId: string; active: string }) {
   return (
-    <nav className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1">
-      {TABS.map((tab) => (
-        <Link
-          key={tab.href}
-          href={`/portal/${projectId}${tab.href}` as Route}
-          className={`shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors ${
-            tab.href === active
-              ? 'bg-[color:var(--color-ink)] text-white'
-              : 'bg-[color:var(--color-surface-secondary)] text-[color:var(--color-ink-secondary)] hover:bg-[color:var(--color-hairline)]'
-          }`}
-        >
-          {tab.label}
-        </Link>
-      ))}
+    <nav className="flex gap-6 border-b border-white/10 mb-6">
+      {TABS.map((tab) => {
+        const isActive = tab.href === active;
+        const Icon = tab.icon;
+        return (
+          <Link
+            key={tab.href}
+            href={`/portal/${projectId}${tab.href}` as Route}
+            className={`flex items-center gap-2 pb-3 text-sm font-medium transition-colors border-b-2 ${
+              isActive
+                ? 'border-white text-white'
+                : 'border-transparent text-gray-500 hover:text-gray-300 hover:border-gray-600'
+            }`}
+          >
+            <Icon size={16} />
+            {tab.label}
+          </Link>
+        );
+      })}
     </nav>
   );
 }
