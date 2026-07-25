@@ -2,7 +2,7 @@
 
 > Ini dokumen *produk*, bukan dokumen teknis. `ARCHITECTURE.md` menjawab "bagaimana sistem ini dibangun". `CLAUDE.md` menjawab "aturan apa yang tidak boleh dilanggar". Dokumen ini menjawab satu pertanyaan yang lebih tinggi: **mengapa Arkavena OS ada, dan untuk siapa.**
 
-> **Riwayat revisi:** Revisi 1 (2026-07-25) memperkenalkan "Project Confidence Score" sebagai north star — sebuah skor numerik tunggal untuk klien. Revisi 2 (2026-07-25, hari yang sama) **membatalkan pendekatan itu atas keputusan Owner secara eksplisit**: skor numerik untuk klien dianggap mengundang klien menghakimi performa operasional tanpa memahami realita konstruksi, dan bertentangan dengan tujuan produk (mengurangi kecemasan, bukan mengundang pengawasan). Dicatat di sini secara visibel, bukan dihapus diam-diam, mengikuti konvensi ADR di `docs/decisions/`. Lihat [ADR 0026](docs/decisions/0026-trust-os-transformation.md) untuk riwayat lengkap dan rasionalnya.
+> **Riwayat revisi:** Revisi 1 (2026-07-25) memperkenalkan "Project Confidence Score" sebagai north star — sebuah skor numerik tunggal untuk klien. Revisi 2 (2026-07-25, hari yang sama) **membatalkan pendekatan itu atas keputusan Owner secara eksplisit**: skor numerik untuk klien dianggap mengundang klien menghakimi performa operasional tanpa memahami realita konstruksi, dan bertentangan dengan tujuan produk (mengurangi kecemasan, bukan mengundang pengawasan). Dicatat di sini secara visibel, bukan dihapus diam-diam, mengikuti konvensi ADR di `docs/decisions/`. Lihat [ADR 0026](docs/decisions/0026-arkavena-os-product-transformation.md) untuk riwayat lengkap dan rasionalnya.
 
 ---
 

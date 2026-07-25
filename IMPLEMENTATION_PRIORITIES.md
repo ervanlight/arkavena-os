@@ -92,7 +92,7 @@
 - **Recommendation:** **Fix After MVP.** Real gap, correctly identified, but sequenced behind F1/F3 because it serves fewer concurrent relationships at current project volume — matches the general principle that Fase 12's first release should nail the *most common* client moments first.
 
 ### F5 — No systematic client communication cadence (the Client Timeline itself)
-- **Business Impact:** Critical — this is the core deliverable `PRODUCT.md` and `ADR 0026` exist to build; without it, the "Trust OS" positioning has no product behind it yet.
+- **Business Impact:** Critical — this is the core deliverable `PRODUCT.md` and `ADR 0026` exist to build; without it, the Arkavena OS positioning has no product behind it yet.
 - **Operational Impact:** Every touchpoint currently defaults to manual/informal channels (confirmed across nearly every Phase 1-8 step in `WORKFLOW_REVIEW.md`).
 - **Technical Risk:** Medium — genuinely new domain work (Client Project Status, Evidence visibility), but already designed in ADR 0026, not unknown territory.
 - **User Impact:** Critical — this is the entire client-facing product.
@@ -134,7 +134,7 @@
 - **User Impact:** None (client never sees this).
 - **Cost to Fix:** Medium — needs a genuine cross-module link (`field-reporting` ↔ `procurement`), the two modules with zero coupling today.
 - **Cost of Doing Nothing:** Low-Medium — an occasional inefficiency, not a trust or safety issue.
-- **Recommendation:** **Fix After MVP.** Real, but purely an internal efficiency gain with no bearing on the "Trust OS" mission this whole review cycle is organized around. Doesn't compete for priority against anything client-facing.
+- **Recommendation:** **Fix After MVP.** Real, but purely an internal efficiency gain with no bearing on the mission this whole review cycle is organized around. Doesn't compete for priority against anything client-facing.
 
 ### F10 — Cash Gate accuracy depends on unprompted manual `funding_receipt` entry
 - **Business Impact:** High — this is the system's single most trust-critical mechanism (per `PRODUCT.md`'s own competitive-advantage claim), and its accuracy has an unmonitored manual dependency.
@@ -192,7 +192,7 @@
 - **User Impact:** None.
 - **Cost to Fix:** Medium (calendaring is its own real feature category).
 - **Cost of Doing Nothing:** Very low.
-- **Recommendation:** **Reject.** Per the founder's own principle ("software must adapt to operations, operations must never adapt to software") — operations already handle this fine informally, and building calendar infrastructure would be solving a problem nobody has reported having. This is squarely outside the Trust OS mission.
+- **Recommendation:** **Reject.** Per the founder's own principle ("software must adapt to operations, operations must never adapt to software") — operations already handle this fine informally, and building calendar infrastructure would be solving a problem nobody has reported having. This is squarely outside Arkavena OS's mission.
 
 ### F17 — No standard assessment checklist/template
 - **Business Impact:** Low at current scale (one or few assessors); grows in value only once there's more than one person doing assessments and consistency starts to matter.
@@ -204,7 +204,7 @@
 - **Recommendation:** **Fix After MVP.** Cheap and eventually useful, but there's no evidence of a current consistency problem to justify prioritizing it now.
 
 ### F18 — No warranty-expiry relationship-transition touchpoint
-- **Business Impact:** Medium (business development — referrals, repeat business, maintenance contracts) but not part of the core Trust OS mission (reducing client anxiety during an active project).
+- **Business Impact:** Medium (business development — referrals, repeat business, maintenance contracts) but not part of Arkavena OS's core mission (reducing client anxiety during an active project).
 - **Operational Impact:** Low.
 - **Technical Risk:** Low.
 - **User Impact:** Low-Medium, and positive rather than anxiety-reducing (this is an opportunity, not a risk).

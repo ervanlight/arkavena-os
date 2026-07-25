@@ -1,4 +1,4 @@
-# ADR 0026 — Trust OS transformation: Client Status, Evidence visibility, module classification
+# ADR 0026 — Arkavena OS product transformation: Client Status, Evidence visibility, module classification
 
 **Status:** PROPOSED — belum diimplementasikan, butuh keputusan Owner per item di bagian §6 sebelum Fase 12 dimulai.
 **Date:** 2026-07-25 (Revisi 2, hari yang sama dengan Revisi 1)
