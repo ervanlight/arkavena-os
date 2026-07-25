@@ -18,7 +18,12 @@ import {
   listChangeOrdersForProject,
   updateChangeOrder,
 } from '../data/change-orders-repository';
-import { changeOrderReasonSchema, createChangeOrderSchema, setChangeOrderImpactSchema } from '../schemas';
+import {
+  changeOrderReasonSchema,
+  createChangeOrderSchema,
+  sendChangeOrderToClientSchema,
+  setChangeOrderImpactSchema,
+} from '../schemas';
 import type { ChangeOrder } from '../types';
 
 /**
@@ -149,13 +154,19 @@ export const submitChangeOrderForReviewAction = safeAction(
 
 export const sendChangeOrderToClientAction = safeAction(
   {
-    schema: z.string().uuid(),
+    schema: sendChangeOrderToClientSchema,
     permission: { resource: 'change_order', action: 'review' },
     loadContext: getActionContext,
     name: 'scopeVariation.sendChangeOrderToClient',
   },
-  async (id, ctx): Promise<ChangeOrder> =>
-    runStaffTransition(ctx, id, 'send_to_client', { patch: { reviewed_by: ctx.userId, reviewed_at: new Date().toISOString() } }),
+  async (input, ctx): Promise<ChangeOrder> =>
+    runStaffTransition(ctx, input.id, 'send_to_client', {
+      patch: {
+        reviewed_by: ctx.userId,
+        reviewed_at: new Date().toISOString(),
+        client_summary: input.clientSummary ?? null,
+      },
+    }),
 );
 
 export const rejectChangeOrderAction = safeAction(

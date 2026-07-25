@@ -4,13 +4,14 @@
  * -- this module owns both tables (ARCHITECTURE.md 1.1).
  */
 
-export type { Evidence, EvidenceActivityTable, EvidenceOverrideRow, NewEvidence } from './types';
+export type { Evidence, EvidenceActivityTable, EvidenceOverrideRow, EvidenceWithUrl, NewEvidence } from './types';
 
 export { overrideEvidenceGateSchema, type OverrideEvidenceGateInput } from './schemas';
 
 export {
   listEvidenceForActivityAction,
   listClientVisibleEvidenceForProjectAction,
+  listClientVisibleEvidenceWithUrlsForProjectAction,
   listEvidenceOverridesForProjectAction,
   overrideEvidenceGateAction,
 } from './actions/evidence-actions';

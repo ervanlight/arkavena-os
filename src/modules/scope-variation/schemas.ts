@@ -27,6 +27,13 @@ export const setChangeOrderImpactSchema = z.object({
 });
 export type SetChangeOrderImpactInput = z.infer<typeof setChangeOrderImpactSchema>;
 
+/** ADR 0026 §4.2: an optional plain-language sentence, set at the moment this variation is actually sent to the client -- never the raw internal `title`. */
+export const sendChangeOrderToClientSchema = z.object({
+  id: z.string().uuid(),
+  clientSummary: z.string().trim().max(300).optional(),
+});
+export type SendChangeOrderToClientInput = z.infer<typeof sendChangeOrderToClientSchema>;
+
 export const changeOrderReasonSchema = z.object({
   id: z.string().uuid(),
   reason: z.string().trim().min(1, 'Alasan wajib diisi'),

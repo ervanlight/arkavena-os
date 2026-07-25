@@ -531,7 +531,12 @@ export const PERMISSIONS = {
    * role uploaded the photo -- not a separate user-facing form).
    */
   evidence: {
-    view: [...ORG_ROLES],
+    // client_approver/client_viewer per ADR 0026 §4 -- the Client Timeline's
+    // own read. RLS (evidence_select_client) is the real gate, scoped to
+    // visibility = 'client_visible'; this entry is what lets a client's own
+    // call to listClientVisibleEvidenceForProjectAction pass requirePermission()
+    // at all, matching client_decision.view's shape.
+    view: [...ORG_ROLES, 'client_approver', 'client_viewer'],
     create: [...ORG_ROLES, 'site_coordinator', 'mandor'],
   },
 

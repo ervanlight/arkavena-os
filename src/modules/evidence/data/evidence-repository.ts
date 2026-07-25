@@ -1,7 +1,9 @@
 import 'server-only';
 import type { ServerSupabase } from '@/core/db/client.server';
 import { NotFoundError } from '@/core/errors/app-error';
-import type { Evidence, NewEvidence } from '../types';
+import type { Evidence, EvidenceWithUrl, NewEvidence } from '../types';
+
+const THUMBNAIL_URL_TTL_SECONDS = 60 * 60; // 1 hour -- one page view's worth, same TTL as client-portal's photo signing.
 
 /** All direct `evidence` table access lives here (ARCHITECTURE.md 1.2). */
 
@@ -41,6 +43,22 @@ export async function listClientVisibleEvidenceForProject(supabase: ServerSupaba
 
   if (error !== null) throw error;
   return data;
+}
+
+/** The Client Timeline's own read, with browser-loadable thumbnail URLs resolved (ADR 0026 §4.2 "Hari Ini"/"Update Terbaru"). */
+export async function listClientVisibleEvidenceWithUrlsForProject(
+  supabase: ServerSupabase,
+  projectId: string,
+): Promise<EvidenceWithUrl[]> {
+  const rows = await listClientVisibleEvidenceForProject(supabase, projectId);
+
+  return Promise.all(
+    rows.map(async ({ thumbnail_path, storage_path: _storagePath, ...rest }) => {
+      if (thumbnail_path === null) return { ...rest, thumbnailUrl: null };
+      const { data: signed } = await supabase.storage.from('photos').createSignedUrl(thumbnail_path, THUMBNAIL_URL_TTL_SECONDS);
+      return { ...rest, thumbnailUrl: signed?.signedUrl ?? null };
+    }),
+  );
 }
 
 /** ADR 0026 §3.3: promotes a held-back row to client_visible, the side effect of another module's own approval action. */

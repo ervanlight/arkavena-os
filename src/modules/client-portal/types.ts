@@ -1,9 +1,12 @@
 import type { Rupiah } from '@/core/money/rupiah';
-import type { Tables } from '@/core/db/database.types';
+import type { Tables, TablesInsert } from '@/core/db/database.types';
 
 /** Row types always derive from the generated schema (ARCHITECTURE.md 3.1). */
 
 export type ClientDecision = Tables<'client_decisions'>;
+
+export type ClientStatusUpdate = Tables<'client_status_updates'>;
+export type NewClientStatusUpdate = TablesInsert<'client_status_updates'>;
 
 /**
  * Supabase's type generator marks every column of a VIEW as nullable --

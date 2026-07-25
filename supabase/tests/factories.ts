@@ -288,6 +288,17 @@ export async function cleanupOrganizations(orgIds: readonly string[]): Promise<v
       // projects (nullably)/users, all ON DELETE RESTRICT -- same class of
       // gap as everything above, blocks `projects`/`users` below otherwise.
       await run('delete from ai_generations where organization_id = any($1::uuid[])', [orgIds]);
+      // Fase 12 (modules/evidence, modules/client-portal): same class of gap
+      // as everything above -- evidence_overrides and evidence both
+      // reference work_packages with ON DELETE RESTRICT, so both must go
+      // before work_packages is deleted just below; client_status_updates
+      // has no such dependency but is grouped here for the same reason
+      // (found while verifying F5's Client Timeline shell -- evidence.test.ts
+      // had been leaving all three tables' rows behind in the shared dev
+      // project on every run since Fase 12 started).
+      await run('delete from evidence_overrides where organization_id = any($1::uuid[])', [orgIds]);
+      await run('delete from evidence where organization_id = any($1::uuid[])', [orgIds]);
+      await run('delete from client_status_updates where organization_id = any($1::uuid[])', [orgIds]);
       // Fase 1 (modules/crm, modules/projects): children before parents, even
       // though replica mode suspends the FK checks that would otherwise force
       // this order -- keeping it anyway is cheap and reads as documentation.

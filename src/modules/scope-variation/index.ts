@@ -13,9 +13,11 @@ export type { ChangeOrderEvent, ChangeOrderStatus } from './domain/types';
 export {
   changeOrderReasonSchema,
   createChangeOrderSchema,
+  sendChangeOrderToClientSchema,
   setChangeOrderImpactSchema,
   type ChangeOrderReasonInput,
   type CreateChangeOrderInput,
+  type SendChangeOrderToClientInput,
   type SetChangeOrderImpactInput,
 } from './schemas';
 

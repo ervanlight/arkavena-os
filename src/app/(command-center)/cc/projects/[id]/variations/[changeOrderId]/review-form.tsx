@@ -11,8 +11,12 @@ const initialState: FormState = { error: null };
 export function ReviewForm({ changeOrderId }: { changeOrderId: string }) {
   const router = useRouter();
 
-  const [sendState, sendAction, isSending] = useActionState(async (_prev: FormState) => {
-    const result = await sendChangeOrderToClientAction(changeOrderId);
+  const [sendState, sendAction, isSending] = useActionState(async (_prev: FormState, formData: FormData) => {
+    const clientSummary = String(formData.get('clientSummary') ?? '').trim();
+    const result = await sendChangeOrderToClientAction({
+      id: changeOrderId,
+      ...(clientSummary !== '' ? { clientSummary } : {}),
+    });
     if (!result.ok) return { error: result.error.message };
     router.refresh();
     return { error: null };
@@ -30,15 +34,27 @@ export function ReviewForm({ changeOrderId }: { changeOrderId: string }) {
 
   return (
     <div className="space-y-4">
-      <form action={sendAction} className="flex items-center gap-3">
-        <Button type="submit" disabled={isSending}>
-          {isSending ? 'Mengirim...' : 'Kirim ke klien'}
-        </Button>
-        {sendState.error !== null && (
-          <span role="alert" className="text-sm text-[color:var(--color-danger)]">
-            {sendState.error}
-          </span>
-        )}
+      <form action={sendAction} className="space-y-2">
+        <Label htmlFor="reviewClientSummary">Ringkasan untuk klien (opsional)</Label>
+        <Textarea
+          id="reviewClientSummary"
+          name="clientSummary"
+          rows={2}
+          placeholder="mis. Pemilihan meja dapur menunggu konfirmasi Anda"
+        />
+        <p className="text-xs text-[color:var(--color-ink-tertiary)]">
+          Kalau dikosongkan, klien akan melihat kalimat generik, bukan judul internal variation ini.
+        </p>
+        <div className="flex items-center gap-3">
+          <Button type="submit" disabled={isSending}>
+            {isSending ? 'Mengirim...' : 'Kirim ke klien'}
+          </Button>
+          {sendState.error !== null && (
+            <span role="alert" className="text-sm text-[color:var(--color-danger)]">
+              {sendState.error}
+            </span>
+          )}
+        </div>
       </form>
 
       <form action={rejectAction} className="space-y-2 border-t border-[color:var(--color-hairline)] pt-4">

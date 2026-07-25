@@ -2,11 +2,7 @@ import type { Route } from 'next';
 import Link from 'next/link';
 
 const TABS = [
-  { href: '', label: 'Ringkasan' },
-  { href: '/zona', label: 'Peta Zona' },
-  { href: '/timeline', label: 'Timeline' },
-  { href: '/keputusan', label: 'Keputusan' },
-  { href: '/foto', label: 'Foto Progres' },
+  { href: '', label: 'Beranda' },
   { href: '/laporan-mingguan', label: 'Laporan Mingguan' },
 ] as const;
 

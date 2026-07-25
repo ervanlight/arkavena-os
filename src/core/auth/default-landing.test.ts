@@ -19,9 +19,14 @@ describe('decideDefaultLanding', () => {
     expect(decideDefaultLanding(null, ['client_approver', 'mandor'])).toBe('/site');
   });
 
-  it('falls back to /cc for a project-role-only user with no field role', () => {
-    expect(decideDefaultLanding(null, ['client_approver'])).toBe('/cc');
-    expect(decideDefaultLanding(null, ['supplier', 'subcontractor'])).toBe('/cc');
+  it('sends a project-role-only client_approver/client_viewer to /portal', () => {
+    expect(decideDefaultLanding(null, ['client_approver'])).toBe('/portal');
+    expect(decideDefaultLanding(null, ['client_viewer'])).toBe('/portal');
+  });
+
+  it('sends a project-role-only supplier/subcontractor to /partner', () => {
+    expect(decideDefaultLanding(null, ['supplier'])).toBe('/partner');
+    expect(decideDefaultLanding(null, ['subcontractor'])).toBe('/partner');
   });
 
   it('falls back to /cc for a signed-in user with no roles at all', () => {

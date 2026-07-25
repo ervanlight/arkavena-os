@@ -8,10 +8,14 @@ import { safeAction } from '@/core/actions/safe-action';
 import { createServerSupabase } from '@/core/db/client.server';
 import { getWorkPackage } from '@/modules/projects/server';
 import type { WorkPackage } from '@/modules/projects';
-import { listEvidenceForActivity, listClientVisibleEvidenceForProject } from '../data/evidence-repository';
+import {
+  listEvidenceForActivity,
+  listClientVisibleEvidenceForProject,
+  listClientVisibleEvidenceWithUrlsForProject,
+} from '../data/evidence-repository';
 import { listOverridesForProject, overrideEvidenceGate } from '../data/evidence-overrides-repository';
 import { overrideEvidenceGateSchema } from '../schemas';
-import type { Evidence, EvidenceOverrideRow } from '../types';
+import type { Evidence, EvidenceOverrideRow, EvidenceWithUrl } from '../types';
 
 export const listEvidenceForActivityAction = safeAction(
   {
@@ -26,17 +30,33 @@ export const listEvidenceForActivityAction = safeAction(
   },
 );
 
-/** The Client Timeline's own read -- RLS (evidence_select_client) is what actually decides whether a given signed-in client may see a given project's rows; this permission entry is the staff-side check for the same action, used when a staff member previews the Timeline. */
+/** RLS (evidence_select_client) is what actually decides whether a given signed-in client may see a given project's rows; this permission entry (evidence.view includes client_approver/client_viewer) is what lets requirePermission() pass for a client caller at all, and also lets staff preview the Timeline. */
 export const listClientVisibleEvidenceForProjectAction = safeAction(
   {
     schema: z.string().uuid(),
     permission: { resource: 'evidence', action: 'view' },
     loadContext: getActionContext,
     name: 'evidence.listClientVisibleEvidenceForProject',
+    audience: 'external',
   },
   async (projectId): Promise<Evidence[]> => {
     const supabase = await createServerSupabase();
     return listClientVisibleEvidenceForProject(supabase, projectId);
+  },
+);
+
+/** Same read as above, with thumbnail URLs resolved -- the Client Timeline's actual data source (ADR 0026 §4.2). */
+export const listClientVisibleEvidenceWithUrlsForProjectAction = safeAction(
+  {
+    schema: z.string().uuid(),
+    permission: { resource: 'evidence', action: 'view' },
+    loadContext: getActionContext,
+    name: 'evidence.listClientVisibleEvidenceWithUrlsForProject',
+    audience: 'external',
+  },
+  async (projectId): Promise<EvidenceWithUrl[]> => {
+    const supabase = await createServerSupabase();
+    return listClientVisibleEvidenceWithUrlsForProject(supabase, projectId);
   },
 );
 

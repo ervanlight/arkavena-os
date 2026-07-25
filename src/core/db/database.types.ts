@@ -451,6 +451,7 @@ export type Database = {
           client_approved_at: string | null
           client_approved_by: string | null
           client_approved_reason: string | null
+          client_summary: string | null
           completed_at: string | null
           completed_by: string | null
           cost_impact_amount: number | null
@@ -478,6 +479,7 @@ export type Database = {
           client_approved_at?: string | null
           client_approved_by?: string | null
           client_approved_reason?: string | null
+          client_summary?: string | null
           completed_at?: string | null
           completed_by?: string | null
           cost_impact_amount?: number | null
@@ -505,6 +507,7 @@ export type Database = {
           client_approved_at?: string | null
           client_approved_by?: string | null
           client_approved_reason?: string | null
+          client_summary?: string | null
           completed_at?: string | null
           completed_by?: string | null
           cost_impact_amount?: number | null
@@ -611,6 +614,7 @@ export type Database = {
       client_decisions: {
         Row: {
           change_order_id: string | null
+          client_summary: string | null
           created_at: string
           decided_at: string | null
           decision:
@@ -625,6 +629,7 @@ export type Database = {
         }
         Insert: {
           change_order_id?: string | null
+          client_summary?: string | null
           created_at?: string
           decided_at?: string | null
           decision?:
@@ -639,6 +644,7 @@ export type Database = {
         }
         Update: {
           change_order_id?: string | null
+          client_summary?: string | null
           created_at?: string
           decided_at?: string | null
           decision?:
