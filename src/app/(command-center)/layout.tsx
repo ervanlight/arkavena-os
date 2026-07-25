@@ -3,35 +3,39 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import {
   Home,
-  Users,
-  TrendingUp,
-  ClipboardList,
   Building2,
-  Truck,
-  BookOpen,
-  ShieldCheck,
-  Package,
-  Award,
+  Inbox,
+  CheckSquare,
+  Rss,
+  GitPullRequest,
   Receipt,
-  UsersRound,
+  FileText,
+  Users,
+  BarChart3,
+  ClipboardList,
   Bell,
+  UsersRound,
   LogOut,
 } from 'lucide-react';
 import { getCurrentUser } from '@/core/auth/session';
 import { signOut } from '@/core/auth/login';
 
+// Product Redesign v2.0: 10 Main Modules for Arkavena PM Control
 const NAV_ITEMS = [
-  { href: '/cc', label: 'Ringkasan', icon: Home },
-  { href: '/cc/clients', label: 'Klien', icon: Users },
-  { href: '/cc/leads', label: 'Leads', icon: TrendingUp },
+  { href: '/cc', label: '1. Dashboard', icon: Home },
+  { href: '/cc/projects', label: '2. Proyek', icon: Building2 },
+  { href: '/cc/daily-reports', label: '3. Daily Report Inbox', icon: Inbox },
+  { href: '/cc/review-center', label: '4. Review Center', icon: CheckSquare },
+  { href: '/cc/client-feed', label: '5. Client Feed', icon: Rss },
+  { href: '/cc/variations', label: '6. Variations', icon: GitPullRequest },
+  { href: '/cc/billing', label: '7. Invoice Generator', icon: Receipt },
+  { href: '/cc/documents', label: '8. Dokumen', icon: FileText },
+  { href: '/cc/subcontractors', label: '9. Subkontraktor', icon: Users },
+  { href: '/cc/analytics', label: '10. Analytics', icon: BarChart3 },
+] satisfies { href: Route; label: string; icon: typeof Home }[];
+
+const SECONDARY_NAV = [
   { href: '/cc/assessments', label: 'Assessment', icon: ClipboardList },
-  { href: '/cc/projects', label: 'Proyek', icon: Building2 },
-  { href: '/cc/vendors', label: 'Vendor', icon: Truck },
-  { href: '/cc/cost-library', label: 'Cost Library', icon: BookOpen },
-  { href: '/cc/quality-gate', label: 'Quality Gate', icon: ShieldCheck },
-  { href: '/cc/assets', label: 'Aset', icon: Package },
-  { href: '/cc/warranties', label: 'Garansi', icon: Award },
-  { href: '/cc/billing', label: 'Billing', icon: Receipt },
   { href: '/cc/notifications', label: 'Notifikasi', icon: Bell },
   { href: '/cc/team', label: 'Tim', icon: UsersRound },
 ] satisfies { href: Route; label: string; icon: typeof Home }[];
@@ -62,17 +66,36 @@ export default async function CommandCenterLayout({ children }: { children: Reac
           <span className="text-[15px] font-semibold text-[color:var(--color-ink)]">Arkavena OS</span>
         </Link>
 
-        <nav className="flex-1 space-y-0.5">
+        <nav className="flex-1 space-y-0.5 overflow-y-auto">
+          <p className="px-2 pb-1 text-[11px] font-bold uppercase tracking-wider text-[color:var(--color-ink-tertiary)]">
+            Main Modules v2.0
+          </p>
           {NAV_ITEMS.map(({ href, label, icon: Icon }) => (
             <Link
               key={href}
               href={href}
-              className="flex items-center gap-2.5 rounded-[10px] px-2.5 py-2 text-[13.5px] font-medium text-[color:var(--color-ink-secondary)] transition-colors hover:bg-[color:var(--color-accent)]/10 hover:text-[color:var(--color-accent-hover)]"
+              className="flex items-center gap-2.5 rounded-[10px] px-2.5 py-1.5 text-[13px] font-medium text-[color:var(--color-ink-secondary)] transition-colors hover:bg-[color:var(--color-accent)]/10 hover:text-[color:var(--color-accent-hover)]"
             >
-              <Icon size={17} strokeWidth={2} />
+              <Icon size={16} strokeWidth={2} />
               {label}
             </Link>
           ))}
+
+          <div className="pt-3">
+            <p className="px-2 pb-1 text-[11px] font-bold uppercase tracking-wider text-[color:var(--color-ink-tertiary)]">
+              Lainnya
+            </p>
+            {SECONDARY_NAV.map(({ href, label, icon: Icon }) => (
+              <Link
+                key={href}
+                href={href}
+                className="flex items-center gap-2.5 rounded-[10px] px-2.5 py-1.5 text-[13px] font-medium text-[color:var(--color-ink-secondary)] transition-colors hover:bg-[color:var(--color-accent)]/10 hover:text-[color:var(--color-accent-hover)]"
+              >
+                <Icon size={16} strokeWidth={2} />
+                {label}
+              </Link>
+            ))}
+          </div>
         </nav>
 
         <div className="mt-4 border-t border-[color:var(--color-hairline)] pt-3">
