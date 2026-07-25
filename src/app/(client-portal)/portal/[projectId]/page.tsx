@@ -7,7 +7,6 @@ import {
   listPendingClientDecisionsAction,
 } from '@/modules/client-portal';
 import { listClientVisibleEvidenceWithUrlsForProjectAction } from '@/modules/evidence';
-import { listProposalsForProjectAction } from '@/modules/estimating';
 import { listInvoicesForProjectAction } from '@/modules/billing';
 import { formatRp } from '@/core/money/rupiah';
 import { Card, EmptyState } from '@/core/ui';
@@ -65,16 +64,14 @@ type FeedItem = { key: string; at: string; label: string; text: string };
 export default async function ClientPortalHomePage({ params }: { params: Promise<{ projectId: string }> }) {
   const { projectId } = await params;
 
-  const [overviewResult, statusResult, pendingResult, evidenceResult, timelineResult, proposalsResult, invoicesResult] =
-    await Promise.all([
-      getClientProjectOverviewAction(projectId),
-      listClientStatusUpdatesForProjectAction(projectId),
-      listPendingClientDecisionsAction(projectId),
-      listClientVisibleEvidenceWithUrlsForProjectAction(projectId),
-      listClientTimelineEventsAction(projectId),
-      listProposalsForProjectAction(projectId),
-      listInvoicesForProjectAction(projectId),
-    ]);
+  const [overviewResult, statusResult, pendingResult, evidenceResult, timelineResult, invoicesResult] = await Promise.all([
+    getClientProjectOverviewAction(projectId),
+    listClientStatusUpdatesForProjectAction(projectId),
+    listPendingClientDecisionsAction(projectId),
+    listClientVisibleEvidenceWithUrlsForProjectAction(projectId),
+    listClientTimelineEventsAction(projectId),
+    listInvoicesForProjectAction(projectId),
+  ]);
 
   if (!overviewResult.ok) {
     return (
@@ -88,16 +85,19 @@ export default async function ClientPortalHomePage({ params }: { params: Promise
 
   const statusHistory = statusResult.ok ? statusResult.data : [];
   const latestStatus = statusHistory[0] ?? null;
+  // Sourced from client_decisions -- change_order- and proposal-backed
+  // decisions alike (fn_change_orders_sync_client_decision /
+  // fn_proposals_sync_client_decision both write to this one table), so
+  // "Menunggu Anda" never needs its own separate proposals fetch (C1 fix:
+  // client-portal must not import `@/modules/estimating` directly).
   const pendingDecisions = pendingResult.ok ? pendingResult.data : [];
   const evidence = evidenceResult.ok ? evidenceResult.data : [];
   const timelineEvents = timelineResult.ok ? timelineResult.data : [];
-  // ADR 0026 §5 amendment (F1): the client's own proposal accept/decline.
-  const pendingProposals = (proposalsResult.ok ? proposalsResult.data : []).filter((p) => p.status === 'sent');
   // ADR 0026 §5: "ada tagihan yang perlu dibayar, jatuh tempo tanggal X" is
   // the one billing slice allowed onto the Timeline, as a plain notification
   // -- never the aging dashboard/DSO analytics (F3, milestone 2.4).
   const invoicesDue = (invoicesResult.ok ? invoicesResult.data : []).filter((inv) => inv.status === 'issued');
-  const hasPendingActions = pendingDecisions.length > 0 || pendingProposals.length > 0 || invoicesDue.length > 0;
+  const hasPendingActions = pendingDecisions.length > 0 || invoicesDue.length > 0;
 
   const now = Date.now();
   const today = new Date(now);
@@ -202,19 +202,14 @@ export default async function ClientPortalHomePage({ params }: { params: Promise
                     Lihat &amp; putuskan
                   </Link>
                 )}
-              </li>
-            ))}
-            {pendingProposals.map((proposal) => (
-              <li key={`proposal-${proposal.id}`} className="flex items-center justify-between gap-3">
-                <span className="text-sm text-[color:var(--color-ink-secondary)]">
-                  {proposal.client_summary ?? 'Ada proposal yang menunggu keputusan Anda'}
-                </span>
-                <Link
-                  href={`/proposals/${proposal.id}/decide`}
-                  className="inline-flex items-center justify-center gap-2 rounded-[var(--radius-control)] bg-[color:var(--color-accent)] px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-[color:var(--color-accent-hover)]"
-                >
-                  Lihat &amp; putuskan
-                </Link>
+                {decision.proposal_id !== null && (
+                  <Link
+                    href={`/proposals/${decision.proposal_id}/decide`}
+                    className="inline-flex items-center justify-center gap-2 rounded-[var(--radius-control)] bg-[color:var(--color-accent)] px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-[color:var(--color-accent-hover)]"
+                  >
+                    Lihat &amp; putuskan
+                  </Link>
+                )}
               </li>
             ))}
             {invoicesDue.map((invoice) => (

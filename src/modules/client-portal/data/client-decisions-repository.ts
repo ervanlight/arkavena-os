@@ -34,3 +34,28 @@ export async function listPendingClientDecisionsForProject(
   if (error !== null) throw error;
   return data;
 }
+
+/**
+ * Post-implementation review fix (C1): the /proposals/[id]/decide page's own
+ * read. Looks up by proposal_id (the route's [id]) rather than the
+ * client_decisions row's own id, mirroring how a client_decisions row is
+ * keyed by change_order_id for /variations/[id]/approve's equivalent
+ * lookup. client-portal never queries `proposals` itself for this --
+ * fn_proposals_sync_client_decision (proposals' own migration) is the only
+ * writer.
+ */
+export async function getClientDecisionForProposal(
+  supabase: ServerSupabase,
+  proposalId: string,
+): Promise<ClientDecision | null> {
+  const { data, error } = await supabase
+    .from('client_decisions')
+    .select('*')
+    .eq('proposal_id', proposalId)
+    .is('deleted_at', null)
+    .order('presented_at', { ascending: false })
+    .maybeSingle();
+
+  if (error !== null) throw error;
+  return data;
+}

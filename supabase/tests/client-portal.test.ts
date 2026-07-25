@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { asUser, closePool, sql } from './db';
+import { asUser, closePool, expectRejection, sql } from './db';
 import {
   addProjectMember,
   cleanupOrganizations,
@@ -175,6 +175,150 @@ describe('fn_change_orders_sync_client_decision -- the trigger that writes clien
       [decision!.id],
     );
     expect(rows).toHaveLength(1);
+  });
+});
+
+/**
+ * Prepares a proposal already at 'sent' -- an estimate is required first
+ * (proposals.estimate_id, not null). Inserted directly at 'sent' rather
+ * than draft-then-UPDATE: fn_proposals_guard_client_columns is an UPDATE
+ * trigger, and the plain privileged `sql()` connection has no JWT claims
+ * set, so fn_current_org_role() reads null on it -- the same "not staff"
+ * branch a real client hits, which would block sent_at/client_summary from
+ * an UPDATE. An INSERT never crosses that trigger at all.
+ */
+async function insertProposal(projectId: string): Promise<string> {
+  const estimateRows = await sql<{ id: string }>(
+    `insert into estimates (organization_id, project_id, version, title, created_by)
+     values ($1, $2, 100000 + floor(random() * 100000)::int, 'Estimasi Uji', $3) returning id`,
+    [org.id, projectId, owner.id],
+  );
+  const rows = await sql<{ id: string }>(
+    `insert into proposals (organization_id, project_id, estimate_id, status, sent_at, client_summary)
+     values ($1, $2, $3, 'sent', now(), 'Proposal renovasi dapur') returning id`,
+    [org.id, projectId, estimateRows[0]!.id],
+  );
+  return rows[0]!.id;
+}
+
+/**
+ * Post-implementation review fix (C1, ADR 0026 §7 item 7): client-portal
+ * must not import `@/modules/estimating` directly (ARCHITECTURE.md 1.2,
+ * F25). These mirror the fn_change_orders_sync_client_decision section
+ * above exactly, sourced from proposals instead of change_orders.
+ */
+describe('fn_proposals_sync_client_decision -- the trigger that writes client_decisions for proposals', () => {
+  it('opens a pending decision the moment a proposal enters sent', async () => {
+    const proposalId = await insertProposal(projectA.id);
+
+    const rows = await sql<{ presented_at: string; decided_at: string | null; decision: string | null; client_summary: string | null }>(
+      'select presented_at, decided_at, decision, client_summary from client_decisions where proposal_id = $1',
+      [proposalId],
+    );
+    expect(rows).toHaveLength(1);
+    expect(rows[0]!.decided_at).toBeNull();
+    expect(rows[0]!.decision).toBeNull();
+    expect(rows[0]!.client_summary).toBe('Proposal renovasi dapur');
+  });
+
+  it('closes the decision with decision=approved when the proposal is accepted', async () => {
+    const proposalId = await insertProposal(projectA.id);
+    await sql(`update proposals set status = 'accepted', decided_at = now(), decided_by = $2, decision_reason = 'Setuju' where id = $1`, [
+      proposalId,
+      owner.id,
+    ]);
+
+    const rows = await sql<{ decided_at: string | null; decision: string | null }>(
+      'select decided_at, decision from client_decisions where proposal_id = $1',
+      [proposalId],
+    );
+    expect(rows[0]!.decided_at).not.toBeNull();
+    expect(rows[0]!.decision).toBe('approved');
+  });
+
+  it('closes the decision with decision=rejected when the proposal is rejected', async () => {
+    const proposalId = await insertProposal(projectA.id);
+    await sql(
+      `update proposals set status = 'rejected', decided_at = now(), decided_by = $2, decision_reason = 'Terlalu mahal' where id = $1`,
+      [proposalId, owner.id],
+    );
+
+    const rows = await sql<{ decided_at: string | null; decision: string | null }>(
+      'select decided_at, decision from client_decisions where proposal_id = $1',
+      [proposalId],
+    );
+    expect(rows[0]!.decided_at).not.toBeNull();
+    expect(rows[0]!.decision).toBe('rejected');
+  });
+
+  it('lets a project\'s client see a pending proposal decision, hides it from another project\'s client', async () => {
+    const proposalId = await insertProposal(projectA.id);
+
+    await asUser(clientApproverA.id, async (run) => {
+      const rows = await run('select id from client_decisions where proposal_id = $1', [proposalId]);
+      expect(rows).toHaveLength(1);
+    });
+    await asUser(clientViewerB.id, async (run) => {
+      const rows = await run('select id from client_decisions where proposal_id = $1', [proposalId]);
+      expect(rows).toHaveLength(0);
+    });
+  });
+});
+
+describe('fn_client_decide_proposal -- the RPC client-portal calls instead of importing modules/estimating', () => {
+  it('lets a client_approver accept a sent proposal, recording their own decision', async () => {
+    const proposalId = await insertProposal(projectA.id);
+
+    // asUser's transaction is rolled back once its callback returns
+    // (db.ts), so both the RPC's own effect and the trigger's
+    // client_decisions side effect can only be observed here, on the same
+    // connection, before that rollback happens -- not from a later,
+    // separate sql() call.
+    await asUser(clientApproverA.id, async (run) => {
+      const rows = await run(
+        `select status, decided_by from fn_client_decide_proposal($1, 'accepted', 'Setuju, silakan lanjutkan')`,
+        [proposalId],
+      );
+      expect(rows[0]!.status).toBe('accepted');
+      expect(rows[0]!.decided_by).toBe(clientApproverA.id);
+
+      const decisionRows = await run('select decision from client_decisions where proposal_id = $1', [proposalId]);
+      expect((decisionRows[0] as { decision: string | null }).decision).toBe('approved');
+    });
+  });
+
+  it('rejects a client from a different project attempting to decide (proposals_update_client RLS, unchanged from F1)', async () => {
+    const proposalId = await insertProposal(projectA.id);
+
+    // Unlike a raw filtered UPDATE, fn_client_decide_proposal raises when
+    // its own UPDATE affects zero rows (its whole purpose is being the only
+    // path a client_approver has to attempt a decision, so a silent no-op
+    // would be a worse UX than an explicit refusal) -- proposals_update_client
+    // RLS is still what actually decides the row is unreachable for this user.
+    await expectRejection(
+      asUser(clientViewerB.id, (run) => run(`select fn_client_decide_proposal($1, 'accepted', 'Mencoba')`, [proposalId])),
+    );
+  });
+
+  it('rejects a client attempting to skip straight to accepted from draft (trg_proposals_guard_transition, unchanged from F1)', async () => {
+    const estimateRows = await sql<{ id: string }>(
+      `insert into estimates (organization_id, project_id, version, title, created_by)
+       values ($1, $2, 999999, 'Estimasi Draft', $3) returning id`,
+      [org.id, projectA.id, owner.id],
+    );
+    const proposalRows = await sql<{ id: string }>(
+      `insert into proposals (organization_id, project_id, estimate_id, status) values ($1, $2, $3, 'draft') returning id`,
+      [org.id, projectA.id, estimateRows[0]!.id],
+    );
+    const proposalId = proposalRows[0]!.id;
+
+    // A draft is invisible to the client (proposals_select_client), so the
+    // RPC's own UPDATE affects zero rows and raises, the same as the
+    // cross-project case above -- the row truly cannot be reached, not just
+    // that the transition guard would refuse it if it could.
+    await expectRejection(
+      asUser(clientApproverA.id, (run) => run(`select fn_client_decide_proposal($1, 'accepted', 'Mencoba')`, [proposalId])),
+    );
   });
 });
 

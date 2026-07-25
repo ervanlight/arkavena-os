@@ -1,5 +1,4 @@
 import { notFound } from 'next/navigation';
-import { formatRp } from '@/core/money/rupiah';
 import { getChangeOrderAction } from '@/modules/scope-variation';
 import { ClientDecisionForm } from './client-decision-form';
 import { Card } from '@/core/ui';
@@ -10,6 +9,13 @@ export const metadata = { title: 'Persetujuan Variation — Arkavena OS' };
  * Plain-language status, never the raw enum (Fase 1 fix, IMPLEMENTATION_PRIORITIES.md F2 /
  * ARCHITECTURE_REVIEW.md's variation-approval finding): a client should never see
  * "awaiting_client_approval" interpolated into a sentence.
+ *
+ * Post-implementation review fix (C2): title/description/cost impact/
+ * schedule impact used to render here raw -- ADR 0026 §5 is explicit that
+ * scope-variation's client-facing moment must read as a simple business
+ * question, "bukan 'Variation Request #24' dengan tabel dampak biaya."
+ * `change_orders.client_summary` (staff-authored, set at
+ * sendChangeOrderToClientAction time) replaces all four fields below.
  */
 const STATUS_LABEL_ID: Record<string, string> = {
   draft: 'sedang disiapkan tim kami',
@@ -52,21 +58,12 @@ export default async function ApproveVariationPage({ params }: { params: Promise
 
   return (
     <div className="mx-auto max-w-lg space-y-6">
-      <h1 className="text-[19px] font-semibold text-[color:var(--color-ink)]">{changeOrder.title}</h1>
+      <h1 className="text-[19px] font-semibold text-[color:var(--color-ink)]">Variation untuk proyek Anda</h1>
 
       <Card>
-        <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
-          <dt className="text-[color:var(--color-ink-tertiary)]">Keterangan</dt>
-          <dd className="text-[color:var(--color-ink)]">{changeOrder.description ?? '—'}</dd>
-          <dt className="text-[color:var(--color-ink-tertiary)]">Dampak biaya</dt>
-          <dd className="font-medium text-[color:var(--color-ink)]">
-            {changeOrder.cost_impact_amount === null ? '—' : formatRp(changeOrder.cost_impact_amount)}
-          </dd>
-          <dt className="text-[color:var(--color-ink-tertiary)]">Dampak jadwal</dt>
-          <dd className="text-[color:var(--color-ink)]">
-            {changeOrder.schedule_impact_days === null ? '—' : `${changeOrder.schedule_impact_days} hari`}
-          </dd>
-        </dl>
+        <p className="text-sm text-[color:var(--color-ink)]">
+          {changeOrder.client_summary ?? 'Ada keputusan yang menunggu konfirmasi Anda'}
+        </p>
       </Card>
 
       {alreadyDecided ? (

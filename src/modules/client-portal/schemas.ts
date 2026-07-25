@@ -7,3 +7,18 @@ export const publishClientStatusSchema = z.object({
   detail: z.string().trim().max(2000).optional(),
 });
 export type PublishClientStatusInput = z.infer<typeof publishClientStatusSchema>;
+
+/**
+ * Post-implementation review fix (C1, ADR 0026 §7 item 7): shaped identically
+ * to modules/estimating's own decideProposalSchema, but defined locally
+ * rather than imported -- client-portal must never import from
+ * `@/modules/estimating` at all (ARCHITECTURE.md 1.2, F25). A four-line Zod
+ * shape duplicated once is the accepted cost of that boundary, the same
+ * trade-off modules/evidence/domain already made for EvidenceActivityTable.
+ */
+export const clientDecideProposalSchema = z.object({
+  proposalId: z.string().uuid(),
+  decision: z.enum(['accepted', 'rejected']),
+  reason: z.string().trim().min(1, 'Alasan wajib diisi').max(2000),
+});
+export type ClientDecideProposalInput = z.infer<typeof clientDecideProposalSchema>;

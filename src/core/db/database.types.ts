@@ -625,6 +625,7 @@ export type Database = {
           organization_id: string
           presented_at: string
           project_id: string
+          proposal_id: string | null
           updated_at: string
         }
         Insert: {
@@ -640,6 +641,7 @@ export type Database = {
           organization_id: string
           presented_at?: string
           project_id: string
+          proposal_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -655,6 +657,7 @@ export type Database = {
           organization_id?: string
           presented_at?: string
           project_id?: string
+          proposal_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -685,6 +688,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "vw_client_project_overview"
             referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "client_decisions_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -3986,6 +3996,34 @@ export type Database = {
       fn_cash_gate_status: {
         Args: { p_project_id: string }
         Returns: Database["public"]["Enums"]["cash_gate_status"]
+      }
+      fn_client_decide_proposal: {
+        Args: {
+          p_decision: Database["public"]["Enums"]["proposal_status"]
+          p_proposal_id: string
+          p_reason: string
+        }
+        Returns: {
+          client_summary: string | null
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_reason: string | null
+          deleted_at: string | null
+          estimate_id: string
+          id: string
+          organization_id: string
+          project_id: string
+          sent_at: string | null
+          status: Database["public"]["Enums"]["proposal_status"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "proposals"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       fn_current_org_id: { Args: never; Returns: string }
       fn_current_org_role: {

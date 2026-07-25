@@ -71,7 +71,6 @@ export {
 } from './actions/estimate-item-actions';
 
 export {
-  clientDecideProposalAction,
   createProposalAction,
   decideProposalAction,
   getProposalAction,

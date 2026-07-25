@@ -18,9 +18,15 @@ export type {
 
 export type { DecisionClockTier } from './domain/decision-clock';
 
-export { publishClientStatusSchema, type PublishClientStatusInput } from './schemas';
+export {
+  publishClientStatusSchema,
+  clientDecideProposalSchema,
+  type PublishClientStatusInput,
+  type ClientDecideProposalInput,
+} from './schemas';
 
 export {
+  getClientDecisionForProposalAction,
   getClientProjectOverviewAction,
   listClientDecisionsAction,
   listClientProgressPhotosAction,
@@ -30,3 +36,5 @@ export {
 } from './actions/client-portal-actions';
 
 export { publishClientStatusAction, listClientStatusUpdatesForProjectAction } from './actions/client-status-actions';
+
+export { clientDecideProposalAction } from './actions/client-proposal-decision-actions';

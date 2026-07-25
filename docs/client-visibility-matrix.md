@@ -20,7 +20,7 @@ Replaced the old Ringkasan/Timeline/Zona/Foto/Keputusan tabs (ADR 0026 §4.1).
 | Section | Source (module's public API) | Fields shown | Why safe |
 | --- | --- | --- | --- |
 | Status | `client-portal.listClientStatusUpdatesForProjectAction` → `client_status_updates` | `status`, `headline`, `detail`, `published_at` | Table is staff-authored specifically for client display (ADR 0026 §2); no internal columns exist on it to accidentally leak |
-| Menunggu Anda | `client-portal.listPendingClientDecisionsAction` → `client_decisions` | `client_summary` (fallback to a generic sentence, never `change_orders.title` raw), Decision Clock tier, `change_order_id` (only used to build a same-origin link) | `change_orders.title`/`description`/cost fields are never read here — ADR 0026 §4.2's whole reason for adding `client_summary` |
+| Menunggu Anda | `client-portal.listPendingClientDecisionsAction` → `client_decisions` | `client_summary` (fallback to a generic sentence, never `change_orders.title`/`proposals`' internals raw), Decision Clock tier, `change_order_id`/`proposal_id` (only used to build a same-origin link) | Neither `change_orders`' nor `proposals`' other fields are ever read here — client-portal reads only its own `client_decisions` table, synced by trigger from both sources (post-implementation review fix, C1) |
 | Hari Ini / Update Terbaru (evidence) | `evidence.listClientVisibleEvidenceWithUrlsForProjectAction` → `evidence` | signed `thumbnailUrl` (1-hour TTL), `captured_at` | Filtered server-side to `visibility = 'client_visible'` (RLS `evidence_select_client`, ADR 0026 §3/ADR 0029); `activity_table`/`activity_id`/`storage_path` never leave the repository layer |
 | Minggu Ini | Derived in-page from the same evidence + status rows above | Counts and headlines only | No new data source; no percentage/ratio computed (ADR 0026 §4.3) |
 | Akan Datang | `client-portal.listClientTimelineEventsAction` → `vw_client_timeline_event`, filtered to `event_type = 'milestone'` | `title` (milestone name, staff-authored), a relative window ("minggu ini"/"minggu depan"/"beberapa minggu lagi") | Never shows an exact date for anything not yet due (ADR 0026 §4.2: "tanpa tanggal pasti kalau berisiko meleset") |
@@ -41,6 +41,16 @@ Replaced a raw `change_order_status` enum interpolation with a
 presentation-only (see ARCHITECTURE_REVIEW.md's "one concrete philosophy
 violation already shipped").
 
+**Post-implementation review fix (C2):** the original F2 fix only translated
+the status enum — `title`, `description`, `cost_impact_amount`, and
+`schedule_impact_days` still rendered raw underneath it, directly
+contradicting ADR 0026 §5's explicit wording for `scope-variation`: *"bukan
+'Variation Request #24' dengan tabel dampak biaya."* All four fields are now
+replaced by `change_orders.client_summary` (staff-authored at
+`sendChangeOrderToClientAction` time), the same field this page's own module
+already had available but never used. Not shown, ever: `title`, `description`,
+`cost_impact_amount`, `schedule_impact_days`.
+
 ## F1 — proposal acceptance (`proposals/[id]/decide/page.tsx`, ADR 0026 §5 amendment)
 
 `estimating` stays **Internal Only** for its mechanism (margin, cost breakdown,
@@ -49,14 +59,34 @@ The narrow decision surface on `proposals` (`status`/`decided_at`/`decided_by`/
 `decision_reason`) is now **Client Decision Required**, the same split
 `change_orders` already has.
 
+**Post-implementation review fix (C1, ADR 0026 §7 item 7):** F1 originally had
+client-portal's app routes import `@/modules/estimating` directly
+(`getProposalAction`, `listProposalsForProjectAction`, `clientDecideProposalAction`)
+— a violation of ARCHITECTURE.md 1.2's F25 rule (client-portal must never
+import cash-gate/estimating directly, "sekalipun untuk satu field yang sudah
+diterjemahkan"), found in a post-implementation review, not caught at
+implementation time. Corrected so client-portal never imports `@/modules/estimating`
+at all, for either reads or writes:
+
 | Field shown | Source | Why safe |
 | --- | --- | --- |
-| `client_summary` | `proposals.client_summary`, staff-authored at send time | Never the estimate/cost breakdown — same pattern as `change_orders.client_summary` |
-| Status (mapped to a sentence, e.g. "menunggu keputusan Anda") | `proposals.status` | Raw enum never interpolated (same discipline as F2's fix) |
+| `client_summary` | `client_decisions.client_summary` (synced from `proposals.client_summary` by `fn_proposals_sync_client_decision`, not read from `proposals` directly) | Never the estimate/cost breakdown — same pattern as `change_orders.client_summary` |
+| Status (mapped to a sentence, e.g. "menunggu keputusan Anda") | `client_decisions.decision`/`decided_at` (not `proposals.status`) | Raw enum never interpolated (same discipline as F2's fix) |
 
-Not shown: `estimate_id`, any cost/margin figure, `estimate_items`, `cost_library`.
-RLS (`proposals_select_client`) hides `draft` proposals entirely — a client never
-sees a proposal still being prepared.
+The client's own accept/reject goes through `fn_client_decide_proposal`, a plain
+(non-`security definer`) database RPC called by `modules/client-portal`'s own
+action via `supabase.rpc(...)` — a named procedure call, not a TypeScript
+import across the boundary, mirroring how `modules/evidence`'s
+`fn_override_evidence_gate` already crosses a cross-cutting mutation boundary.
+`proposals_update_client` RLS and the two guard triggers built for F1
+(`fn_proposals_guard_transition`, `fn_proposals_guard_client_columns`) keep
+enforcing exactly as before, unchanged.
+
+Not shown, ever: `estimate_id`, any cost/margin figure, `estimate_items`,
+`cost_library`. RLS (`proposals_select_client`, still the real gate underneath
+`client_decisions`) hides a `draft` proposal entirely — a client never sees a
+proposal still being prepared, and client-portal never queries `proposals`
+to find that out.
 
 ## F3 — invoice/payment-due visibility (`portal/[projectId]/page.tsx`, milestone 2.4)
 

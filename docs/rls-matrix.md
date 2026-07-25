@@ -403,6 +403,14 @@ user:
 | --- | --- |
 | `client_decisions.decision` is set if and only if `decided_at` is set | `ck_client_decisions_decision_requires_decided_at` |
 | `client_decisions` stays in sync with `change_orders.status` without a second state machine | `fn_change_orders_sync_client_decision` |
+| Exactly one of `change_order_id`/`proposal_id` is set — never both, never neither | `ck_client_decisions_exactly_one_source` (post-implementation review fix, C1) |
+| `client_decisions` stays in sync with `proposals.status` the same way it mirrors `change_orders.status` | `fn_proposals_sync_client_decision` (post-implementation review fix, C1 — see Fase 8 below) |
+
+### Post-implementation review fix — proposal decisions also mirror through `client_decisions` (C1, ADR 0026 §7 item 7)
+
+F1 originally had client-portal's app routes import `@/modules/estimating` directly (`getProposalAction`, `listProposalsForProjectAction`, `clientDecideProposalAction`) — a direct violation of ARCHITECTURE.md 1.2's F25 rule ("client-portal tidak boleh mengimpor cash-gate atau estimating secara langsung"), found in a post-implementation review. `client_decisions.proposal_id` (nullable FK, mirroring `change_order_id` exactly — Wave 8's own comment on that column anticipated this) plus `fn_proposals_sync_client_decision` (mirroring `fn_change_orders_sync_client_decision`) close the read side: client-portal now only ever reads `client_decisions`, never `proposals`.
+
+For the one write client-portal must still cause (a client's own accept/reject), `fn_client_decide_proposal` (Fase 8, see below) is a plain (non-`security definer`) RPC — a named database procedure called by string identifier, not a TypeScript import across the boundary. `proposals_update_client` RLS and `trg_proposals_guard_transition`/`trg_proposals_guard_client_columns` (all built for F1) keep enforcing exactly as before, checked against the calling client's own session, completely unchanged.
 
 ## Fase 7 — billing (Wave 8/9)
 
@@ -519,6 +527,30 @@ application-layer check for the client's own accept/reject action, distinct
 from staff-side `proposal.decide` (records a decision made outside the
 system on the client's behalf) — same split as `change_order`'s `decide` vs
 `client_approve`/`client_reject`.
+
+### Post-implementation review fix — `fn_client_decide_proposal` + `fn_proposals_sync_estimate_status` (C1, ADR 0026 §7 item 7)
+
+F1's `clientDecideProposalAction` originally lived in `modules/estimating`,
+imported directly by client-portal — a boundary violation (ARCHITECTURE.md
+1.2, F25). Replaced by:
+
+- **`fn_client_decide_proposal(p_proposal_id, p_decision, p_reason)`** —
+  a plain (non-`security definer`) RPC, called from `modules/client-portal`'s
+  own action via `supabase.rpc(...)`, never a TypeScript import. Does exactly
+  what the removed TS action did (an `UPDATE ... RETURNING`), so
+  `proposals_update_client` RLS and both guard triggers above still enforce
+  everything, unchanged, checked against the calling client_approver's own
+  session. Raises `no_data_found` if its own UPDATE affects zero rows
+  (RLS-invisible row, or a transition the guard trigger would refuse) rather
+  than the silent no-op a raw filtered UPDATE gives — this RPC is now the
+  only path a client_approver has to attempt a decision, so an explicit
+  refusal is better UX than a quiet no-op.
+- **`fn_proposals_sync_estimate_status`** — an `AFTER UPDATE OF status` trigger
+  on `proposals`, `security definer`. `sendProposalAction`/`decideProposalAction`
+  (staff) already called `updateEstimate()` explicitly to keep `estimates.status`
+  in sync (ADR 0018 SS4-SS5); a client_approver has no write access to
+  `estimates` at all, so this trigger is what keeps that sync working
+  regardless of which path changed `proposals.status`.
 
 ## Fase 8 — procurement (Wave 2-3, 7-9, ADR 0018 SS6)
 

@@ -132,59 +132,6 @@ export const decideProposalAction = safeAction(
   },
 );
 
-/**
- * A client_approver deciding on their own behalf -- distinct from
- * decideProposalAction (staff recording a decision made outside the
- * system), same split as scope-variation's decide vs client_approve/
- * client_reject. RLS (proposals_update_client) and
- * trg_proposals_guard_client_columns are the real enforcement underneath;
- * this permission entry (proposal.client_decide -> client_approver only) is
- * what gives a friendly Indonesian refusal to anyone else before the
- * request ever reaches the database.
- */
-export const clientDecideProposalAction = safeAction(
-  {
-    schema: decideProposalSchema,
-    permission: { resource: 'proposal', action: 'client_decide' },
-    loadContext: getActionContext,
-    name: 'estimating.clientDecideProposal',
-    audience: 'external',
-  },
-  async (input, ctx): Promise<Proposal> => {
-    const supabase = await createServerSupabase();
-    const before = await getProposal(supabase, input.id);
-
-    if (before.status !== 'sent') {
-      throw new DomainRuleError(
-        ERROR_CODES.PROPOSAL_INVALID_TRANSITION,
-        `Proposal ${before.id} is status ${before.status}, not sent`,
-        { meta: { proposalId: before.id, status: before.status } },
-      );
-    }
-
-    const after = await updateProposal(supabase, input.id, {
-      status: input.decision,
-      decided_at: new Date().toISOString(),
-      decided_by: ctx.userId,
-      decision_reason: input.reason,
-    });
-    await updateEstimate(supabase, after.estimate_id, { status: input.decision });
-
-    await recordAudit(createAuditGateway(supabase), {
-      entityTable: 'proposals',
-      entityId: after.id,
-      action: input.decision === 'accepted' ? 'approve' : 'reject',
-      reason: input.reason,
-      previousValue: { status: before.status },
-      newValue: { status: after.status },
-      projectId: after.project_id,
-      requestId: ctx.requestId,
-    });
-
-    return after;
-  },
-);
-
 export const listProposalsForProjectAction = safeAction(
   {
     schema: z.string().uuid(),

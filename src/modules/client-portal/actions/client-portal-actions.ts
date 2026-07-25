@@ -6,6 +6,7 @@ import { safeAction } from '@/core/actions/safe-action';
 import { createServerSupabase } from '@/core/db/client.server';
 import { decisionClockTier, type DecisionClockTier } from '../domain/decision-clock';
 import {
+  getClientDecisionForProposal,
   listClientDecisionsForProject,
   listPendingClientDecisionsForProject,
 } from '../data/client-decisions-repository';
@@ -95,6 +96,25 @@ export const listClientDecisionsAction = safeAction(
   async (projectId): Promise<ClientDecision[]> => {
     const supabase = await createServerSupabase();
     return listClientDecisionsForProject(supabase, projectId);
+  },
+);
+
+/**
+ * Post-implementation review fix (C1): the /proposals/[id]/decide page's own
+ * read, keyed by proposal_id. Replaces the direct `@/modules/estimating`
+ * import (getProposalAction) that page originally used.
+ */
+export const getClientDecisionForProposalAction = safeAction(
+  {
+    schema: z.string().uuid(),
+    permission: { resource: 'client_decision', action: 'view' },
+    loadContext: getActionContext,
+    name: 'clientPortal.getClientDecisionForProposal',
+    audience: 'external',
+  },
+  async (proposalId): Promise<ClientDecision | null> => {
+    const supabase = await createServerSupabase();
+    return getClientDecisionForProposal(supabase, proposalId);
   },
 );
 

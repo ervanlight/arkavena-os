@@ -234,6 +234,40 @@ describe('RLS -- proposals client accept/decline (Fase 12, ADR 0026 §5 amendmen
   });
 });
 
+/**
+ * Post-implementation review fix (C1, ADR 0026 §7 item 7): fn_client_decide_proposal
+ * (called by client-portal via RPC, not a TypeScript import) needs
+ * estimates.status kept in sync the same way sendProposalAction/
+ * decideProposalAction already do for staff -- but a client_approver has no
+ * write access to (or even SELECT on) `estimates` at all, so a trigger is
+ * the only mechanism that can do this regardless of who changed
+ * proposals.status. Tested here as a plain UPDATE via the privileged sql()
+ * connection rather than through a client_approver's own asUser session --
+ * the trigger is security definer with no caller-based branching at all, so
+ * proving it fires for any UPDATE of proposals.status is sufficient; a
+ * client_approver's own read of the result would be blocked by
+ * estimates_select_staff RLS regardless of whether the sync worked, which
+ * would make the test meaningless from that angle.
+ */
+describe('fn_proposals_sync_estimate_status -- keeps estimates.status mirroring proposals.status regardless of caller', () => {
+  it('syncs the estimate status the moment proposals.status changes', async () => {
+    const estimateId = await insertEstimate({ version: 900000 + Math.floor(Math.random() * 100000) });
+    const proposal = await sql<{ id: string }>(
+      `insert into proposals (organization_id, project_id, estimate_id, status, sent_at) values ($1, $2, $3, 'sent', now()) returning id`,
+      [org.id, project.id, estimateId],
+    );
+    const proposalId = proposal[0]!.id;
+
+    await sql(
+      `update proposals set status = 'accepted', decided_at = now(), decided_by = $2, decision_reason = 'Setuju' where id = $1`,
+      [proposalId, owner.id],
+    );
+
+    const rows = await sql<{ status: string }>('select status from estimates where id = $1', [estimateId]);
+    expect(rows[0]!.status).toBe('accepted');
+  });
+});
+
 describe('uq_estimates_one_baseline_per_project -- a database fact, not application discipline', () => {
   it('refuses a second baseline on the same project', async () => {
     const baselineProject = await createProjectWithClientAndSite(org.id);

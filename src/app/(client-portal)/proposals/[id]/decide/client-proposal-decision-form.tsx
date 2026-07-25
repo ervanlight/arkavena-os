@@ -2,7 +2,7 @@
 
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
-import { clientDecideProposalAction } from '@/modules/estimating';
+import { clientDecideProposalAction } from '@/modules/client-portal';
 import { Button, Input, Textarea, Label } from '@/core/ui';
 
 type FormState = { error: string | null; ok: boolean };
@@ -13,7 +13,7 @@ export function ClientProposalDecisionForm({ proposalId }: { proposalId: string 
 
   const [acceptState, acceptAction, isAccepting] = useActionState(async (_prev: FormState, formData: FormData) => {
     const result = await clientDecideProposalAction({
-      id: proposalId,
+      proposalId,
       decision: 'accepted',
       reason: String(formData.get('acceptReason') ?? ''),
     });
@@ -24,7 +24,7 @@ export function ClientProposalDecisionForm({ proposalId }: { proposalId: string 
 
   const [rejectState, rejectAction, isRejecting] = useActionState(async (_prev: FormState, formData: FormData) => {
     const result = await clientDecideProposalAction({
-      id: proposalId,
+      proposalId,
       decision: 'rejected',
       reason: String(formData.get('rejectReason') ?? ''),
     });
