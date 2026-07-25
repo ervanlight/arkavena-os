@@ -167,8 +167,9 @@ test('lead -> assessment -> estimasi -> proposal -> kontrak -> baseline, end to 
       // plain 'Baseline' would also match the still-rendered "Jadikan
       // baseline" heading before the post-mutation refresh lands -- a false
       // positive that would pass even if the mutation never actually landed
-      // client-side. The emerald badge is the one unambiguous signal.
-      await expect(page.locator('span.bg-emerald-100')).toHaveText('Baseline', NAV_TIMEOUT);
+      // client-side. The StatusBadge is the one unambiguous signal (exact
+      // match, not a substring of the surrounding heading).
+      await expect(page.getByText('Baseline', { exact: true })).toBeVisible(NAV_TIMEOUT);
     });
 
     await test.step('baseline benar-benar tercatat di database, bukan cuma di UI', async () => {

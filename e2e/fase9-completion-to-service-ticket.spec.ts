@@ -67,12 +67,12 @@ test('proyek selesai -> warranty register otomatis + galeri before-after; tiket 
       await page.getByLabel('Jenis item *').fill('key');
       await page.getByLabel('Deskripsi').fill('Kunci pintu utama');
       await page.getByRole('button', { name: 'Tambah item handover' }).click();
-      await expect(page.getByRole('cell', { name: 'key', exact: true })).toBeVisible(NAV_TIMEOUT);
+      await expect(page.getByText('key', { exact: true })).toBeVisible(NAV_TIMEOUT);
 
       await page.getByLabel('Jenis item *').fill('ac_unit');
       await page.getByLabel('Deskripsi').fill('AC split 1 PK ruang tamu');
       await page.getByRole('button', { name: 'Tambah item handover' }).click();
-      await expect(page.getByRole('cell', { name: 'ac_unit', exact: true })).toBeVisible(NAV_TIMEOUT);
+      await expect(page.getByText('ac_unit', { exact: true })).toBeVisible(NAV_TIMEOUT);
     });
 
     await test.step('proyek ditandai selesai (belum ada UI Command Center untuk ini -- gap Fase 1, dicatat langsung)', async () => {
