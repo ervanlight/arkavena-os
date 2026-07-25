@@ -32,13 +32,13 @@ const NAV_ITEMS = [
   { href: '/cc/documents', label: '8. Dokumen', icon: FileText },
   { href: '/cc/subcontractors', label: '9. Subkontraktor', icon: Users },
   { href: '/cc/analytics', label: '10. Analytics', icon: BarChart3 },
-] satisfies { href: Route; label: string; icon: typeof Home }[];
+];
 
 const SECONDARY_NAV = [
   { href: '/cc/assessments', label: 'Assessment', icon: ClipboardList },
   { href: '/cc/notifications', label: 'Notifikasi', icon: Bell },
   { href: '/cc/team', label: 'Tim', icon: UsersRound },
-] satisfies { href: Route; label: string; icon: typeof Home }[];
+];
 
 /**
  * Shared shell for every Command Center page (owner, TD, finance, QS, ...).
@@ -73,7 +73,7 @@ export default async function CommandCenterLayout({ children }: { children: Reac
           {NAV_ITEMS.map(({ href, label, icon: Icon }) => (
             <Link
               key={href}
-              href={href}
+              href={href as Route}
               className="flex items-center gap-2.5 rounded-[10px] px-2.5 py-1.5 text-[13px] font-medium text-[color:var(--color-ink-secondary)] transition-colors hover:bg-[color:var(--color-accent)]/10 hover:text-[color:var(--color-accent-hover)]"
             >
               <Icon size={16} strokeWidth={2} />
@@ -88,7 +88,7 @@ export default async function CommandCenterLayout({ children }: { children: Reac
             {SECONDARY_NAV.map(({ href, label, icon: Icon }) => (
               <Link
                 key={href}
-                href={href}
+                href={href as Route}
                 className="flex items-center gap-2.5 rounded-[10px] px-2.5 py-1.5 text-[13px] font-medium text-[color:var(--color-ink-secondary)] transition-colors hover:bg-[color:var(--color-accent)]/10 hover:text-[color:var(--color-accent-hover)]"
               >
                 <Icon size={16} strokeWidth={2} />

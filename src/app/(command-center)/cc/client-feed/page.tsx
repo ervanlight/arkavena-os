@@ -1,4 +1,4 @@
-import { Rss, Eye, ShieldAlert } from 'lucide-react';
+import { Eye, ShieldAlert } from 'lucide-react';
 import { Card } from '@/core/ui';
 
 export const metadata = { title: 'Client Feed — Arkavena OS' };

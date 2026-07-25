@@ -1,4 +1,4 @@
-import { GitPullRequest, ArrowRight, DollarSign, Send } from 'lucide-react';
+import { GitPullRequest, DollarSign, Send } from 'lucide-react';
 import { Card } from '@/core/ui';
 
 export const metadata = { title: 'Variations — Arkavena OS' };

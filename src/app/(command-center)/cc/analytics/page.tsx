@@ -1,4 +1,4 @@
-import { BarChart3, Clock, TrendingUp, ShieldCheck } from 'lucide-react';
+import { Clock, TrendingUp, ShieldCheck } from 'lucide-react';
 import { Card } from '@/core/ui';
 
 export const metadata = { title: 'Performance Analytics — Arkavena OS' };

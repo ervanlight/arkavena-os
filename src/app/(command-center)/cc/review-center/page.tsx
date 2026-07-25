@@ -1,4 +1,4 @@
-import { CheckSquare, FileText, Image as ImageIcon } from 'lucide-react';
+import { FileText, Image as ImageIcon } from 'lucide-react';
 import { Card } from '@/core/ui';
 
 export const metadata = { title: 'Review Center — Arkavena OS' };

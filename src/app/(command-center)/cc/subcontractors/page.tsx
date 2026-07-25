@@ -1,4 +1,4 @@
-import { Users, FileText, CheckCircle2 } from 'lucide-react';
+import { Users } from 'lucide-react';
 import { Card } from '@/core/ui';
 
 export const metadata = { title: 'Subkontraktor — Arkavena OS' };
