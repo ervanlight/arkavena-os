@@ -1,13 +1,17 @@
 import Link from 'next/link';
-import { AlertTriangle, Receipt, MessageCircleWarning, TriangleAlert, type LucideIcon } from 'lucide-react';
+import { 
+  Inbox, 
+  CheckSquare, 
+  Receipt, 
+  FileText, 
+  GitPullRequest,
+  Plus,
+  Building2,
+  ChevronRight
+} from 'lucide-react';
 import { getCurrentUser } from '@/core/auth/session';
-import { listOrgActivityAction, listProjectsAction, listWorkPackagesForProjectAction, type Project } from '@/modules/projects';
-import { listIssuesForProjectAction } from '@/modules/field-reporting';
-import { listPendingClientDecisionsAction } from '@/modules/client-portal';
-import { listAgingDashboardAction } from '@/modules/billing';
-import { getGateStateAction, type CashGateStatus } from '@/modules/cash-gate';
-import { syncAttentionNotificationsAction, type AttentionItemInput } from '@/core/notifications';
-import { Card, PageHeader, StatusBadge, EmptyState } from '@/core/ui';
+import { listOrgActivityAction, listProjectsAction } from '@/modules/projects';
+import { Card, PageHeader, StatusBadge, EmptyState, Button } from '@/core/ui';
 import { ActivityFeed } from '../_components/activity-feed';
 
 export const metadata = { title: 'Command Center — Arkavena OS' };
@@ -28,61 +32,13 @@ const PROJECT_STATUS_TONE: Record<string, 'neutral' | 'info' | 'warning' | 'succ
   cancelled: 'neutral',
 };
 
-const GATE_DOT_COLOR: Record<CashGateStatus, string> = {
-  green: '#34c759',
-  yellow: '#ff9f0a',
-  red: '#ff453a',
-  overdue: '#ff453a',
-};
-
 const ACTIVE_STATUSES = new Set(['planning', 'in_progress', 'on_hold']);
 
-type AttentionItem = { key: string; icon: LucideIcon; tint: string; label: string; href: string };
-
-async function loadProjectSummary(project: Project) {
-  const [gateResult, workPackagesResult, decisionsResult, issuesResult] = await Promise.all([
-    getGateStateAction(project.id),
-    listWorkPackagesForProjectAction(project.id),
-    listPendingClientDecisionsAction(project.id),
-    listIssuesForProjectAction(project.id),
-  ]);
-
-  const workPackages = workPackagesResult.ok ? workPackagesResult.data : [];
-  const percentDone =
-    workPackages.length === 0
-      ? null
-      : Math.round(
-          (workPackages.filter((wp) => wp.status === 'completed').length / workPackages.length) * 100,
-        );
-
-  const overdueDecisions = decisionsResult.ok ? decisionsResult.data.filter((decision) => decision.clockTier === 'overdue') : [];
-  const openHighSeverityIssues = issuesResult.ok
-    ? issuesResult.data.filter((issue) => issue.status === 'open' && issue.severity === 'high')
-    : [];
-
-  return {
-    project,
-    gate: gateResult.ok ? gateResult.data : null,
-    percentDone,
-    overdueDecisions,
-    openHighSeverityIssues,
-  };
-}
-
-/**
- * The real Command Center landing page. Owner critique: after login staff
- * got a greeting and nothing else -- no wayfinding into which project needs
- * them today. This surfaces every active project's health at a glance, a
- * "Perlu perhatian" strip aggregating what's overdue/red across all of them
- * (Cash Gate, invoices, client decisions, field issues), and the org-wide
- * activity journal below it.
- */
 export default async function CommandCenterHome() {
-  const [user, projectsResult, activityResult, agingResult] = await Promise.all([
+  const [user, projectsResult, activityResult] = await Promise.all([
     getCurrentUser(),
     listProjectsAction(undefined),
     listOrgActivityAction(undefined),
-    listAgingDashboardAction(undefined),
   ]);
 
   const hour = new Date().getHours();
@@ -90,170 +46,192 @@ export default async function CommandCenterHome() {
 
   const allProjects = projectsResult.ok ? projectsResult.data : [];
   const activeProjects = allProjects.filter((p) => ACTIVE_STATUSES.has(p.status));
-  const summaries = await Promise.all(activeProjects.map(loadProjectSummary));
-
-  const overdueInvoices = agingResult.ok ? agingResult.data.filter((inv) => inv.agingTier !== 'current') : [];
-
-  const attentionItems: AttentionItem[] = [];
-  for (const s of summaries) {
-    if (s.gate !== null && (s.gate.status === 'red' || s.gate.status === 'overdue')) {
-      attentionItems.push({
-        key: `gate-${s.project.id}`,
-        icon: AlertTriangle,
-        tint: '#ff453a',
-        label: `Cash Gate ${s.gate.status === 'red' ? 'merah' : 'jatuh tempo'} — ${s.project.name}`,
-        href: `/cc/projects/${s.project.id}/cash-gate`,
-      });
-    }
-    if (s.overdueDecisions.length > 0) {
-      attentionItems.push({
-        key: `decisions-${s.project.id}`,
-        icon: MessageCircleWarning,
-        tint: '#af52de',
-        label: `${s.overdueDecisions.length} keputusan klien terlambat — ${s.project.name}`,
-        href: `/cc/projects/${s.project.id}/aktivitas`,
-      });
-    }
-    if (s.openHighSeverityIssues.length > 0) {
-      attentionItems.push({
-        key: `issues-${s.project.id}`,
-        icon: TriangleAlert,
-        tint: '#ff453a',
-        label: `${s.openHighSeverityIssues.length} masalah berat terbuka — ${s.project.name}`,
-        href: `/cc/projects/${s.project.id}/aktivitas`,
-      });
-    }
-  }
-  if (overdueInvoices.length > 0) {
-    attentionItems.push({
-      key: 'invoices-overdue',
-      icon: Receipt,
-      tint: '#ff9f0a',
-      label: `${overdueInvoices.length} invoice jatuh tempo`,
-      href: '/cc/billing',
-    });
-  }
-
-  // F11: turn what this dashboard already computed into persistent, markable-
-  // read notifications for the viewer -- no cron exists (ADR 0019 §5), so this
-  // read is the trigger point. Fire-and-forget: a failure here should never
-  // block the dashboard itself from rendering.
-  const attentionNotificationItems: AttentionItemInput[] = [];
-  for (const s of summaries) {
-    if (s.gate !== null && (s.gate.status === 'red' || s.gate.status === 'overdue')) {
-      attentionNotificationItems.push({
-        entityTable: 'cash_gate_attention',
-        entityId: s.project.id,
-        title: `Cash Gate ${s.gate.status === 'red' ? 'merah' : 'jatuh tempo'} — ${s.project.name}`,
-        body: null,
-      });
-    }
-    if (s.overdueDecisions.length > 0) {
-      attentionNotificationItems.push({
-        entityTable: 'client_decision_attention',
-        entityId: s.project.id,
-        title: `${s.overdueDecisions.length} keputusan klien terlambat — ${s.project.name}`,
-        body: null,
-      });
-    }
-    if (s.openHighSeverityIssues.length > 0) {
-      attentionNotificationItems.push({
-        entityTable: 'issue_attention',
-        entityId: s.project.id,
-        title: `${s.openHighSeverityIssues.length} masalah berat terbuka — ${s.project.name}`,
-        body: null,
-      });
-    }
-  }
-  if (overdueInvoices.length > 0) {
-    attentionNotificationItems.push({
-      entityTable: 'invoice_aging_attention',
-      entityId: null,
-      title: `${overdueInvoices.length} invoice jatuh tempo`,
-      body: null,
-    });
-  }
-  if (attentionNotificationItems.length > 0) {
-    // Awaited, not fire-and-forget: a dangling promise from a Server
-    // Component isn't guaranteed to finish once the response is sent.
-    // safeAction() never throws (resolves to ActionResult either way), so
-    // this can't fail the page render.
-    await syncAttentionNotificationsAction(attentionNotificationItems);
-  }
+  const recentActivity = activityResult.ok ? activityResult.data : [];
 
   return (
-    <div className="space-y-6">
-      <PageHeader title={`${greeting}, ${user?.fullName?.split(' ')[0] ?? ''}`} subtitle={user?.organizationName} />
+    <div className="space-y-8">
+      <PageHeader 
+        title={`${greeting}, ${user?.fullName?.split(' ')[0] ?? ''}`} 
+        subtitle="Berikut adalah hal-hal yang memerlukan keputusan Anda hari ini." 
+      />
 
-      {attentionItems.length > 0 && (
-        <div className="space-y-2">
-          <h2 className="px-0.5 text-[13px] font-semibold uppercase tracking-wide text-[color:var(--color-ink-tertiary)]">
-            Perlu perhatian
-          </h2>
-          <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
-            {attentionItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.key}
-                  href={item.href as never}
-                  className="flex shrink-0 items-center gap-2 rounded-full bg-[color:var(--color-surface)] py-2 pl-2.5 pr-3.5 text-[13px] font-medium text-[color:var(--color-ink)] shadow-[var(--shadow-card)]"
-                >
-                  <Icon size={15} color={item.tint} strokeWidth={2.3} />
-                  {item.label}
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      <div className="space-y-2">
-        <h2 className="px-0.5 text-[13px] font-semibold uppercase tracking-wide text-[color:var(--color-ink-tertiary)]">Proyek aktif</h2>
-        {summaries.length === 0 ? (
-          <EmptyState title="Belum ada proyek aktif" description="Proyek yang sedang berjalan akan muncul di sini." />
-        ) : (
-          <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
-            {summaries.map(({ project, gate, percentDone }) => (
-              <Link key={project.id} href={`/cc/projects/${project.id}` as never}>
-                <Card interactive className="h-full">
-                  <div className="flex items-start justify-between gap-2">
-                    <p className="truncate text-[16px] font-semibold text-[color:var(--color-ink)]">{project.name}</p>
-                    {gate !== null && (
-                      <span
-                        className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full"
-                        style={{ backgroundColor: GATE_DOT_COLOR[gate.status] }}
-                        title={`Cash Gate: ${gate.status}`}
-                      />
-                    )}
-                  </div>
-                  <div className="mt-2">
-                    <StatusBadge tone={PROJECT_STATUS_TONE[project.status] ?? 'neutral'}>
-                      {PROJECT_STATUS_LABEL[project.status] ?? project.status}
-                    </StatusBadge>
-                  </div>
-                  <div className="mt-3">
-                    <div className="flex items-center justify-between text-xs text-[color:var(--color-ink-tertiary)]">
-                      <span>Progres paket kerja</span>
-                      <span>{percentDone !== null ? `${percentDone}%` : '—'}</span>
-                    </div>
-                    <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-[color:var(--color-surface-secondary)]">
-                      <div className="h-full rounded-full bg-[color:var(--color-accent)]" style={{ width: `${percentDone ?? 0}%` }} />
-                    </div>
-                  </div>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div className="space-y-2">
-        <h2 className="px-0.5 text-[13px] font-semibold uppercase tracking-wide text-[color:var(--color-ink-tertiary)]">
-          Aktivitas terbaru
+      {/* SECTION 1: TODAY'S WORK */}
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-[color:var(--color-ink-tertiary)]">
+          Pekerjaan Hari Ini
         </h2>
-        <ActivityFeed events={activityResult.ok ? activityResult.data : []} />
+        
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {/* Action Card: Daily Reports */}
+          <Card className="flex flex-col justify-between border-l-4 border-l-blue-500 p-5 shadow-sm">
+            <div>
+              <div className="flex items-center gap-2 text-blue-600 mb-1">
+                <Inbox size={16} />
+                <span className="text-xs font-bold tracking-wider uppercase">Laporan Harian</span>
+              </div>
+              <h3 className="text-xl font-bold text-[color:var(--color-ink)]">18 <span className="text-sm font-normal text-[color:var(--color-ink-secondary)]">menunggu tinjauan</span></h3>
+            </div>
+            <div className="mt-4">
+              <Link href={"/cc/daily-reports" as never}>
+                <Button size="sm" variant="secondary" className="w-full justify-between">
+                  Tinjau Laporan <ChevronRight size={14} />
+                </Button>
+              </Link>
+            </div>
+          </Card>
+
+          {/* Action Card: RAB Reviews */}
+          <Card className="flex flex-col justify-between border-l-4 border-l-yellow-500 p-5 shadow-sm">
+            <div>
+              <div className="flex items-center gap-2 text-yellow-600 mb-1">
+                <CheckSquare size={16} />
+                <span className="text-xs font-bold tracking-wider uppercase">RAB Subkontraktor</span>
+              </div>
+              <h3 className="text-xl font-bold text-[color:var(--color-ink)]">4 <span className="text-sm font-normal text-[color:var(--color-ink-secondary)]">penawaran baru</span></h3>
+            </div>
+            <div className="mt-4">
+              <Link href={"/cc/review-center" as never}>
+                <Button size="sm" variant="secondary" className="w-full justify-between">
+                  Beri Keputusan <ChevronRight size={14} />
+                </Button>
+              </Link>
+            </div>
+          </Card>
+
+          {/* Action Card: Variations / Addendums */}
+          <Card className="flex flex-col justify-between border-l-4 border-l-purple-500 p-5 shadow-sm">
+            <div>
+              <div className="flex items-center gap-2 text-purple-600 mb-1">
+                <GitPullRequest size={16} />
+                <span className="text-xs font-bold tracking-wider uppercase">Permintaan Addendum</span>
+              </div>
+              <h3 className="text-xl font-bold text-[color:var(--color-ink)]">2 <span className="text-sm font-normal text-[color:var(--color-ink-secondary)]">dari klien</span></h3>
+            </div>
+            <div className="mt-4">
+              <Link href={"/cc/variations" as never}>
+                <Button size="sm" variant="secondary" className="w-full justify-between">
+                  Tinjau Permintaan <ChevronRight size={14} />
+                </Button>
+              </Link>
+            </div>
+          </Card>
+
+          {/* Action Card: Invoices */}
+          <Card className="flex flex-col justify-between border-l-4 border-l-red-500 p-5 shadow-sm">
+            <div>
+              <div className="flex items-center gap-2 text-red-600 mb-1">
+                <Receipt size={16} />
+                <span className="text-xs font-bold tracking-wider uppercase">Tagihan Jatuh Tempo</span>
+              </div>
+              <h3 className="text-xl font-bold text-[color:var(--color-ink)]">1 <span className="text-sm font-normal text-[color:var(--color-ink-secondary)]">invoice menunggak</span></h3>
+            </div>
+            <div className="mt-4">
+              <Link href="/cc/billing">
+                <Button size="sm" variant="secondary" className="w-full justify-between">
+                  Tindak Lanjuti <ChevronRight size={14} />
+                </Button>
+              </Link>
+            </div>
+          </Card>
+          
+          {/* Action Card: Documents */}
+          <Card className="flex flex-col justify-between border-l-4 border-l-slate-500 p-5 shadow-sm">
+            <div>
+              <div className="flex items-center gap-2 text-slate-600 mb-1">
+                <FileText size={16} />
+                <span className="text-xs font-bold tracking-wider uppercase">Persetujuan Dokumen</span>
+              </div>
+              <h3 className="text-xl font-bold text-[color:var(--color-ink)]">3 <span className="text-sm font-normal text-[color:var(--color-ink-secondary)]">dokumen penting</span></h3>
+            </div>
+            <div className="mt-4">
+              <Link href={"/cc/documents" as never}>
+                <Button size="sm" variant="secondary" className="w-full justify-between">
+                  Buka Berkas <ChevronRight size={14} />
+                </Button>
+              </Link>
+            </div>
+          </Card>
+        </div>
+      </section>
+
+      {/* SECTION 4: QUICK ACTIONS (Moved up for better inbox feel) */}
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-[color:var(--color-ink-tertiary)]">
+          Tindakan Cepat
+        </h2>
+        <div className="flex flex-wrap gap-3">
+          <Link href="/cc/projects/new">
+            <Button size="sm" variant="secondary" className="gap-1.5 rounded-full px-4 border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] shadow-[var(--shadow-card)]">
+              <Plus size={14} /> Buat Proyek
+            </Button>
+          </Link>
+          <Link href="/cc/billing">
+            <Button size="sm" variant="secondary" className="gap-1.5 rounded-full px-4 border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] shadow-[var(--shadow-card)]">
+              <Plus size={14} /> Buat Invoice
+            </Button>
+          </Link>
+          <Link href={"/cc/variations" as never}>
+            <Button size="sm" variant="secondary" className="gap-1.5 rounded-full px-4 border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] shadow-[var(--shadow-card)]">
+              <Plus size={14} /> Addendum Baru
+            </Button>
+          </Link>
+          <Link href={"/cc/subcontractors" as never}>
+            <Button size="sm" variant="secondary" className="gap-1.5 rounded-full px-4 border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] shadow-[var(--shadow-card)]">
+              <Plus size={14} /> Tambah Subkon
+            </Button>
+          </Link>
+        </div>
+      </section>
+
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+        {/* SECTION 2: ACTIVE PROJECTS */}
+        <section className="space-y-3">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-[color:var(--color-ink-tertiary)]">
+            Proyek Aktif
+          </h2>
+          {activeProjects.length === 0 ? (
+            <EmptyState title="Belum ada proyek aktif" description="Proyek yang sedang berjalan akan muncul di sini." />
+          ) : (
+            <Card className="p-0 overflow-hidden">
+              <ul className="divide-y divide-[color:var(--color-hairline)]">
+                {activeProjects.map((project) => (
+                  <li key={project.id}>
+                    <Link href={`/cc/projects/${project.id}` as never} className="block hover:bg-[color:var(--color-surface-hover)] transition-colors p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[color:var(--color-canvas)] text-[color:var(--color-ink-secondary)]">
+                            <Building2 size={20} strokeWidth={1.5} />
+                          </div>
+                          <div>
+                            <p className="text-[15px] font-semibold text-[color:var(--color-ink)]">{project.name}</p>
+                            <p className="text-xs text-[color:var(--color-ink-tertiary)] mt-0.5">
+                              Laporan terakhir: Hari ini
+                            </p>
+                          </div>
+                        </div>
+                        <StatusBadge tone={PROJECT_STATUS_TONE[project.status] ?? 'neutral'}>
+                          {PROJECT_STATUS_LABEL[project.status] ?? project.status}
+                        </StatusBadge>
+                      </div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          )}
+        </section>
+
+        {/* SECTION 3: RECENT ACTIVITY */}
+        <section className="space-y-3">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-[color:var(--color-ink-tertiary)]">
+            Aktivitas Terbaru
+          </h2>
+          <Card className="p-4">
+            <ActivityFeed events={recentActivity} />
+          </Card>
+        </section>
       </div>
+      
     </div>
   );
 }
