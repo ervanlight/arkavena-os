@@ -136,6 +136,104 @@ describe('RLS -- estimates/estimate_items/proposals are staff-only, org-scoped',
   });
 });
 
+describe('RLS -- proposals client accept/decline (Fase 12, ADR 0026 §5 amendment)', () => {
+  let clientApprover: SeedUser;
+  let clientViewer: SeedUser;
+
+  beforeAll(async () => {
+    clientApprover = await createUser({ organizationId: org.id, orgRole: null });
+    await addProjectMember(project.id, clientApprover.id, 'client_approver');
+    clientViewer = await createUser({ organizationId: org.id, orgRole: null });
+    await addProjectMember(project.id, clientViewer.id, 'client_viewer');
+  });
+
+  async function insertProposal(status: 'draft' | 'sent' = 'sent') {
+    const estimateId = await insertEstimate({ version: 100 + Math.floor(Math.random() * 100000) });
+    const sentAt = status === 'sent' ? new Date().toISOString() : null;
+    const rows = await sql<{ id: string }>(
+      `insert into proposals (organization_id, project_id, estimate_id, status, sent_at)
+       values ($1, $2, $3, $4, $5) returning id`,
+      [org.id, project.id, estimateId, status, sentAt],
+    );
+    return rows[0]!.id;
+  }
+
+  it('hides a draft proposal from client_approver and client_viewer alike', async () => {
+    const proposalId = await insertProposal('draft');
+    await asUser(clientApprover.id, async (run) => {
+      expect(await run('select id from proposals where id = $1', [proposalId])).toHaveLength(0);
+    });
+    await asUser(clientViewer.id, async (run) => {
+      expect(await run('select id from proposals where id = $1', [proposalId])).toHaveLength(0);
+    });
+  });
+
+  it('lets client_approver and client_viewer both read a sent proposal', async () => {
+    const proposalId = await insertProposal('sent');
+    await asUser(clientApprover.id, async (run) => {
+      expect(await run('select id from proposals where id = $1', [proposalId])).toHaveLength(1);
+    });
+    await asUser(clientViewer.id, async (run) => {
+      expect(await run('select id from proposals where id = $1', [proposalId])).toHaveLength(1);
+    });
+  });
+
+  it('lets client_approver accept a sent proposal, recording their own decision', async () => {
+    const proposalId = await insertProposal('sent');
+    await asUser(clientApprover.id, async (run) => {
+      await run(
+        `update proposals set status = 'accepted', decided_at = now(), decided_by = $2, decision_reason = 'Setuju' where id = $1`,
+        [proposalId, clientApprover.id],
+      );
+      const rows = (await run('select status, decided_by from proposals where id = $1', [proposalId])) as {
+        status: string;
+        decided_by: string;
+      }[];
+      expect(rows[0]!.status).toBe('accepted');
+      expect(rows[0]!.decided_by).toBe(clientApprover.id);
+    });
+  });
+
+  it('leaves client_viewer unable to affect any row when attempting to decide (read-only role)', async () => {
+    // proposals_update_client's USING clause requires 'client_approver' --
+    // client_viewer simply matches no row (0 rows affected), the same
+    // "RLS filters, it does not raise" shape as the draft-transition test
+    // above, not a thrown error.
+    const proposalId = await insertProposal('sent');
+    await asUser(clientViewer.id, async (run) => {
+      const rows = await run(
+        `update proposals set status = 'accepted', decided_at = now(), decided_by = $2, decision_reason = 'x' where id = $1 returning id`,
+        [proposalId, clientViewer.id],
+      );
+      expect(rows).toHaveLength(0);
+    });
+  });
+
+  it('fn_proposals_guard_transition blocks a client_approver from skipping straight to accepted from draft', async () => {
+    const proposalId = await insertProposal('draft');
+    // A draft is invisible to the client (RLS), so this update affects zero
+    // rows rather than raising -- proving the row truly cannot be reached,
+    // not just that the transition guard would refuse it if it could.
+    await asUser(clientApprover.id, async (run) => {
+      const rows = await run(
+        `update proposals set status = 'accepted', decided_at = now(), decided_by = $2, decision_reason = 'x' where id = $1 returning id`,
+        [proposalId, clientApprover.id],
+      );
+      expect(rows).toHaveLength(0);
+    });
+  });
+
+  it('fn_proposals_guard_client_columns blocks a client_approver from touching client_summary or estimate_id', async () => {
+    const proposalId = await insertProposal('sent');
+    const error = await expectRejection(
+      asUser(clientApprover.id, (run) =>
+        run(`update proposals set client_summary = 'saya ubah sendiri' where id = $1`, [proposalId]),
+      ),
+    );
+    expect(error.message).toMatch(/only record their own accept\/reject decision/);
+  });
+});
+
 describe('uq_estimates_one_baseline_per_project -- a database fact, not application discipline', () => {
   it('refuses a second baseline on the same project', async () => {
     const baselineProject = await createProjectWithClientAndSite(org.id);

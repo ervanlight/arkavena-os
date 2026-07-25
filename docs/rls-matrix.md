@@ -472,13 +472,14 @@ a money/approval gate.
 ## Fase 8 — estimating (Wave 5-6, ADR 0018)
 
 Staff-only, same treatment as the rest of Fase 8 — no project role, field, or
-client-facing policy exists for any table in this section.
+client-facing policy exists for `estimates`/`estimate_items`. **`proposals` is
+the one exception, added in Fase 12** (ADR 0026 §5 amendment, F1) — see below.
 
 | Table | Owner/TD/Finance/QS/Procurement | Any project role | Client |
 | --- | --- | --- | --- |
 | `estimates` | CRUD\* (org) | — | — |
 | `estimate_items` | CRUD\* (org) | — | — |
-| `proposals` | CRUD\* (org) | — | — |
+| `proposals` | CRUD\* (org) | — | `client_approver`/`client_viewer`: SELECT once `status <> 'draft'`; `client_approver` also UPDATE, restricted to their own decision columns (Fase 12, see below) |
 
 \* "CRUD" here means SELECT/INSERT/UPDATE — no DELETE policy exists for
 anyone, same as every other table in this document; soft delete
@@ -499,6 +500,25 @@ anyone, same as every other table in this document; soft delete
 `proposal.decide` all list every org role (`[...ORG_ROLES]`) — none of these
 is a money/approval gate the way `invoice.issue` is; they are workflow-progress
 actions available to any staff member.
+
+### Fase 12 amendment — `proposals` client accept/decline (F1, ADR 0026 §5)
+
+`proposals_select_client` (SELECT, `client_approver`/`client_viewer`, scoped
+to `status <> 'draft'`) and `proposals_update_client` (UPDATE,
+`client_approver` only) mirror `change_orders`' own client-facing pair
+exactly (Wave 7). Two DB-layer guards underneath, same two-layer enforcement
+as every other approval in this system (CLAUDE.md law §0.3):
+
+| Rule | Enforced by |
+| --- | --- |
+| Status only ever moves draft→sent→accepted/rejected, for staff and a client_approver alike | `fn_proposals_guard_transition` (added this phase — proposals had no DB-layer transition guard at all before a client could reach this table) |
+| A client_approver's UPDATE may only touch `status`/`decided_at`/`decided_by`/`decision_reason`, never `client_summary`, `estimate_id`, or any other field | `fn_proposals_guard_client_columns` |
+
+`proposal.client_decide` (`requirePermission`, `client_approver` only) is the
+application-layer check for the client's own accept/reject action, distinct
+from staff-side `proposal.decide` (records a decision made outside the
+system on the client's behalf) — same split as `change_order`'s `decide` vs
+`client_approve`/`client_reject`.
 
 ## Fase 8 — procurement (Wave 2-3, 7-9, ADR 0018 SS6)
 

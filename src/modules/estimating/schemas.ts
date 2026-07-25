@@ -76,6 +76,8 @@ export type CreateProposalInput = z.infer<typeof createProposalSchema>;
 
 export const sendProposalSchema = z.object({
   id: z.string().uuid(),
+  /** ADR 0026 §5 amendment: an optional plain-language sentence, set at the moment this proposal is actually sent to the client. */
+  clientSummary: z.string().trim().max(300).optional(),
 });
 export type SendProposalInput = z.infer<typeof sendProposalSchema>;
 

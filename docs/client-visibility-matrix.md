@@ -41,7 +41,21 @@ Replaced a raw `change_order_status` enum interpolation with a
 presentation-only (see ARCHITECTURE_REVIEW.md's "one concrete philosophy
 violation already shipped").
 
-## Still to document here as they ship
+## F1 — proposal acceptance (`proposals/[id]/decide/page.tsx`, ADR 0026 §5 amendment)
 
-- F1 (proposal acceptance) — milestone 2.3
-- F3 (invoice/payment-due visibility) — milestone 2.4
+`estimating` stays **Internal Only** for its mechanism (margin, cost breakdown,
+`estimates`/`estimate_items`/`cost_library` — untouched, D2.6 protection unchanged).
+The narrow decision surface on `proposals` (`status`/`decided_at`/`decided_by`/
+`decision_reason`) is now **Client Decision Required**, the same split
+`change_orders` already has.
+
+| Field shown | Source | Why safe |
+| --- | --- | --- |
+| `client_summary` | `proposals.client_summary`, staff-authored at send time | Never the estimate/cost breakdown — same pattern as `change_orders.client_summary` |
+| Status (mapped to a sentence, e.g. "menunggu keputusan Anda") | `proposals.status` | Raw enum never interpolated (same discipline as F2's fix) |
+
+Not shown: `estimate_id`, any cost/margin figure, `estimate_items`, `cost_library`.
+RLS (`proposals_select_client`) hides `draft` proposals entirely — a client never
+sees a proposal still being prepared.
+
+## F3 — invoice/payment-due visibility — milestone 2.4, not yet built

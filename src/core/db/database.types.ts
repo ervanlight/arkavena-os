@@ -2904,6 +2904,7 @@ export type Database = {
       }
       proposals: {
         Row: {
+          client_summary: string | null
           created_at: string
           decided_at: string | null
           decided_by: string | null
@@ -2918,6 +2919,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          client_summary?: string | null
           created_at?: string
           decided_at?: string | null
           decided_by?: string | null
@@ -2932,6 +2934,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          client_summary?: string | null
           created_at?: string
           decided_at?: string | null
           decided_by?: string | null

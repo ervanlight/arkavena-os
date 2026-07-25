@@ -134,6 +134,11 @@ const ACTION_COMMANDS: Record<string, 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE'>
   // (+ tracking columns) -- proposals_update_staff is the policy underneath.
   send: 'UPDATE',
   decide: 'UPDATE',
+  // A client_approver's own accept/reject -- proposals_update_client is the
+  // policy underneath, with trg_proposals_guard_client_columns as the
+  // precise check (ADR 0026 §5 amendment), same split as change_orders'
+  // client_approve/client_reject above.
+  client_decide: 'UPDATE',
   // change_role and invite are deliberately absent. Neither has, or should
   // ever have, a matching RLS policy: change_role is enforced by
   // fn_users_guard_privileged_columns (a trigger, not a policy), and invite

@@ -443,10 +443,18 @@ export const PERMISSIONS = {
   },
 
   proposal: {
-    view: [...ORG_ROLES],
+    // client_approver/client_viewer per ADR 0026 §5 amendment (F1) -- RLS
+    // (proposals_select_client) is the real gate, scoped to status <>
+    // 'draft'; this entry is what lets a client's own call pass
+    // requirePermission() at all, mirroring evidence.view's same shape.
+    view: [...ORG_ROLES, 'client_approver', 'client_viewer'],
     create: [...ORG_ROLES],
     send: [...ORG_ROLES],
     decide: [...ORG_ROLES],
+    // A client_approver deciding on their own behalf -- distinct from
+    // `decide` (staff recording a decision made outside the system), same
+    // split as change_order's decide vs client_approve/client_reject.
+    client_decide: ['client_approver'],
   },
 
   vendor_quote: {
