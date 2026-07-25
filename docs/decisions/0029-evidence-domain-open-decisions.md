@@ -1,8 +1,10 @@
 # ADR 0029 — Evidence domain: resolving the 3 remaining open decisions from ADR 0026
 
-**Status:** PROPOSED — needs Owner approval before F5 (Client Timeline shell) is implemented. Do not build against this ADR until it is marked Accepted.
+**Status:** Accepted
 **Date:** 2026-07-25
-**Trigger:** `IMPLEMENTATION_PLAN.md` Phase 2, F5's prerequisite check surfaced a real conflict — F5's full design (ADR 0026 §4) needs Evidence-backed content ("Hari Ini"/"Update Terbaru"), but 3 of ADR 0026 §7's 5 open decisions (all Evidence-related) were never resolved. ADR 0028 already resolved the other 2 (F8, F29). This ADR proposes resolutions for the remaining 3, each with a recommendation and explicit trade-offs, per the Owner's request — no implementation happens until this is Accepted.
+**Trigger:** `IMPLEMENTATION_PLAN.md` Phase 2, F5's prerequisite check surfaced a real conflict — F5's full design (ADR 0026 §4) needs Evidence-backed content ("Hari Ini"/"Update Terbaru"), but 3 of ADR 0026 §7's 5 open decisions (all Evidence-related) were never resolved. ADR 0028 already resolved the other 2 (F8, F29). This ADR proposes resolutions for the remaining 3, each with a recommendation and explicit trade-offs.
+
+**Revision note:** an adversarial design review (requested by the Owner before acceptance) found the original recommendations sound in substance but incomplete in three specific ways. All three are folded in below as accepted amendments — no other part of the original recommendations changed. This is the Owner's final quality gate for the Evidence domain: once Accepted, all three decisions below are locked, per the Owner's own instruction — further design discussion on these three points only reopens if implementation surfaces a genuine, unresolvable conflict.
 
 ---
 
@@ -18,8 +20,10 @@
 - **Trade-off for:** Lets the team build the habit before the gate can actually stop anyone, avoiding operational disruption during rollout.
 - **Trade-off against:** A warning with no consequence is exactly the "SOP that gets quietly ignored" failure mode this whole review cycle has been trying to move away from (see `ARCHITECTURE_REVIEW.md`'s framing of Cash Gate/Quality Gate as valuable *because* they're literal, not advisory). "Enforce later" also has no natural trigger — without a specific date or condition, "later" tends to never arrive.
 
-### Recommendation
-**Hard block, but scoped to exactly where it's load-bearing** — combine with Decision 2 below: enforce only for milestones already in client-facing scope (i.e., projects with an active signed contract, per ADR 0028's Decision 1), and pair the block with an **override path identical to Cash Gate's own pattern** (owner-only, reason required, logged to `audit_logs` like every other override in this system). This gets the best of both options: the gate is real (not advisory) exactly where it protects client trust, but nothing ever grinds to a permanent halt — a legitimate exception is always one documented override away, exactly like Cash Gate today. Internal-only, pre-contract projects are not gated at all (nothing to protect yet, per Decision 2).
+### Decision
+**Hard block, scoped to exactly where it's load-bearing** (see Decision 2), paired with a documented override — **amended to Technical Director authority, not Owner-only.** The original recommendation borrowed Cash Gate's exact override shape (owner-only). The design review found a better precedent: Evidence-gating is a documentation/verification control — closer in kind to Quality Gate (TD-authorized override) than to Cash Gate (a financial control, correctly Owner-only because it protects the org's money). Evidence-gating protects whether work is properly documented before being called done, which is exactly TD's domain (the same person who already overrides failed Quality Gate hold points).
+
+**Final shape:** `modules/evidence` exposes an override action, TD-only (`roleCan(orgRole, 'evidence_override', 'create')` restricted to `technical_director`), mandatory `reason` (compile-time enforced the same way every other override in this system is — `withAudit({ requiresReason: true })`), written to `audit_logs` like every Cash Gate/Quality Gate override before it. Nothing about the *shape* of the override changes from the original recommendation (reason required, audited, one clean escape hatch) — only *who* holds it.
 
 ---
 
@@ -35,8 +39,17 @@
 - **Trade-off for:** Ties the cost (capturing evidence) directly to the benefit (a client can eventually see it) — the same reasoning already applied to Decision 1's recommendation.
 - **Trade-off against:** Requires a concept of "which milestones are client-facing" to exist. Building a new flag/marker for this would itself be new scope.
 
-### Recommendation
-**Client-facing milestones only, defined without inventing a new flag:** reuse ADR 0028's already-settled definition — a milestone is in scope the moment its project has an active signed contract (`contracts.status = 'active'`), the exact same condition that activates Client Project Status and the Client Timeline. This means Evidence-gating and Decision 1's hard block both activate for a project at precisely the same moment the client-facing layer does — one condition, reused, not two separate concepts to keep in sync.
+### Decision
+**Client-facing milestones only, defined without inventing a new flag** — reuse ADR 0028's already-settled condition (a project has an active signed contract, `contracts.status = 'active'`). **Amended:** rather than informally "reusing" that check in two unrelated places (F5's Client Timeline and Evidence-gating), it is named as one explicit, shared business rule so the coupling is visible in code, not incidental:
+
+```ts
+// modules/projects/domain/client-facing.ts
+export function isProjectClientFacing(project: Project, contracts: Contract[]): boolean {
+  return contracts.some((c) => c.status === 'active');
+}
+```
+
+Owned by `modules/projects` (it operates purely on `projects`/`contracts` data, which that module already owns), exported from its public API, and called identically by `modules/client-portal` (to gate Client Project Status / Client Timeline, ADR 0028) and by `modules/evidence` (to gate completion-evidence enforcement, this ADR). One named rule, two callers — a future change to either concern edits a call site, not a re-derivation of the underlying condition.
 
 ---
 
@@ -52,19 +65,26 @@
 - **Trade-off for:** Single source of truth — no possibility of the two tables drifting out of sync.
 - **Trade-off against:** A major migration touching `field-reporting`'s live upload flow (offline outbox included), and a real module-boundary question: either `field-reporting` starts writing into a table it doesn't own (violates CLAUDE.md's one-table-one-module rule), or ownership of photo capture itself would need to move to `evidence`, which is a much larger change than "add a new module." High risk, large rework, for a problem Option 3a can solve more cheaply (see recommendation).
 
-### Recommendation
-**Parallel tables (3a), with the sync-gap risk closed structurally rather than left to memory:** `modules/evidence` exposes a narrow action (e.g. `recordEvidenceFromPhotoAction`), and `field-reporting`'s existing photo-upload action calls it automatically every time a photo is saved — creating a matching `evidence` row (`internal_only` by default, per ADR 0026 §3.2's own default) in the same transaction. This is a small addition to an existing action, not a migration of `photos` itself, and it means "did someone remember to also create an evidence row" is never a real question — it happens automatically, every time, with the same one-table-one-module boundary fully intact (`field-reporting` still owns `photos`; it calls `evidence`'s public API exactly the way any other cross-module call in this system works).
+### Decision
+**Parallel tables (3a), with the sync-gap risk closed structurally**: `modules/evidence` exposes a narrow action (`recordEvidenceFromPhotoAction`), and `field-reporting`'s existing photo-upload action calls it automatically every time a photo is saved — creating a matching `evidence` row (`internal_only` by default, per ADR 0026 §3.2) in the same transaction.
+
+**Amendment — explicit `photos` → `evidence` activity-mapping rule** (the design review's finding: `photos` has four nullable FKs — `work_package_id`, `daily_log_id`, `handover_item_id`, `zone_id` — but `evidence.activity_table`/`activity_id` requires exactly one polymorphic reference; the original recommendation didn't say which wins). Priority order, first match wins:
+
+1. `work_package_id` set → `activity_table = 'work_packages'`
+2. else `daily_log_id` set → `activity_table = 'daily_logs'`
+3. else `handover_item_id` set → `activity_table = 'handover_items'`
+4. else (only `zone_id`, no specific activity) → **no evidence row is created.** A general zone progress photo isn't tied to a specific unit of work; it has nothing for Evidence-gating (Decision 1) to attach to, and that's correct, not a gap — Evidence-gating only cares about photos that document a specific activity's completion.
 
 ---
 
-## Summary of recommended resolutions
+## Summary of accepted decisions
 
-| Decision | Recommendation |
+| Decision | Resolution |
 |---|---|
-| 1. Gating strictness | Hard block, scoped to client-facing milestones only (ties to Decision 2), with a Cash-Gate-style owner override + reason |
-| 2. Initial scope | Only milestones on projects with an active signed contract (reuses ADR 0028's Decision 1 condition, no new flag) |
-| 3. `evidence` vs `photos` | Parallel tables; `field-reporting`'s photo upload automatically creates a matching `internal_only` evidence row via `evidence`'s own action, closing the sync-gap risk without a migration |
+| 1. Gating strictness | Hard block, scoped to client-facing milestones (Decision 2), override by **Technical Director** (amended from Owner), reason required, audited |
+| 2. Initial scope | Only milestones on projects where `isProjectClientFacing()` (new named shared rule in `modules/projects`) is true — one function, called by both `client-portal` and `evidence` |
+| 3. `evidence` vs `photos` | Parallel tables; photo upload auto-creates a matching `internal_only` evidence row via priority-ordered FK mapping (work_package → daily_log → handover_item → skip if none) |
 
-All three recommendations converge on the same principle already established in ADR 0028: reuse `contracts.status = 'active'` as the one condition that activates every client-facing mechanism, rather than inventing a new flag or a second concept to keep in sync with it.
+All three decisions converge on the same principle ADR 0028 established: one named, shared condition activates every client-facing and gating mechanism, rather than several independent concepts that must be kept in sync by convention.
 
-**This ADR does not become Accepted, and no Evidence-domain code is written, until the Owner confirms or amends these three resolutions.**
+**This ADR is now Accepted. Evidence domain design is locked** — `modules/evidence`, the `isProjectClientFacing()` shared rule, and the photo-mapping priority order above are the specification implementation proceeds against. Further design discussion on these three points reopens only if implementation surfaces a genuine, unresolvable conflict, per the Owner's standing instruction.

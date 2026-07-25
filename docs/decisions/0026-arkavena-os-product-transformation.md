@@ -1,6 +1,6 @@
 # ADR 0026 — Arkavena OS product transformation: Client Status, Evidence visibility, module classification
 
-**Status:** PROPOSED — belum diimplementasikan, butuh keputusan Owner per item di bagian §6 sebelum Fase 12 dimulai.
+**Status:** Accepted — kelima keputusan terbuka di §7 sudah tuntas (lihat catatan di §7). Fase 12 boleh berjalan.
 **Date:** 2026-07-25 (Revisi 2, hari yang sama dengan Revisi 1)
 **Trigger:** Instruksi eksplisit Owner untuk mengevaluasi ulang arsitektur produk sebagai "Trust Operating System" — lalu, di hari yang sama, koreksi arah eksplisit: Arkavena OS bukan sistem monitoring klien atau dashboard transparansi, melainkan alat yang mengurangi kecemasan klien **sambil melindungi kebebasan operasional Arkavena**.
 
@@ -231,15 +231,17 @@ Sesuai instruksi: AI mengurangi kerja komunikasi manual, **tidak pernah menghasi
 
 ---
 
-## 7. Keputusan yang dibutuhkan Owner sebelum implementasi
+## 7. Keputusan yang dibutuhkan Owner sebelum implementasi — status akhir
 
-1. **Definisi tier "Management"** untuk kategori Internal + Management — owner + technical_director + finance, atau perlu disesuaikan (misalnya QS ikut serta untuk modul tertentu)?
-2. **Default visibility Evidence** — dikonfirmasi `internal_only` sebagai default (rekomendasi kuat, konsisten dengan prinsip "klien tidak perlu tahu semuanya"), bukan opt-out?
-3. **Siapa yang berwenang mempublikasikan Client Project Status** — semua staf internal, atau dibatasi ke role tertentu (mis. hanya Owner/TD/PM) supaya nada komunikasi ke klien tetap konsisten?
-4. **Evidence-gating completion** (§3.4) — tetap diusulkan sebagai hard block dua lapis, tapi murni internal; perlu konfirmasi timing (langsung aktif, atau masa transisi sebagai warning dulu) — sama seperti Revisi 1.
-5. **Timing Fase 12** relatif terhadap Fase 11 (Partner Desk) yang belum lulus pre-launch checklist penuh — apakah Trust Transformation menyela urutan Build Sequence atau menunggu giliran (CLAUDE.md hukum §0.7).
+Kelima keputusan berikut sudah tuntas, dicatat di sini untuk jejak audit:
 
-Sampai kelima hal ini diputuskan, ADR ini tetap **PROPOSED**.
+1. **Definisi tier "Management"** — **Resolved, [ADR 0028](0028-fase12-project-status-gating-and-management-tier.md) Keputusan 2.** Label dokumentasi visibilitas klien (owner, technical_director, finance), bukan tier permission yang ditegakkan kode — `core/permissions/matrix.ts` tidak berubah.
+2. **Default visibility Evidence** — **Resolved.** `internal_only` sebagai default dikonfirmasi tanpa keberatan; desain [ADR 0029](0029-evidence-domain-open-decisions.md) dibangun di atas default ini tanpa perubahan.
+3. **Siapa yang berwenang mempublikasikan Client Project Status** — **Resolved, saat penyelarasan dokumen ini (2026-07-25).** Owner + Technical Director — dua role yang sama dipercaya untuk kontrol paling sensitif lainnya (Cash Gate override, Quality Gate override), memastikan nada komunikasi ke klien tetap konsisten. Finance sengaja tidak diikutkan (Finance mengelola kas, bukan hubungan klien, per `PRODUCT.md` Target Users). Diterapkan sebagai entri permission-matrix baru (`client_status.publish`, `['owner', 'technical_director']`) saat F5 dibangun.
+4. **Evidence-gating completion** — **Resolved, [ADR 0029](0029-evidence-domain-open-decisions.md) Keputusan 1.** Hard block, dibatasi ke milestone client-facing, override oleh Technical Director (bukan Owner — amandemen dari draf awal ADR 0029 setelah design review).
+5. **Timing Fase 12** relatif terhadap Fase 11 — **Resolved by direction.** Owner sudah mengarahkan berulang kali secara eksplisit untuk melanjutkan Fase 12 sekarang (sesi 2026-07-25) — pola yang sama seperti ADR 0023 meng-override volume gate ADR 0022: kondisi Fase 11 (pre-launch checklist belum sepenuhnya tuntas) tidak berubah, tapi Owner sadar memutuskan tidak menunggu.
+
+Kelima keputusan tuntas — status ADR ini **Accepted**.
 
 ---
 
