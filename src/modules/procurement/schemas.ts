@@ -52,6 +52,8 @@ export const createPurchaseOrderSchema = z.object({
   projectId: z.string().uuid(),
   vendorId: z.string().uuid(),
   vendorQuoteId: z.string().uuid().optional(),
+  /** Phase 3 (F9): only meaningful when issued without a vendor quote -- a quote-linked PO already resolves its material request via vendor_quotes.material_request_id, checked by fn_purchase_orders_sync_material_request_status regardless of what this field carries. */
+  materialRequestId: z.string().uuid().optional(),
   description: z.string().trim().min(1, 'Deskripsi wajib diisi').max(500),
   amount: moneyString,
   notes: z.string().trim().max(2000).optional(),

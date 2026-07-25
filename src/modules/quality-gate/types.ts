@@ -14,3 +14,7 @@ export type InspectionUpdate = TablesUpdate<'inspections'>;
 export type Nonconformity = Tables<'nonconformities'>;
 export type NewNonconformity = TablesInsert<'nonconformities'>;
 export type NonconformityUpdate = TablesUpdate<'nonconformities'>;
+
+/** Phase 3 (F15): the whole-project QC walkthrough, distinct from any one work package's own inspection. Append-only -- no update type. */
+export type ProjectCompletionSignoff = Tables<'project_completion_signoffs'>;
+export type NewProjectCompletionSignoff = TablesInsert<'project_completion_signoffs'>;

@@ -26,6 +26,8 @@ export type {
 export type { MaintenanceSchedule, MaintenanceScheduleInput } from './domain/maintenance-schedule';
 export { computeNextDueDate } from './domain/maintenance-schedule';
 export type { ServiceTicketStatus } from './domain/service-ticket-transition';
+export type { WarrantyExpiryTier } from './domain/warranty-expiry';
+export { warrantyExpiryTier } from './domain/warranty-expiry';
 
 export {
   createAssetSchema,
@@ -61,6 +63,7 @@ export {
 export {
   createWarrantyAction,
   getWarrantyAction,
+  listWarrantiesAction,
   listWarrantiesForProjectAction,
   updateWarrantyAction,
 } from './actions/warranty-actions';

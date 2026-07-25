@@ -17,6 +17,14 @@ export async function listWarrantiesForProject(supabase: ServerSupabase, project
   return data;
 }
 
+/** Phase 3 (F18): the org-wide view a business-development touchpoint needs -- which warranties, across every project, are approaching or past ends_at. Mirrors listAssets' org-wide shape. */
+export async function listWarranties(supabase: ServerSupabase): Promise<Warranty[]> {
+  const { data, error } = await supabase.from('warranties').select('*').is('deleted_at', null).order('ends_at', { ascending: true });
+
+  if (error !== null) throw error;
+  return data;
+}
+
 export async function getWarranty(supabase: ServerSupabase, id: string): Promise<Warranty> {
   const { data, error } = await supabase.from('warranties').select('*').eq('id', id).is('deleted_at', null).maybeSingle();
 

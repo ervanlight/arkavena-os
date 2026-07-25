@@ -2,7 +2,11 @@
 
 import { useActionState, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { updateAssessmentFindingsAction } from '@/modules/assessment';
+import {
+  STANDARD_ASSESSMENT_CHECKLIST_ITEMS,
+  updateAssessmentFindingsAction,
+  type AssessmentChecklistResponses,
+} from '@/modules/assessment';
 import { generateAssessmentScopeDraftAction } from '@/modules/ai-scribe';
 import { Label, Textarea, Button } from '@/core/ui';
 
@@ -15,17 +19,20 @@ export function FindingsForm({
   siteConditions,
   recommendedScope,
   notes,
+  checklistResponses,
   disabled,
 }: {
   assessmentId: string;
   siteConditions: string | null;
   recommendedScope: string | null;
   notes: string | null;
+  checklistResponses: AssessmentChecklistResponses | null;
   disabled: boolean;
 }) {
   const router = useRouter();
   const [recommendedScopeValue, setRecommendedScopeValue] = useState(recommendedScope ?? '');
   const [assist, setAssist] = useState<AssistState>({ status: 'idle' });
+  const [checked, setChecked] = useState<AssessmentChecklistResponses>(checklistResponses ?? {});
 
   /** Draft only -- fills the same textarea the human still reviews and saves via the form below (ADR 0020 SS2). */
   async function handleAssist() {
@@ -47,6 +54,7 @@ export function FindingsForm({
       siteConditions: String(formData.get('siteConditions') ?? '') || undefined,
       recommendedScope: String(formData.get('recommendedScope') ?? '') || undefined,
       notes: String(formData.get('notes') ?? '') || undefined,
+      checklistResponses: checked,
     });
 
     if (!result.ok) {
@@ -100,6 +108,27 @@ export function FindingsForm({
       <div>
         <Label htmlFor="notes">Catatan</Label>
         <Textarea id="notes" name="notes" rows={2} disabled={disabled} defaultValue={notes ?? ''} />
+      </div>
+
+      <div>
+        <Label>Checklist standar</Label>
+        <ul className="mt-1.5 space-y-1.5">
+          {STANDARD_ASSESSMENT_CHECKLIST_ITEMS.map((item) => (
+            <li key={item.key} className="flex items-center gap-2">
+              <input
+                id={`checklist-${item.key}`}
+                type="checkbox"
+                checked={checked[item.key] ?? false}
+                disabled={disabled}
+                onChange={(e) => setChecked((prev) => ({ ...prev, [item.key]: e.target.checked }))}
+                className="h-4 w-4 rounded border-[color:var(--color-hairline)]"
+              />
+              <label htmlFor={`checklist-${item.key}`} className="text-sm text-[color:var(--color-ink)]">
+                {item.label}
+              </label>
+            </li>
+          ))}
+        </ul>
       </div>
 
       {state.error !== null && (

@@ -82,6 +82,7 @@ const RESOURCE_TABLES: Record<Resource, string> = {
   evidence: 'evidence',
   evidence_override: 'evidence_overrides',
   client_status: 'client_status_updates',
+  project_completion_signoff: 'project_completion_signoffs',
 };
 
 /** Matrix actions that map onto a SQL command the policy list should cover. */

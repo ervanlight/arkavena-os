@@ -2,12 +2,19 @@ import { notFound } from 'next/navigation';
 import { getCurrentUser } from '@/core/auth/session';
 import { roleCan } from '@/core/permissions/matrix';
 import { getProjectAction, listWorkPackagesForProjectAction } from '@/modules/projects';
-import { listHoldPointStatusForWorkPackageAction, type HoldPointTemplate, type Inspection } from '@/modules/quality-gate';
+import {
+  getProjectCompletionSignoffForProjectAction,
+  listHoldPointStatusForWorkPackageAction,
+  type HoldPointTemplate,
+  type Inspection,
+} from '@/modules/quality-gate';
 import { Card, StatusBadge, EmptyState } from '@/core/ui';
 import { SetWorkTypeForm } from './set-work-type-form';
 import { CreateInspectionForm } from './create-inspection-form';
 import { RecordInspectionResultForm } from './record-inspection-result-form';
 import { OverrideInspectionForm } from './override-inspection-form';
+import { ProjectCompletionSignoffForm } from './project-completion-signoff-form';
+import { MarkProjectCompletedForm } from './mark-project-completed-form';
 
 export const metadata = { title: 'Quality Gate proyek — Arkavena OS' };
 
@@ -26,10 +33,11 @@ const INSPECTION_STATUS_TONE: Record<string, 'neutral' | 'success' | 'danger'> =
 export default async function ProjectQualityGatePage({ params }: { params: Promise<{ id: string }> }) {
   const { id: projectId } = await params;
 
-  const [projectResult, workPackagesResult, user] = await Promise.all([
+  const [projectResult, workPackagesResult, user, completionSignoffResult] = await Promise.all([
     getProjectAction(projectId),
     listWorkPackagesForProjectAction(projectId),
     getCurrentUser(),
+    getProjectCompletionSignoffForProjectAction(projectId),
   ]);
 
   if (!projectResult.ok) {
@@ -44,6 +52,8 @@ export default async function ProjectQualityGatePage({ params }: { params: Promi
   const project = projectResult.data;
   const workPackages = workPackagesResult.ok ? workPackagesResult.data : [];
   const isTechnicalDirector = roleCan(user?.orgRole ?? null, 'inspection', 'override');
+  const canSignOffCompletion = roleCan(user?.orgRole ?? null, 'project_completion_signoff', 'create');
+  const completionSignoff = completionSignoffResult.ok ? completionSignoffResult.data : null;
 
   const workPackagesWithWorkType = workPackages.filter((wp) => wp.work_type !== null);
   const holdPointStatusEntries = await Promise.all(
@@ -144,6 +154,32 @@ export default async function ProjectQualityGatePage({ params }: { params: Promi
           );
         })}
       </div>
+
+      <Card className="space-y-3">
+        <h2 className="text-[17px] font-semibold text-[color:var(--color-ink)]">Serah terima final proyek</h2>
+        <p className="text-sm text-[color:var(--color-ink-secondary)]">
+          Berbeda dari inspeksi per paket kerja di atas -- ini penanda bahwa Technical Director telah meninjau
+          proyek secara keseluruhan dan menyatakan selesai.
+        </p>
+
+        {completionSignoff !== null ? (
+          <div className="rounded-[var(--radius-control)] border border-[color:var(--color-hairline)] p-3">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-sm font-medium text-[color:var(--color-ink)]">Sudah ditandatangani</p>
+              <StatusBadge tone="success">Selesai ditinjau</StatusBadge>
+            </div>
+            <p className="mt-1 text-xs text-[color:var(--color-ink-tertiary)]">
+              {new Date(completionSignoff.signed_off_at).toLocaleString('id-ID')}
+            </p>
+            {completionSignoff.notes !== null && (
+              <p className="mt-1 text-xs text-[color:var(--color-ink-tertiary)]">{completionSignoff.notes}</p>
+            )}
+            {project.status !== 'completed' && <MarkProjectCompletedForm projectId={project.id} />}
+          </div>
+        ) : (
+          canSignOffCompletion && <ProjectCompletionSignoffForm projectId={project.id} />
+        )}
+      </Card>
     </div>
   );
 }

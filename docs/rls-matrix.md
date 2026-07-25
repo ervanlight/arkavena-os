@@ -338,6 +338,17 @@ about the field, not something the field records about itself.
 | `hold_point_templates` | CRUD\* (org) | — |
 | `inspections` | CRUD\* (org) | — |
 | `nonconformities` | CRUD\* (org) | — |
+| `project_completion_signoffs` | SELECT (org, all roles) / INSERT (org, TD only†) | — |
+
+† RLS lets any staff member's INSERT through (`project_completion_signoffs_insert_staff`);
+`fn_project_completion_signoffs_guard_td_only` (a `BEFORE INSERT` trigger checking
+`signed_off_by`'s `org_role`) is the real, unbypassable restriction — same split as
+`fn_inspections_guard_td_only_override` above. Append-only, no UPDATE/DELETE policy
+for anyone; `uq_project_completion_signoffs_project` limits it to at most one row per
+project. Phase 3 (F15): the whole-project QC walkthrough, distinct from any single
+work package's own inspection. `fn_projects_guard_completion_signoff` (`BEFORE UPDATE
+OF status ON projects`) blocks `projects.status -> 'completed'` unless a row exists
+here for that project.
 
 \* "CRUD" here means SELECT/INSERT/UPDATE — no DELETE policy exists for
 anyone, same as every other table in this document; soft delete

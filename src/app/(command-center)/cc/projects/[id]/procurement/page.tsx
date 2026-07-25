@@ -6,6 +6,7 @@ import {
   listVendorQuotesForProjectAction,
   listVendorsAction,
 } from '@/modules/procurement';
+import { listMaterialRequestsForProjectAction } from '@/modules/field-reporting';
 import { Card, EmptyState, StatusBadge } from '@/core/ui';
 import { CreateVendorQuoteForm } from './vendor-quote-form';
 import { CreatePurchaseOrderForm } from './purchase-order-form';
@@ -30,16 +31,23 @@ const QUOTE_STATUS_TONE: Record<string, 'neutral' | 'info' | 'warning' | 'succes
 export default async function ProjectProcurementPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
-  const [user, vendorsResult, quotesResult, purchaseOrdersResult] = await Promise.all([
+  const [user, vendorsResult, quotesResult, purchaseOrdersResult, materialRequestsResult] = await Promise.all([
     getCurrentUser(),
     listVendorsAction(undefined),
     listVendorQuotesForProjectAction(id),
     listPurchaseOrdersForProjectAction(id),
+    listMaterialRequestsForProjectAction(id),
   ]);
 
   const vendors = vendorsResult.ok ? vendorsResult.data : [];
   const quotes = quotesResult.ok ? quotesResult.data : [];
   const purchaseOrders = purchaseOrdersResult.ok ? purchaseOrdersResult.data : [];
+  // Phase 3 (F9): only requests still awaiting fulfillment are worth picking
+  // from here -- once a PO links one, fn_purchase_orders_sync_material_request_status
+  // already flips it to 'fulfilled', so it drops out of this list on its own.
+  const openMaterialRequests = (materialRequestsResult.ok ? materialRequestsResult.data : []).filter(
+    (request) => request.status === 'requested',
+  );
   const canOverride = roleCan(user?.orgRole ?? null, 'cash_gate_override', 'create');
 
   const deliveriesByPo = new Map<string, Awaited<ReturnType<typeof listDeliveriesForPurchaseOrderAction>>>();
@@ -109,7 +117,7 @@ export default async function ProjectProcurementPage({ params }: { params: Promi
           </div>
         )}
         <Card className="space-y-4 border border-dashed border-[color:var(--color-hairline)] shadow-none">
-          <CreatePurchaseOrderForm projectId={id} vendors={vendors} quotes={quotes} />
+          <CreatePurchaseOrderForm projectId={id} vendors={vendors} quotes={quotes} materialRequests={openMaterialRequests} />
         </Card>
         {canOverride && (
           <Card className="space-y-4 border border-dashed border-[color:var(--color-warning)]/50 bg-[color:var(--color-warning)]/10 shadow-none">

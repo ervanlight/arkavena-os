@@ -62,6 +62,7 @@ export const updateAssessmentFindingsAction = safeAction(
       ...(input.siteConditions !== undefined ? { site_conditions: input.siteConditions } : {}),
       ...(input.recommendedScope !== undefined ? { recommended_scope: input.recommendedScope } : {}),
       ...(input.notes !== undefined ? { notes: input.notes } : {}),
+      ...(input.checklistResponses !== undefined ? { checklist_responses: input.checklistResponses } : {}),
     });
 
     await recordAudit(createAuditGateway(supabase), {

@@ -13,7 +13,7 @@ export async function listAssessments(supabase: ServerSupabase): Promise<Assessm
     .order('created_at', { ascending: false });
 
   if (error !== null) throw error;
-  return data;
+  return data as Assessment[];
 }
 
 export async function listAssessmentsForSite(supabase: ServerSupabase, siteId: string): Promise<Assessment[]> {
@@ -25,7 +25,7 @@ export async function listAssessmentsForSite(supabase: ServerSupabase, siteId: s
     .order('created_at', { ascending: false });
 
   if (error !== null) throw error;
-  return data;
+  return data as Assessment[];
 }
 
 export async function getAssessment(supabase: ServerSupabase, id: string): Promise<Assessment> {
@@ -40,14 +40,14 @@ export async function getAssessment(supabase: ServerSupabase, id: string): Promi
   if (data === null) {
     throw new NotFoundError(`Assessment ${id} not found`, { meta: { assessmentId: id } });
   }
-  return data;
+  return data as Assessment;
 }
 
 export async function insertAssessment(supabase: ServerSupabase, input: NewAssessment): Promise<Assessment> {
   const { data, error } = await supabase.from('assessments').insert(input).select().single();
 
   if (error !== null) throw error;
-  return data;
+  return data as Assessment;
 }
 
 export async function updateAssessment(
@@ -67,5 +67,5 @@ export async function updateAssessment(
   if (data === null) {
     throw new NotFoundError(`Assessment ${id} not found`, { meta: { assessmentId: id } });
   }
-  return data;
+  return data as Assessment;
 }

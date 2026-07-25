@@ -27,16 +27,33 @@ const createdOrgs: string[] = [];
 
 let org: SeedOrg;
 let owner: SeedUser;
+let technicalDirector: SeedUser;
 let clientApproverA: SeedUser; // member of projectA
 let clientViewerA: SeedUser; // member of projectA
 let clientViewerB: SeedUser; // member of projectB, not projectA
 let projectA: SeedProjectWithClientAndSite;
 let projectB: SeedProjectWithClientAndSite;
 
+/**
+ * Phase 3 (F15): trg_projects_guard_completion_signoff now blocks
+ * projects.status -> 'completed' unless a project_completion_signoffs row
+ * already exists -- every test below that completes a project needs one
+ * first, same as any other real caller would.
+ */
+async function signOffAndCompleteProject(projectId: string): Promise<void> {
+  await sql(`insert into project_completion_signoffs (organization_id, project_id, signed_off_by) values ($1, $2, $3)`, [
+    org.id,
+    projectId,
+    technicalDirector.id,
+  ]);
+  await sql(`update projects set status = 'completed' where id = $1`, [projectId]);
+}
+
 beforeAll(async () => {
   const a = await createOrgWithStaff();
   org = a.org;
   owner = a.owner;
+  technicalDirector = a.technicalDirector;
 
   projectA = await createProjectWithClientAndSite(org.id);
   projectB = await createProjectWithClientAndSite(org.id);
@@ -335,7 +352,7 @@ describe('fn_projects_sync_handover_signoff_decision -- opens a pending handover
   it('opens a pending handover_signoff decision the moment a project first reaches completed, never re-fires', async () => {
     const project = await createProjectWithClientAndSite(org.id);
 
-    await sql(`update projects set status = 'completed' where id = $1`, [project.id]);
+    await signOffAndCompleteProject(project.id);
 
     const rows = await sql<{ decided_at: string | null; decision: string | null; client_summary: string | null }>(
       'select decided_at, decision, client_summary from client_decisions where project_id = $1 and handover_signoff = true',
@@ -359,7 +376,7 @@ describe('fn_client_accept_handover -- the RPC client-portal calls for its own h
     const project = await createProjectWithClientAndSite(org.id);
     const clientApprover = await createUser({ organizationId: org.id, orgRole: null });
     await addProjectMember(project.id, clientApprover.id, 'client_approver');
-    await sql(`update projects set status = 'completed' where id = $1`, [project.id]);
+    await signOffAndCompleteProject(project.id);
     const [decision] = await sql<{ id: string }>(
       'select id from client_decisions where project_id = $1 and handover_signoff = true',
       [project.id],
@@ -383,7 +400,7 @@ describe('fn_client_accept_handover -- the RPC client-portal calls for its own h
     const otherProject = await createProjectWithClientAndSite(org.id);
     const clientViewerOther = await createUser({ organizationId: org.id, orgRole: null });
     await addProjectMember(otherProject.id, clientViewerOther.id, 'client_viewer');
-    await sql(`update projects set status = 'completed' where id = $1`, [project.id]);
+    await signOffAndCompleteProject(project.id);
     const [decision] = await sql<{ id: string }>(
       'select id from client_decisions where project_id = $1 and handover_signoff = true',
       [project.id],
@@ -401,7 +418,7 @@ describe('fn_client_accept_handover -- the RPC client-portal calls for its own h
     const project = await createProjectWithClientAndSite(org.id);
     const clientApprover = await createUser({ organizationId: org.id, orgRole: null });
     await addProjectMember(project.id, clientApprover.id, 'client_approver');
-    await sql(`update projects set status = 'completed' where id = $1`, [project.id]);
+    await signOffAndCompleteProject(project.id);
     const [decision] = await sql<{ id: string }>(
       'select id from client_decisions where project_id = $1 and handover_signoff = true',
       [project.id],

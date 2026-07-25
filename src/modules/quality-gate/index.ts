@@ -15,9 +15,11 @@ export type {
   NewHoldPointTemplate,
   NewInspection,
   NewNonconformity,
+  NewProjectCompletionSignoff,
   Nonconformity,
   NonconformityUpdate,
   Proceed,
+  ProjectCompletionSignoff,
   WorkPackageState,
 } from './types';
 
@@ -25,6 +27,7 @@ export {
   createHoldPointTemplateSchema,
   createInspectionSchema,
   createNonconformitySchema,
+  createProjectCompletionSignoffSchema,
   overrideInspectionSchema,
   recordInspectionResultSchema,
   resolveNonconformitySchema,
@@ -32,6 +35,7 @@ export {
   type CreateHoldPointTemplateInput,
   type CreateInspectionInput,
   type CreateNonconformityInput,
+  type CreateProjectCompletionSignoffInput,
   type OverrideInspectionInput,
   type RecordInspectionResultInput,
   type ResolveNonconformityInput,
@@ -56,3 +60,7 @@ export {
   listNonconformitiesForInspectionAction,
   resolveNonconformityAction,
 } from './actions/nonconformity-actions';
+export {
+  createProjectCompletionSignoffAction,
+  getProjectCompletionSignoffForProjectAction,
+} from './actions/project-completion-signoff-actions';

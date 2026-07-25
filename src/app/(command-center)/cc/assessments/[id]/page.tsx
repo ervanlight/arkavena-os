@@ -81,6 +81,7 @@ export default async function AssessmentDetailPage({ params }: { params: Promise
           siteConditions={assessment.site_conditions}
           recommendedScope={assessment.recommended_scope}
           notes={assessment.notes}
+          checklistResponses={assessment.checklist_responses}
           disabled={assessment.status === 'completed'}
         />
       </Card>

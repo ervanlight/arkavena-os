@@ -27,6 +27,7 @@ const createdOrgs: string[] = [];
 
 let org: SeedOrg;
 let owner: SeedUser;
+let technicalDirector: SeedUser;
 let procurement: SeedUser;
 
 let orgB: SeedOrg;
@@ -36,6 +37,7 @@ beforeAll(async () => {
   const a = await createOrgWithStaff();
   org = a.org;
   owner = a.owner;
+  technicalDirector = a.technicalDirector;
   procurement = a.procurement;
 
   const b = await createOrgWithStaff();
@@ -151,6 +153,15 @@ describe('fn_projects_sync_warranties_on_completion -- the trigger actually crea
        values ($1, $2, 'ac_unit', now(), $3) returning id`,
       [org.id, project.id, owner.id],
     );
+
+    // Phase 3 (F15): trg_projects_guard_completion_signoff now blocks
+    // projects.status -> 'completed' unless a project_completion_signoffs
+    // row already exists.
+    await sql(`insert into project_completion_signoffs (organization_id, project_id, signed_off_by) values ($1, $2, $3)`, [
+      org.id,
+      project.id,
+      technicalDirector.id,
+    ]);
 
     await asUser(owner.id, async (run) => {
       await run(`update projects set status = 'completed' where id = $1`, [project.id]);

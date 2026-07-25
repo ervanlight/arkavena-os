@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createPurchaseOrderAction, type Vendor, type VendorQuote } from '@/modules/procurement';
+import type { MaterialRequest } from '@/modules/field-reporting';
 import { Button, Input, Label, Select } from '@/core/ui';
 
 type FormState = { error: string | null };
@@ -16,20 +17,24 @@ export function CreatePurchaseOrderForm({
   projectId,
   vendors,
   quotes,
+  materialRequests,
 }: {
   projectId: string;
   vendors: Vendor[];
   quotes: VendorQuote[];
+  materialRequests: MaterialRequest[];
 }) {
   const router = useRouter();
 
   const [state, formAction, isPending] = useActionState(async (_prev: FormState, formData: FormData) => {
     const vendorQuoteId = String(formData.get('vendorQuoteId') ?? '');
+    const materialRequestId = String(formData.get('materialRequestId') ?? '');
 
     const result = await createPurchaseOrderAction({
       projectId,
       vendorId: String(formData.get('vendorId') ?? ''),
       ...(vendorQuoteId !== '' ? { vendorQuoteId } : {}),
+      ...(materialRequestId !== '' ? { materialRequestId } : {}),
       description: String(formData.get('description') ?? ''),
       amount: String(formData.get('amount') ?? ''),
     });
@@ -62,6 +67,17 @@ export function CreatePurchaseOrderForm({
           {quotes.map((quote) => (
             <option key={quote.id} value={quote.id}>
               {quote.description}
+            </option>
+          ))}
+        </Select>
+      </div>
+      <div>
+        <Label htmlFor="materialRequestId">Memenuhi permintaan material</Label>
+        <Select id="materialRequestId" name="materialRequestId">
+          <option value="">-- Tidak terkait permintaan tertentu --</option>
+          {materialRequests.map((request) => (
+            <option key={request.id} value={request.id}>
+              {request.item_description} ({request.quantity} {request.unit})
             </option>
           ))}
         </Select>

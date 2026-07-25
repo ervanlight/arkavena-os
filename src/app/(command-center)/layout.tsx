@@ -11,6 +11,7 @@ import {
   BookOpen,
   ShieldCheck,
   Package,
+  Award,
   Receipt,
   UsersRound,
   LogOut,
@@ -28,6 +29,7 @@ const NAV_ITEMS = [
   { href: '/cc/cost-library', label: 'Cost Library', icon: BookOpen },
   { href: '/cc/quality-gate', label: 'Quality Gate', icon: ShieldCheck },
   { href: '/cc/assets', label: 'Aset', icon: Package },
+  { href: '/cc/warranties', label: 'Garansi', icon: Award },
   { href: '/cc/billing', label: 'Billing', icon: Receipt },
   { href: '/cc/team', label: 'Tim', icon: UsersRound },
 ] satisfies { href: Route; label: string; icon: typeof Home }[];

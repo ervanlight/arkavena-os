@@ -39,6 +39,7 @@ export const createPurchaseOrderAction = safeAction(
       project_id: input.projectId,
       vendor_id: input.vendorId,
       vendor_quote_id: input.vendorQuoteId ?? null,
+      material_request_id: input.materialRequestId ?? null,
       description: input.description,
       amount: toRupiah(input.amount),
       issued_by: ctx.userId,

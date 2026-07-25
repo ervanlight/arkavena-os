@@ -339,6 +339,18 @@ export const PERMISSIONS = {
     resolve: [...ORG_ROLES],
   },
 
+  /**
+   * Phase 3 (F15): the whole-project QC walkthrough, distinct from any one
+   * work package's own inspection. fn_project_completion_signoffs_guard_td_only
+   * (the migration) is the real, unbypassable check; this is only the
+   * friendly Indonesian refusal for everyone else, same split as
+   * inspection.override above.
+   */
+  project_completion_signoff: {
+    view: [...ORG_ROLES],
+    create: ['technical_director'],
+  },
+
   // -------------------------------------------------------------------------
   // Fase 6 (modules/client-portal)
   //

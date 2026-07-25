@@ -319,3 +319,93 @@ describe('audit trail -- fn_audit_row_change fires for these tables too', () => 
     expect(rows).toHaveLength(1);
   });
 });
+
+describe('project_completion_signoffs -- Phase 3 (F15), TD-only, gates projects.status -> completed', () => {
+  it('rejects moving a project straight to completed with no sign-off row at all', async () => {
+    const p = await createProjectWithClientAndSite(org.id);
+    const error = await expectRejection(sql(`update projects set status = 'completed' where id = $1`, [p.id]));
+    expect(error.message).toMatch(/serah terima final/i);
+  });
+
+  it('rejects a sign-off attributed to a non-TD user, even an Owner', async () => {
+    const p = await createProjectWithClientAndSite(org.id);
+    const error = await expectRejection(
+      sql(`insert into project_completion_signoffs (organization_id, project_id, signed_off_by) values ($1, $2, $3)`, [
+        org.id,
+        p.id,
+        owner.id,
+      ]),
+    );
+    expect(error.message).toMatch(/hanya technical director/i);
+  });
+
+  it('accepts a sign-off from a real technical_director, then allows the project to complete', async () => {
+    const p = await createProjectWithClientAndSite(org.id);
+    await sql(`insert into project_completion_signoffs (organization_id, project_id, signed_off_by) values ($1, $2, $3)`, [
+      org.id,
+      p.id,
+      technicalDirector.id,
+    ]);
+
+    await sql(`update projects set status = 'completed' where id = $1`, [p.id]);
+    const rows = await sql<{ status: string }>('select status from projects where id = $1', [p.id]);
+    expect(rows[0]!.status).toBe('completed');
+  });
+
+  it('allows at most one sign-off row per project', async () => {
+    const p = await createProjectWithClientAndSite(org.id);
+    await sql(`insert into project_completion_signoffs (organization_id, project_id, signed_off_by) values ($1, $2, $3)`, [
+      org.id,
+      p.id,
+      technicalDirector.id,
+    ]);
+
+    const error = await expectRejection(
+      sql(`insert into project_completion_signoffs (organization_id, project_id, signed_off_by) values ($1, $2, $3)`, [
+        org.id,
+        p.id,
+        technicalDirector.id,
+      ]),
+    );
+    expect(error.message).toMatch(/duplicate key|unique constraint/i);
+  });
+
+  it('lets staff see a sign-off in their own organisation, but hides it across organisations', async () => {
+    const p = await createProjectWithClientAndSite(org.id);
+    const [signoff] = await sql<{ id: string }>(
+      `insert into project_completion_signoffs (organization_id, project_id, signed_off_by) values ($1, $2, $3) returning id`,
+      [org.id, p.id, technicalDirector.id],
+    );
+
+    await asUser(owner.id, async (run) => {
+      const rows = await run('select id from project_completion_signoffs where id = $1', [signoff!.id]);
+      expect(rows).toHaveLength(1);
+    });
+
+    const bTd = await createUser({ organizationId: orgB.id, orgRole: 'technical_director' });
+    const bProject = await createProjectWithClientAndSite(orgB.id);
+    const [signoffB] = await sql<{ id: string }>(
+      `insert into project_completion_signoffs (organization_id, project_id, signed_off_by) values ($1, $2, $3) returning id`,
+      [orgB.id, bProject.id, bTd.id],
+    );
+
+    await asUser(owner.id, async (run) => {
+      const rows = await run('select id from project_completion_signoffs where id = $1', [signoffB!.id]);
+      expect(rows).toHaveLength(0);
+    });
+  });
+
+  it('records an audit row for the sign-off insert', async () => {
+    const p = await createProjectWithClientAndSite(org.id);
+    const [signoff] = await sql<{ id: string }>(
+      `insert into project_completion_signoffs (organization_id, project_id, signed_off_by) values ($1, $2, $3) returning id`,
+      [org.id, p.id, technicalDirector.id],
+    );
+
+    const rows = await sql(
+      `select 1 from audit_logs where entity_table = 'project_completion_signoffs' and entity_id = $1 and action = 'insert' and source = 'trigger'`,
+      [signoff!.id],
+    );
+    expect(rows).toHaveLength(1);
+  });
+});

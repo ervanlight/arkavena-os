@@ -50,3 +50,9 @@ export const resolveNonconformitySchema = z.object({
   id: z.string().uuid(),
 });
 export type ResolveNonconformityInput = z.infer<typeof resolveNonconformitySchema>;
+
+export const createProjectCompletionSignoffSchema = z.object({
+  projectId: z.string().uuid(),
+  notes: z.string().trim().max(2000).optional(),
+});
+export type CreateProjectCompletionSignoffInput = z.infer<typeof createProjectCompletionSignoffSchema>;

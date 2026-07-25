@@ -5,6 +5,8 @@
  */
 
 export type { Assessment, AssessmentUpdate, NewAssessment } from './types';
+export type { AssessmentChecklistItemKey, AssessmentChecklistResponses } from './domain/standard-checklist';
+export { STANDARD_ASSESSMENT_CHECKLIST_ITEMS } from './domain/standard-checklist';
 
 export {
   completeAssessmentSchema,

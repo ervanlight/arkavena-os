@@ -86,6 +86,7 @@ export type Database = {
         Row: {
           assessed_at: string | null
           assessed_by: string | null
+          checklist_responses: Json | null
           created_at: string
           deleted_at: string | null
           id: string
@@ -102,6 +103,7 @@ export type Database = {
         Insert: {
           assessed_at?: string | null
           assessed_by?: string | null
+          checklist_responses?: Json | null
           created_at?: string
           deleted_at?: string | null
           id?: string
@@ -118,6 +120,7 @@ export type Database = {
         Update: {
           assessed_at?: string | null
           assessed_by?: string | null
+          checklist_responses?: Json | null
           created_at?: string
           deleted_at?: string | null
           id?: string
@@ -2760,6 +2763,71 @@ export type Database = {
           },
         ]
       }
+      project_completion_signoffs: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          id: string
+          notes: string | null
+          organization_id: string
+          project_id: string
+          signed_off_at: string
+          signed_off_by: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          project_id: string
+          signed_off_at?: string
+          signed_off_by: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          project_id?: string
+          signed_off_at?: string
+          signed_off_by?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_completion_signoffs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_completion_signoffs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_completion_signoffs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "project_completion_signoffs_signed_off_by_fkey"
+            columns: ["signed_off_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_members: {
         Row: {
           created_at: string
@@ -3020,6 +3088,7 @@ export type Database = {
           description: string
           id: string
           issued_by: string
+          material_request_id: string | null
           notes: string | null
           organization_id: string
           project_id: string
@@ -3034,6 +3103,7 @@ export type Database = {
           description: string
           id?: string
           issued_by: string
+          material_request_id?: string | null
           notes?: string | null
           organization_id: string
           project_id: string
@@ -3048,6 +3118,7 @@ export type Database = {
           description?: string
           id?: string
           issued_by?: string
+          material_request_id?: string | null
           notes?: string | null
           organization_id?: string
           project_id?: string
@@ -3061,6 +3132,13 @@ export type Database = {
             columns: ["issued_by"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_material_request_id_fkey"
+            columns: ["material_request_id"]
+            isOneToOne: false
+            referencedRelation: "material_requests"
             referencedColumns: ["id"]
           },
           {
@@ -4107,6 +4185,7 @@ export type Database = {
           description: string
           id: string
           issued_by: string
+          material_request_id: string | null
           notes: string | null
           organization_id: string
           project_id: string

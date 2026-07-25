@@ -6,7 +6,7 @@ import { createAuditGateway } from '@/core/audit/gateway.server';
 import { getActionContext } from '@/core/auth/session';
 import { safeAction } from '@/core/actions/safe-action';
 import { createServerSupabase } from '@/core/db/client.server';
-import { getWarranty, insertWarranty, listWarrantiesForProject, updateWarranty } from '../data/warranties-repository';
+import { getWarranty, insertWarranty, listWarranties, listWarrantiesForProject, updateWarranty } from '../data/warranties-repository';
 import { createWarrantySchema, updateWarrantySchema } from '../schemas';
 import type { Warranty } from '../types';
 
@@ -88,6 +88,20 @@ export const listWarrantiesForProjectAction = safeAction(
   async (projectId): Promise<Warranty[]> => {
     const supabase = await createServerSupabase();
     return listWarrantiesForProject(supabase, projectId);
+  },
+);
+
+/** Phase 3 (F18): the org-wide business-development touchpoint -- which warranties, across every project, are approaching or past expiry (warrantyExpiryTier, computed at read time -- no scheduler exists in this stack, ADR 0019 SS5). */
+export const listWarrantiesAction = safeAction(
+  {
+    schema: z.void(),
+    permission: { resource: 'warranty', action: 'view' },
+    loadContext: getActionContext,
+    name: 'maintenanceEngine.listWarranties',
+  },
+  async (): Promise<Warranty[]> => {
+    const supabase = await createServerSupabase();
+    return listWarranties(supabase);
   },
 );
 
