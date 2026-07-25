@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { formatRp } from '@/core/money/rupiah';
 import { getBillingPackAction } from '@/modules/billing';
+import { Card } from '@/core/ui';
 
 export const metadata = { title: 'Billing Pack — BuildTrust OS' };
 
@@ -25,7 +26,7 @@ export default async function BillingPackPage({ params }: { params: Promise<{ id
   if (!result.ok) {
     if (result.error.code === 'NOT_FOUND') notFound();
     return (
-      <p role="alert" className="text-sm text-red-600">
+      <p role="alert" className="text-sm text-[color:var(--color-danger)]">
         {result.error.message}
       </p>
     );
@@ -36,56 +37,70 @@ export default async function BillingPackPage({ params }: { params: Promise<{ id
   return (
     <div className="space-y-6">
       <div>
-        <Link href={`/cc/projects/${projectId}/invoices` as Route} className="text-sm text-slate-500 hover:text-slate-900">
+        <Link
+          href={`/cc/projects/${projectId}/invoices` as Route}
+          className="text-sm text-[color:var(--color-ink-tertiary)] hover:text-[color:var(--color-ink)]"
+        >
           ← Invoice
         </Link>
-        <h1 className="mt-1 text-lg font-semibold text-slate-900">Billing Pack — {invoice.title}</h1>
-        <p className="text-sm text-slate-500">{formatRp(invoice.amount)} · jatuh tempo {invoice.due_date}</p>
+        <h1 className="mt-1 text-[20px] font-semibold text-[color:var(--color-ink)]">Billing Pack — {invoice.title}</h1>
+        <p className="text-sm text-[color:var(--color-ink-secondary)]">
+          {formatRp(invoice.amount)} · jatuh tempo {invoice.due_date}
+        </p>
       </div>
 
-      <section className="rounded-lg bg-white p-6 shadow-sm">
-        <h2 className="text-sm font-semibold text-slate-900">QC (hold point)</h2>
-        {qcStatus.length === 0 && <p className="mt-2 text-sm text-slate-500">Tidak ada syarat QC untuk milestone ini.</p>}
-        <ul className="mt-3 divide-y divide-slate-100">
+      <Card>
+        <h2 className="text-[15px] font-semibold text-[color:var(--color-ink)]">QC (hold point)</h2>
+        {qcStatus.length === 0 && (
+          <p className="mt-2 text-sm text-[color:var(--color-ink-secondary)]">Tidak ada syarat QC untuk milestone ini.</p>
+        )}
+        <ul className="mt-3 divide-y divide-[color:var(--color-hairline)]">
           {qcStatus.map((hp, index) => (
             <li key={`${hp.templateName}-${index}`} className="flex items-center justify-between py-2 text-sm">
-              <span className="text-slate-900">{hp.templateName}</span>
-              <span className="text-slate-600">
+              <span className="text-[color:var(--color-ink)]">{hp.templateName}</span>
+              <span className="text-[color:var(--color-ink-secondary)]">
                 {hp.overridden ? 'Di-override TD' : (QC_STATUS_LABEL_ID[hp.status] ?? hp.status)}
               </span>
             </li>
           ))}
         </ul>
-      </section>
+      </Card>
 
       {variation !== null && (
-        <section className="rounded-lg bg-white p-6 shadow-sm">
-          <h2 className="text-sm font-semibold text-slate-900">Variation terkait</h2>
+        <Card>
+          <h2 className="text-[15px] font-semibold text-[color:var(--color-ink)]">Variation terkait</h2>
           <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
-            <dt className="text-slate-500">Judul</dt>
-            <dd className="text-slate-900">{variation.title}</dd>
-            <dt className="text-slate-500">Status</dt>
-            <dd className="text-slate-900">{variation.status}</dd>
-            <dt className="text-slate-500">Dampak biaya</dt>
-            <dd className="text-slate-900">
+            <dt className="text-[color:var(--color-ink-tertiary)]">Judul</dt>
+            <dd className="text-[color:var(--color-ink)]">{variation.title}</dd>
+            <dt className="text-[color:var(--color-ink-tertiary)]">Status</dt>
+            <dd className="text-[color:var(--color-ink)]">{variation.status}</dd>
+            <dt className="text-[color:var(--color-ink-tertiary)]">Dampak biaya</dt>
+            <dd className="text-[color:var(--color-ink)]">
               {variation.cost_impact_amount === null ? '—' : formatRp(variation.cost_impact_amount)}
             </dd>
           </dl>
-        </section>
+        </Card>
       )}
 
-      <section className="rounded-lg bg-white p-6 shadow-sm">
-        <h2 className="text-sm font-semibold text-slate-900">Bukti progres (foto)</h2>
-        {evidencePhotos.length === 0 && <p className="mt-2 text-sm text-slate-500">Belum ada foto terkait milestone ini.</p>}
+      <Card>
+        <h2 className="text-[15px] font-semibold text-[color:var(--color-ink)]">Bukti progres (foto)</h2>
+        {evidencePhotos.length === 0 && (
+          <p className="mt-2 text-sm text-[color:var(--color-ink-secondary)]">Belum ada foto terkait milestone ini.</p>
+        )}
         <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {evidencePhotos.map((photo) => (
-            <figure key={photo.id} className="overflow-hidden rounded-md border border-slate-200 p-2 text-xs text-slate-600">
+            <figure
+              key={photo.id}
+              className="overflow-hidden rounded-[var(--radius-control)] border border-[color:var(--color-hairline)] p-2 text-xs text-[color:var(--color-ink-secondary)]"
+            >
               <p>{photo.caption ?? 'Tanpa keterangan'}</p>
-              <p className="mt-1 text-slate-400">{new Date(photo.created_at).toLocaleDateString('id-ID')}</p>
+              <p className="mt-1 text-[color:var(--color-ink-tertiary)]">
+                {new Date(photo.created_at).toLocaleDateString('id-ID')}
+              </p>
             </figure>
           ))}
         </div>
-      </section>
+      </Card>
     </div>
   );
 }

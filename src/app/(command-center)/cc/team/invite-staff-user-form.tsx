@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
 import { inviteStaffUserAction } from '@/core/auth/invite-staff-user';
+import { Label, Input, Select, Button } from '@/core/ui';
 
 type FormState = { error: string | null; ok: boolean; temporaryPassword: string | null };
 const initialState: FormState = { error: null, ok: false, temporaryPassword: null };
@@ -36,39 +37,16 @@ export function InviteStaffUserForm() {
   return (
     <form action={formAction} className="grid grid-cols-1 gap-4 sm:grid-cols-4">
       <div>
-        <label htmlFor="fullName" className="block text-sm font-medium text-slate-700">
-          Nama *
-        </label>
-        <input
-          id="fullName"
-          name="fullName"
-          required
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        />
+        <Label htmlFor="fullName">Nama *</Label>
+        <Input id="fullName" name="fullName" required />
       </div>
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-slate-700">
-          Email *
-        </label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          required
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        />
+        <Label htmlFor="email">Email *</Label>
+        <Input id="email" name="email" type="email" required />
       </div>
       <div>
-        <label htmlFor="orgRole" className="block text-sm font-medium text-slate-700">
-          Peran *
-        </label>
-        <select
-          id="orgRole"
-          name="orgRole"
-          required
-          defaultValue=""
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        >
+        <Label htmlFor="orgRole">Peran *</Label>
+        <Select id="orgRole" name="orgRole" required defaultValue="">
           <option value="" disabled>
             -- Pilih peran --
           </option>
@@ -77,35 +55,36 @@ export function InviteStaffUserForm() {
               {role.label}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
 
       <div className="flex items-end">
-        <button
-          type="submit"
-          disabled={isPending}
-          className="w-full rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-        >
+        <Button type="submit" disabled={isPending} className="w-full">
           {isPending ? 'Mengundang...' : 'Undang'}
-        </button>
+        </Button>
       </div>
 
       <div className="sm:col-span-4">
         {state.error !== null && (
-          <p role="alert" className="text-sm text-red-600">
+          <p role="alert" className="text-sm text-[color:var(--color-danger)]">
             {state.error}
           </p>
         )}
         {state.ok && state.temporaryPassword !== null && (
-          <div role="status" className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm">
-            <p className="text-emerald-800">
+          <div
+            role="status"
+            className="rounded-[var(--radius-control)] border border-[color:var(--color-success)]/30 bg-[color:var(--color-success)]/12 p-3 text-sm"
+          >
+            <p className="text-[color:var(--color-success)]">
               Staf berhasil diundang. Kata sandi awal (sampaikan secara langsung, tidak dikirim lewat email):
             </p>
-            <p className="mt-1 font-mono text-base font-semibold text-emerald-900">{state.temporaryPassword}</p>
+            <p className="mt-1 font-mono text-base font-semibold text-[color:var(--color-success)]">
+              {state.temporaryPassword}
+            </p>
           </div>
         )}
         {state.ok && state.temporaryPassword === null && (
-          <p className="text-sm text-emerald-600">Email ini sudah terdaftar di organisasi Anda.</p>
+          <p className="text-sm text-[color:var(--color-success)]">Email ini sudah terdaftar di organisasi Anda.</p>
         )}
       </div>
     </form>

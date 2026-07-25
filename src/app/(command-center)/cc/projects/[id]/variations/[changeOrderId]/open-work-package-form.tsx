@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createWorkPackageAction } from '@/modules/projects';
+import { Button, Input, Label } from '@/core/ui';
 
 type FormState = { error: string | null };
 const initialState: FormState = { error: null };
@@ -34,26 +35,20 @@ export function OpenWorkPackageForm({ projectId, changeOrderId }: { projectId: s
   return (
     <form action={formAction} className="flex flex-wrap items-end gap-3">
       <div>
-        <label htmlFor="workPackageName" className="block text-xs font-medium text-slate-700">
-          Nama paket kerja
-        </label>
-        <input
+        <Label htmlFor="workPackageName">Nama paket kerja</Label>
+        <Input
           id="workPackageName"
           name="name"
           required
           placeholder="mis. Pemasangan kamar mandi lantai 2"
-          className="mt-1 w-64 rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+          className="w-64"
         />
       </div>
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-      >
+      <Button type="submit" disabled={isPending}>
         {isPending ? 'Membuka...' : 'Buka paket kerja'}
-      </button>
+      </Button>
       {state.error !== null && (
-        <p role="alert" className="w-full text-sm text-red-600">
+        <p role="alert" className="w-full text-sm text-[color:var(--color-danger)]">
           {state.error}
         </p>
       )}

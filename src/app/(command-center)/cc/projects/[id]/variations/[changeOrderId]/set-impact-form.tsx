@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
 import { setChangeOrderImpactAction } from '@/modules/scope-variation';
+import { Button, Input, Label } from '@/core/ui';
 
 type FormState = { error: string | null };
 const initialState: FormState = { error: null };
@@ -36,10 +37,8 @@ export function SetImpactForm({
   return (
     <form action={formAction} className="flex flex-wrap items-end gap-3">
       <div>
-        <label htmlFor="costImpactAmount" className="block text-xs font-medium text-slate-700">
-          Dampak biaya (Rp, boleh minus untuk pengurangan)
-        </label>
-        <input
+        <Label htmlFor="costImpactAmount">Dampak biaya (Rp, boleh minus untuk pengurangan)</Label>
+        <Input
           id="costImpactAmount"
           name="costImpactAmount"
           required
@@ -47,31 +46,25 @@ export function SetImpactForm({
           pattern="-?\d+"
           defaultValue={currentCostImpact}
           placeholder="mis. 45000000 atau -5000000"
-          className="mt-1 w-52 rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+          className="w-52"
         />
       </div>
       <div>
-        <label htmlFor="scheduleImpactDays" className="block text-xs font-medium text-slate-700">
-          Dampak jadwal (hari, boleh minus)
-        </label>
-        <input
+        <Label htmlFor="scheduleImpactDays">Dampak jadwal (hari, boleh minus)</Label>
+        <Input
           id="scheduleImpactDays"
           name="scheduleImpactDays"
           type="number"
           required
           defaultValue={currentScheduleImpact}
-          className="mt-1 w-32 rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+          className="w-32"
         />
       </div>
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-      >
+      <Button type="submit" disabled={isPending}>
         {isPending ? 'Menyimpan...' : 'Simpan estimasi'}
-      </button>
+      </Button>
       {state.error !== null && (
-        <p role="alert" className="w-full text-sm text-red-600">
+        <p role="alert" className="w-full text-sm text-[color:var(--color-danger)]">
           {state.error}
         </p>
       )}

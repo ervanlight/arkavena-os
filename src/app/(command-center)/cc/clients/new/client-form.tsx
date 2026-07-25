@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClientAction } from '@/modules/crm';
+import { Card, Input, Label, Textarea, Button } from '@/core/ui';
 
 type FormState = { error: string | null };
 
@@ -34,75 +35,40 @@ export function NewClientForm() {
   }, initialState);
 
   return (
-    <form action={formAction} className="max-w-lg space-y-4 rounded-lg bg-white p-6 shadow-sm">
-      <div>
-        <label htmlFor="name" className="block text-sm font-medium text-slate-700">
-          Nama klien *
-        </label>
-        <input
-          id="name"
-          name="name"
-          required
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        />
-      </div>
-      <div>
-        <label htmlFor="contactName" className="block text-sm font-medium text-slate-700">
-          Nama kontak
-        </label>
-        <input
-          id="contactName"
-          name="contactName"
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        />
-      </div>
-      <div>
-        <label htmlFor="email" className="block text-sm font-medium text-slate-700">
-          Email
-        </label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        />
-      </div>
-      <div>
-        <label htmlFor="phone" className="block text-sm font-medium text-slate-700">
-          Telepon
-        </label>
-        <input
-          id="phone"
-          name="phone"
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        />
-      </div>
-      <div>
-        <label htmlFor="address" className="block text-sm font-medium text-slate-700">
-          Alamat
-        </label>
-        <textarea
-          id="address"
-          name="address"
-          rows={2}
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        />
-      </div>
+    <Card className="max-w-lg">
+      <form action={formAction} className="space-y-4">
+        <div>
+          <Label htmlFor="name">Nama klien *</Label>
+          <Input id="name" name="name" required />
+        </div>
+        <div>
+          <Label htmlFor="contactName">Nama kontak</Label>
+          <Input id="contactName" name="contactName" />
+        </div>
+        <div>
+          <Label htmlFor="email">Email</Label>
+          <Input id="email" name="email" type="email" />
+        </div>
+        <div>
+          <Label htmlFor="phone">Telepon</Label>
+          <Input id="phone" name="phone" />
+        </div>
+        <div>
+          <Label htmlFor="address">Alamat</Label>
+          <Textarea id="address" name="address" rows={2} />
+        </div>
 
-      {state.error !== null && (
-        <p role="alert" className="text-sm text-red-600">
-          {state.error}
-        </p>
-      )}
+        {state.error !== null && (
+          <p role="alert" className="text-sm text-[color:var(--color-danger)]">
+            {state.error}
+          </p>
+        )}
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-      >
-        {isPending ? 'Menyimpan...' : 'Simpan klien'}
-      </button>
-    </form>
+        <Button type="submit" disabled={isPending}>
+          {isPending ? 'Menyimpan...' : 'Simpan klien'}
+        </Button>
+      </form>
+    </Card>
   );
 }
 

@@ -9,7 +9,7 @@ export default async function IssuePage({ searchParams }: { searchParams: Promis
 
   return (
     <div className="space-y-4">
-      <h1 className="text-lg font-semibold text-slate-900">Lapor Masalah</h1>
+      <h1 className="text-[19px] font-semibold text-[color:var(--color-ink)]">Lapor Masalah</h1>
       <IssueForm projectId={projectId} />
     </div>
   );

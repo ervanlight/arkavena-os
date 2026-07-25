@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createHandoverItemAction } from '@/modules/maintenance-engine';
+import { Label, Input, Button } from '@/core/ui';
 
 type FormState = { error: string | null };
 
@@ -28,52 +29,28 @@ export function CreateHandoverItemForm({ projectId }: { projectId: string }) {
   return (
     <form action={formAction} className="grid grid-cols-1 gap-4 sm:grid-cols-3">
       <div>
-        <label htmlFor="itemType" className="block text-sm font-medium text-slate-700">
-          Jenis item *
-        </label>
-        <input
-          id="itemType"
-          name="itemType"
-          required
-          placeholder="key, as_built_drawing, ac_unit, ..."
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        />
+        <Label htmlFor="itemType">Jenis item *</Label>
+        <Input id="itemType" name="itemType" required placeholder="key, as_built_drawing, ac_unit, ..." />
       </div>
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-slate-700">
-          Deskripsi
-        </label>
-        <input
-          id="description"
-          name="description"
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        />
+        <Label htmlFor="description">Deskripsi</Label>
+        <Input id="description" name="description" />
       </div>
       <div>
-        <label htmlFor="handedOverTo" className="block text-sm font-medium text-slate-700">
-          Diserahkan kepada
-        </label>
-        <input
-          id="handedOverTo"
-          name="handedOverTo"
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        />
+        <Label htmlFor="handedOverTo">Diserahkan kepada</Label>
+        <Input id="handedOverTo" name="handedOverTo" />
       </div>
 
       {state.error !== null && (
-        <p role="alert" className="col-span-full text-sm text-red-600">
+        <p role="alert" className="col-span-full text-sm text-[color:var(--color-danger)]">
           {state.error}
         </p>
       )}
 
       <div className="col-span-full">
-        <button
-          type="submit"
-          disabled={isPending}
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-        >
+        <Button type="submit" disabled={isPending}>
           {isPending ? 'Menyimpan...' : 'Tambah item handover'}
-        </button>
+        </Button>
       </div>
     </form>
   );

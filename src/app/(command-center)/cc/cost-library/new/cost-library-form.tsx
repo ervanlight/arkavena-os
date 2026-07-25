@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createCostLibraryItemAction } from '@/modules/estimating';
+import { Card, Input, Label, Button } from '@/core/ui';
 
 type FormState = { error: string | null };
 
@@ -27,67 +28,36 @@ export function NewCostLibraryItemForm() {
   }, initialState);
 
   return (
-    <form action={formAction} className="max-w-lg space-y-4 rounded-lg bg-white p-6 shadow-sm">
-      <div>
-        <label htmlFor="name" className="block text-sm font-medium text-slate-700">
-          Nama item *
-        </label>
-        <input
-          id="name"
-          name="name"
-          required
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        />
-      </div>
-      <div>
-        <label htmlFor="unit" className="block text-sm font-medium text-slate-700">
-          Satuan *
-        </label>
-        <input
-          id="unit"
-          name="unit"
-          required
-          placeholder="m2, m3, sak, ..."
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        />
-      </div>
-      <div>
-        <label htmlFor="defaultUnitCost" className="block text-sm font-medium text-slate-700">
-          Harga satuan (Rp) *
-        </label>
-        <input
-          id="defaultUnitCost"
-          name="defaultUnitCost"
-          required
-          inputMode="numeric"
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        />
-      </div>
-      <div>
-        <label htmlFor="category" className="block text-sm font-medium text-slate-700">
-          Kategori
-        </label>
-        <input
-          id="category"
-          name="category"
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        />
-      </div>
+    <Card className="max-w-lg">
+      <form action={formAction} className="space-y-4">
+        <div>
+          <Label htmlFor="name">Nama item *</Label>
+          <Input id="name" name="name" required />
+        </div>
+        <div>
+          <Label htmlFor="unit">Satuan *</Label>
+          <Input id="unit" name="unit" required placeholder="m2, m3, sak, ..." />
+        </div>
+        <div>
+          <Label htmlFor="defaultUnitCost">Harga satuan (Rp) *</Label>
+          <Input id="defaultUnitCost" name="defaultUnitCost" required inputMode="numeric" />
+        </div>
+        <div>
+          <Label htmlFor="category">Kategori</Label>
+          <Input id="category" name="category" />
+        </div>
 
-      {state.error !== null && (
-        <p role="alert" className="text-sm text-red-600">
-          {state.error}
-        </p>
-      )}
+        {state.error !== null && (
+          <p role="alert" className="text-sm text-[color:var(--color-danger)]">
+            {state.error}
+          </p>
+        )}
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-      >
-        {isPending ? 'Menyimpan...' : 'Simpan item'}
-      </button>
-    </form>
+        <Button type="submit" disabled={isPending}>
+          {isPending ? 'Menyimpan...' : 'Simpan item'}
+        </Button>
+      </form>
+    </Card>
   );
 }
 

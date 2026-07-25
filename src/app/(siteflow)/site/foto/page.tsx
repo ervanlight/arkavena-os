@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/core/auth/session';
 import { listWorkPackagesForProjectAction, listZonesForProjectAction } from '@/modules/projects';
 import { PhotoForm } from './photo-form';
+import { Card } from '@/core/ui';
 
 export const metadata = { title: 'Ambil Foto — SiteFlow' };
 
@@ -22,11 +23,13 @@ export default async function PhotoPage({ searchParams }: { searchParams: Promis
 
   return (
     <div className="space-y-4">
-      <h1 className="text-lg font-semibold text-slate-900">Ambil Foto</h1>
+      <h1 className="text-[19px] font-semibold text-[color:var(--color-ink)]">Ambil Foto</h1>
       {zones.length === 0 ? (
-        <p className="rounded-lg bg-white p-4 text-sm text-slate-600 shadow-sm">
-          Belum ada zona di proyek ini. Hubungi kantor untuk menambahkan.
-        </p>
+        <Card>
+          <p className="text-sm text-[color:var(--color-ink-secondary)]">
+            Belum ada zona di proyek ini. Hubungi kantor untuk menambahkan.
+          </p>
+        </Card>
       ) : (
         <PhotoForm
           organizationId={user.organizationId}

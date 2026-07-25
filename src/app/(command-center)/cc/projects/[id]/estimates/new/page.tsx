@@ -7,7 +7,7 @@ export default async function NewEstimatePage({ params }: { params: Promise<{ id
 
   return (
     <div className="space-y-6">
-      <h1 className="text-lg font-semibold text-slate-900">Buat estimasi</h1>
+      <h2 className="text-[17px] font-semibold text-[color:var(--color-ink)]">Buat estimasi</h2>
       <NewEstimateForm projectId={id} />
     </div>
   );

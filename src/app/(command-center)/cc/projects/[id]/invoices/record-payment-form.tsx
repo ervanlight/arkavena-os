@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
 import { recordPaymentAction } from '@/modules/billing';
+import { Input, Button } from '@/core/ui';
 
 type FormState = { error: string | null };
 const initialState: FormState = { error: null };
@@ -22,21 +23,12 @@ export function RecordPaymentForm({ invoiceId }: { invoiceId: string }) {
 
   return (
     <form action={formAction} className="mt-2 flex flex-wrap items-center gap-2">
-      <input
-        name="amount"
-        required
-        placeholder="Nominal dibayar (Rp)"
-        className="w-40 rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-      />
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-      >
+      <Input name="amount" required placeholder="Nominal dibayar (Rp)" className="w-40" />
+      <Button type="submit" variant="secondary" size="sm" disabled={isPending}>
         {isPending ? 'Menyimpan...' : 'Catat pembayaran'}
-      </button>
+      </Button>
       {state.error !== null && (
-        <span role="alert" className="text-xs text-red-600">
+        <span role="alert" className="text-xs text-[color:var(--color-danger)]">
           {state.error}
         </span>
       )}

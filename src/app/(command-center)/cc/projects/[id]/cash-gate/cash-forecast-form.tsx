@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createCashForecastAction } from '@/modules/cash-gate';
+import { Label, Input, Button } from '@/core/ui';
 
 type FormState = { error: string | null };
 const initialState: FormState = { error: null };
@@ -28,40 +29,26 @@ export function CashForecastForm({ projectId }: { projectId: string }) {
   return (
     <form action={formAction} className="flex flex-wrap items-end gap-3">
       <div>
-        <label htmlFor="forecastAmount" className="block text-xs font-medium text-slate-700">
-          Nominal (Rp)
-        </label>
-        <input
+        <Label htmlFor="forecastAmount">Nominal (Rp)</Label>
+        <Input
           id="forecastAmount"
           name="amount"
           required
           inputMode="numeric"
           pattern="\d+"
           placeholder="mis. 30000000"
-          className="mt-1 w-40 rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+          className="w-40"
         />
       </div>
       <div>
-        <label htmlFor="forecastNeededByDate" className="block text-xs font-medium text-slate-700">
-          Dibutuhkan pada
-        </label>
-        <input
-          id="forecastNeededByDate"
-          name="neededByDate"
-          type="date"
-          required
-          className="mt-1 rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        />
+        <Label htmlFor="forecastNeededByDate">Dibutuhkan pada</Label>
+        <Input id="forecastNeededByDate" name="neededByDate" type="date" required />
       </div>
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-      >
+      <Button type="submit" disabled={isPending} size="sm">
         {isPending ? 'Menyimpan...' : 'Tambah proyeksi'}
-      </button>
+      </Button>
       {state.error !== null && (
-        <p role="alert" className="w-full text-sm text-red-600">
+        <p role="alert" className="w-full text-sm text-[color:var(--color-danger)]">
           {state.error}
         </p>
       )}

@@ -1,4 +1,5 @@
 import { listHoldPointTemplatesAction } from '@/modules/quality-gate';
+import { Card, PageHeader, StatusBadge, EmptyState } from '@/core/ui';
 import { CreateHoldPointTemplateForm } from './create-hold-point-template-form';
 
 export const metadata = { title: 'Quality Gate — BuildTrust OS' };
@@ -16,37 +17,32 @@ export default async function QualityGatePage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-lg font-semibold text-slate-900">Quality Gate — Hold Point</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Template hold point per jenis pekerjaan. Berlaku otomatis untuk setiap paket kerja yang diberi jenis
-          pekerjaan yang sama.
-        </p>
-      </div>
+      <PageHeader
+        title="Quality Gate — Hold Point"
+        subtitle="Template hold point per jenis pekerjaan. Berlaku otomatis untuk setiap paket kerja yang diberi jenis pekerjaan yang sama."
+      />
 
-      <div className="rounded-lg bg-white p-6 shadow-sm">
-        <h2 className="text-base font-semibold text-slate-900">Tambah hold point</h2>
+      <Card>
+        <h2 className="text-[17px] font-semibold text-[color:var(--color-ink)]">Tambah hold point</h2>
         <div className="mt-4">
           <CreateHoldPointTemplateForm />
         </div>
-      </div>
+      </Card>
 
       <div className="space-y-6">
-        {byWorkType.size === 0 && <p className="text-sm text-slate-500">Belum ada hold point.</p>}
+        {byWorkType.size === 0 && <EmptyState title="Belum ada hold point" />}
         {[...byWorkType.entries()].map(([workType, items]) => (
-          <div key={workType} className="rounded-lg bg-white p-6 shadow-sm">
-            <h3 className="text-sm font-semibold text-slate-900">{workType}</h3>
-            <ul className="mt-3 divide-y divide-slate-100">
+          <Card key={workType}>
+            <h3 className="text-[15px] font-semibold text-[color:var(--color-ink)]">{workType}</h3>
+            <ul className="mt-3 divide-y divide-[color:var(--color-hairline)]">
               {items.map((template) => (
                 <li key={template.id} className="flex items-center justify-between py-2 text-sm">
-                  <span className="text-slate-900">{template.name}</span>
-                  {!template.is_active && (
-                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500">Nonaktif</span>
-                  )}
+                  <span className="text-[color:var(--color-ink)]">{template.name}</span>
+                  {!template.is_active && <StatusBadge tone="neutral">Nonaktif</StatusBadge>}
                 </li>
               ))}
             </ul>
-          </div>
+          </Card>
         ))}
       </div>
     </div>

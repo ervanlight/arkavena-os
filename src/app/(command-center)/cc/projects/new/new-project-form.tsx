@@ -4,6 +4,7 @@ import { useActionState } from 'react';
 import { createSiteAction } from '@/modules/crm';
 import type { Client } from '@/modules/crm';
 import { createProjectAction } from '@/modules/projects';
+import { Card, Label, Input, Select, Textarea, Button } from '@/core/ui';
 
 type FormState = { error: string | null };
 const initialState: FormState = { error: null };
@@ -50,98 +51,59 @@ export function NewProjectForm({ clients }: { clients: Client[] }) {
   }, initialState);
 
   return (
-    <form action={formAction} className="max-w-lg space-y-4 rounded-lg bg-white p-6 shadow-sm">
-      <div>
-        <label htmlFor="clientId" className="block text-sm font-medium text-slate-700">
-          Klien *
-        </label>
-        <select
-          id="clientId"
-          name="clientId"
-          required
-          defaultValue=""
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        >
-          <option value="" disabled>
-            Pilih klien
-          </option>
-          {clients.map((client) => (
-            <option key={client.id} value={client.id}>
-              {client.name}
+    <Card className="max-w-lg">
+      <form action={formAction} className="space-y-4">
+        <div>
+          <Label htmlFor="clientId">Klien *</Label>
+          <Select id="clientId" name="clientId" required defaultValue="">
+            <option value="" disabled>
+              Pilih klien
             </option>
-          ))}
-        </select>
-        {clients.length === 0 && (
-          <p className="mt-1 text-xs text-amber-600">Belum ada klien. Tambahkan klien terlebih dahulu.</p>
-        )}
-      </div>
+            {clients.map((client) => (
+              <option key={client.id} value={client.id}>
+                {client.name}
+              </option>
+            ))}
+          </Select>
+          {clients.length === 0 && (
+            <p className="mt-1 text-xs text-[color:var(--color-warning)]">Belum ada klien. Tambahkan klien terlebih dahulu.</p>
+          )}
+        </div>
 
-      <div className="border-t border-slate-100 pt-4">
-        <p className="text-sm font-medium text-slate-700">Lokasi proyek</p>
-        <div className="mt-2 space-y-3">
-          <div>
-            <label htmlFor="siteName" className="block text-sm text-slate-600">
-              Nama lokasi *
-            </label>
-            <input
-              id="siteName"
-              name="siteName"
-              required
-              placeholder="mis. Rumah Pak Budi — Jl. Merdeka No. 10"
-              className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-            />
-          </div>
-          <div>
-            <label htmlFor="siteAddress" className="block text-sm text-slate-600">
-              Alamat
-            </label>
-            <textarea
-              id="siteAddress"
-              name="siteAddress"
-              rows={2}
-              className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-            />
+        <div className="border-t border-[color:var(--color-hairline)] pt-4">
+          <p className="text-sm font-medium text-[color:var(--color-ink-secondary)]">Lokasi proyek</p>
+          <div className="mt-2 space-y-3">
+            <div>
+              <Label htmlFor="siteName">Nama lokasi *</Label>
+              <Input id="siteName" name="siteName" required placeholder="mis. Rumah Pak Budi — Jl. Merdeka No. 10" />
+            </div>
+            <div>
+              <Label htmlFor="siteAddress">Alamat</Label>
+              <Textarea id="siteAddress" name="siteAddress" rows={2} />
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="border-t border-slate-100 pt-4">
-        <label htmlFor="projectName" className="block text-sm font-medium text-slate-700">
-          Nama proyek *
-        </label>
-        <input
-          id="projectName"
-          name="projectName"
-          required
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        />
-      </div>
+        <div className="border-t border-[color:var(--color-hairline)] pt-4">
+          <Label htmlFor="projectName">Nama proyek *</Label>
+          <Input id="projectName" name="projectName" required />
+        </div>
 
-      <div>
-        <label htmlFor="startDate" className="block text-sm font-medium text-slate-700">
-          Tanggal mulai
-        </label>
-        <input
-          id="startDate"
-          name="startDate"
-          type="date"
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        />
-      </div>
+        <div>
+          <Label htmlFor="startDate">Tanggal mulai</Label>
+          <Input id="startDate" name="startDate" type="date" />
+        </div>
 
-      {state.error !== null && (
-        <p role="alert" className="text-sm text-red-600">
-          {state.error}
-        </p>
-      )}
+        {state.error !== null && (
+          <p role="alert" className="text-sm text-[color:var(--color-danger)]">
+            {state.error}
+          </p>
+        )}
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-      >
-        {isPending ? 'Menyimpan...' : 'Simpan proyek'}
-      </button>
-    </form>
+        <Button type="submit" disabled={isPending}>
+          {isPending ? 'Menyimpan...' : 'Simpan proyek'}
+        </Button>
+      </form>
+    </Card>
   );
 }

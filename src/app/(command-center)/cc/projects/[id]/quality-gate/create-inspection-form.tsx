@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createInspectionAction } from '@/modules/quality-gate';
+import { Button } from '@/core/ui';
 
 type FormState = { error: string | null };
 const initialState: FormState = { error: null };
@@ -29,15 +30,11 @@ export function CreateInspectionForm({
 
   return (
     <form action={formAction} className="inline-flex items-center gap-2">
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-      >
+      <Button type="submit" variant="secondary" size="sm" disabled={isPending}>
         {isPending ? 'Membuat...' : 'Mulai pemeriksaan'}
-      </button>
+      </Button>
       {state.error !== null && (
-        <span role="alert" className="text-xs text-red-600">
+        <span role="alert" className="text-xs text-[color:var(--color-danger)]">
           {state.error}
         </span>
       )}

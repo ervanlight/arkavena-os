@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
 import { overrideOpenWorkPackageAction } from '@/modules/cash-gate';
+import { Label, Select, Textarea, Button } from '@/core/ui';
 
 type FormState = { error: string | null };
 const initialState: FormState = { error: null };
@@ -34,48 +35,34 @@ export function OverrideForm({ workPackages }: { workPackages: readonly BlockedW
 
   return (
     <form action={formAction} className="space-y-3">
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-[color:var(--color-ink-tertiary)]">
         Membuka paket kerja meski Cash Gate merah/terlambat. Alasan wajib diisi dan tercatat di audit log.
       </p>
       <div>
-        <label htmlFor="overrideWorkPackageId" className="block text-xs font-medium text-slate-700">
-          Paket kerja
-        </label>
-        <select
-          id="overrideWorkPackageId"
-          name="workPackageId"
-          required
-          className="mt-1 w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        >
+        <Label htmlFor="overrideWorkPackageId">Paket kerja</Label>
+        <Select id="overrideWorkPackageId" name="workPackageId" required>
           {workPackages.map((wp) => (
             <option key={wp.id} value={wp.id}>
               {wp.name}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
       <div>
-        <label htmlFor="overrideReason" className="block text-xs font-medium text-slate-700">
-          Alasan
-        </label>
-        <textarea
+        <Label htmlFor="overrideReason">Alasan</Label>
+        <Textarea
           id="overrideReason"
           name="reason"
           required
           rows={2}
           placeholder="mis. Termin sudah cair, bukti transfer menyusul"
-          className="mt-1 w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
         />
       </div>
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded-md bg-red-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-800 disabled:opacity-50"
-      >
+      <Button type="submit" variant="destructive" size="sm" disabled={isPending}>
         {isPending ? 'Mengirim override...' : 'Override & buka paket kerja'}
-      </button>
+      </Button>
       {state.error !== null && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-[color:var(--color-danger)]">
           {state.error}
         </p>
       )}

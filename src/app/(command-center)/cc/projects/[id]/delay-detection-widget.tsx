@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { generateDelayDetectionAction, type DelayDetectionResult } from '@/modules/ai-scribe';
+import { Card, Button } from '@/core/ui';
 
 type WidgetState =
   | { status: 'idle' }
@@ -30,35 +31,32 @@ export function DelayDetectionWidget({ projectId }: { projectId: string }) {
   }
 
   return (
-    <div className="space-y-4 rounded-lg bg-white p-6 shadow-sm">
+    <Card className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold text-slate-900">Deteksi keterlambatan (AI)</h2>
-        <button
-          type="button"
-          onClick={handleCheck}
-          disabled={state.status === 'loading'}
-          className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-        >
+        <h2 className="text-[17px] font-semibold text-[color:var(--color-ink)]">Deteksi keterlambatan (AI)</h2>
+        <Button type="button" variant="secondary" size="sm" onClick={handleCheck} disabled={state.status === 'loading'}>
           {state.status === 'loading' ? 'Memeriksa...' : 'Periksa termin'}
-        </button>
+        </Button>
       </div>
 
       {state.status === 'error' && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-[color:var(--color-danger)]">
           {state.message}
         </p>
       )}
 
       {state.status === 'done' && state.result.overdueMilestones.length === 0 && (
-        <p className="text-sm text-emerald-600">Tidak ada termin yang terlambat.</p>
+        <p className="text-sm text-[color:var(--color-success)]">Tidak ada termin yang terlambat.</p>
       )}
 
       {state.status === 'done' && state.result.overdueMilestones.length > 0 && (
         <div className="space-y-2">
           {state.result.draftSummary !== null && (
-            <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800">{state.result.draftSummary}</p>
+            <p className="rounded-[var(--radius-control)] bg-[color:var(--color-warning)]/14 px-3 py-2 text-sm text-[#a05a00]">
+              {state.result.draftSummary}
+            </p>
           )}
-          <ul className="list-inside list-disc text-sm text-slate-700">
+          <ul className="list-inside list-disc text-sm text-[color:var(--color-ink-secondary)]">
             {state.result.overdueMilestones.map((milestone) => (
               <li key={milestone.id}>
                 {milestone.name} — terlambat {milestone.daysOverdue} hari
@@ -67,6 +65,6 @@ export function DelayDetectionWidget({ projectId }: { projectId: string }) {
           </ul>
         </div>
       )}
-    </div>
+    </Card>
   );
 }

@@ -2,6 +2,7 @@ import type { Route } from 'next';
 import Link from 'next/link';
 import { formatRp } from '@/core/money/rupiah';
 import { listAgingDashboardAction, type InvoiceAgingTier } from '@/modules/billing';
+import { Card, PageHeader, StatusBadge, EmptyState } from '@/core/ui';
 
 export const metadata = { title: 'Aging Dashboard — BuildTrust OS' };
 
@@ -13,12 +14,12 @@ const TIER_LABEL_ID: Record<InvoiceAgingTier, string> = {
   overdue_90_plus: 'Terlambat > 90 hari',
 };
 
-const TIER_BADGE_CLASS: Record<InvoiceAgingTier, string> = {
-  current: 'bg-emerald-100 text-emerald-800',
-  overdue_1_30: 'bg-amber-100 text-amber-800',
-  overdue_31_60: 'bg-orange-100 text-orange-800',
-  overdue_61_90: 'bg-red-100 text-red-800',
-  overdue_90_plus: 'bg-red-900 text-white',
+const TIER_TONE: Record<InvoiceAgingTier, 'success' | 'warning' | 'danger'> = {
+  current: 'success',
+  overdue_1_30: 'warning',
+  overdue_31_60: 'warning',
+  overdue_61_90: 'danger',
+  overdue_90_plus: 'danger',
 };
 
 const TIER_ORDER: InvoiceAgingTier[] = ['overdue_90_plus', 'overdue_61_90', 'overdue_31_60', 'overdue_1_30', 'current'];
@@ -36,51 +37,39 @@ export default async function BillingAgingDashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-lg font-semibold text-slate-900">Aging Dashboard</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Setiap invoice yang sudah terbit tapi belum lunas, dikelompokkan berdasarkan seberapa terlambat.
-        </p>
-      </div>
+      <PageHeader
+        title="Aging Dashboard"
+        subtitle="Setiap invoice yang sudah terbit tapi belum lunas, dikelompokkan berdasarkan seberapa terlambat."
+      />
 
-      {rows.length === 0 && <p className="text-sm text-slate-500">Tidak ada invoice terbit yang belum lunas.</p>}
+      {rows.length === 0 && <EmptyState title="Tidak ada invoice terbit yang belum lunas" />}
 
       <div className="space-y-6">
         {TIER_ORDER.filter((tier) => (byTier.get(tier) ?? []).length > 0).map((tier) => (
-          <div key={tier} className="rounded-lg bg-white p-6 shadow-sm">
-            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${TIER_BADGE_CLASS[tier]}`}>
-              {TIER_LABEL_ID[tier]}
-            </span>
-            <div className="mt-3 overflow-hidden rounded-lg border border-slate-200">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-slate-50 text-slate-500">
-                  <tr>
-                    <th className="px-4 py-2 font-medium">Invoice</th>
-                    <th className="px-4 py-2 font-medium">Nominal</th>
-                    <th className="px-4 py-2 font-medium">Jatuh tempo</th>
-                    <th className="px-4 py-2 font-medium" />
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {(byTier.get(tier) ?? []).map((invoice) => (
-                    <tr key={invoice.id}>
-                      <td className="px-4 py-2 font-medium text-slate-900">{invoice.title}</td>
-                      <td className="px-4 py-2 text-slate-600">{formatRp(invoice.amount)}</td>
-                      <td className="px-4 py-2 text-slate-600">{invoice.due_date}</td>
-                      <td className="px-4 py-2">
-                        <Link
-                          href={`/cc/projects/${invoice.project_id}/invoices` as Route}
-                          className="text-xs font-medium text-slate-600 underline"
-                        >
-                          Lihat
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <Card key={tier}>
+            <StatusBadge tone={TIER_TONE[tier]}>{TIER_LABEL_ID[tier]}</StatusBadge>
+            <ul className="mt-3 divide-y divide-[color:var(--color-hairline)]">
+              {(byTier.get(tier) ?? []).map((invoice) => (
+                <li key={invoice.id} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                  <div className="min-w-0">
+                    <p className="truncate text-[15px] font-medium text-[color:var(--color-ink)]">{invoice.title}</p>
+                    <p className="mt-0.5 text-xs text-[color:var(--color-ink-tertiary)]">
+                      Jatuh tempo {invoice.due_date}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-3">
+                    <span className="text-sm text-[color:var(--color-ink-secondary)]">{formatRp(invoice.amount)}</span>
+                    <Link
+                      href={`/cc/projects/${invoice.project_id}/invoices` as Route}
+                      className="text-xs font-medium text-[color:var(--color-accent)] hover:underline"
+                    >
+                      Lihat
+                    </Link>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </Card>
         ))}
       </div>
     </div>

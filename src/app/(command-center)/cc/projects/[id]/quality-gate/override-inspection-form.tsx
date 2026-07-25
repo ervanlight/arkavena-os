@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
 import { overrideInspectionAction } from '@/modules/quality-gate';
+import { Button, Input } from '@/core/ui';
 
 type FormState = { error: string | null };
 const initialState: FormState = { error: null };
@@ -26,21 +27,17 @@ export function OverrideInspectionForm({ inspectionId }: { inspectionId: string 
 
   return (
     <form action={formAction} className="mt-2 flex flex-wrap items-center gap-2">
-      <input
+      <Input
         name="reason"
         required
         placeholder="Alasan override (wajib, tercatat di audit log)"
-        className="w-72 rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+        className="w-72"
       />
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded-md bg-amber-700 px-2 py-1 text-xs font-medium text-white hover:bg-amber-800 disabled:opacity-50"
-      >
+      <Button type="submit" variant="destructive" size="sm" disabled={isPending}>
         {isPending ? 'Mengirim override...' : 'Override (Technical Director)'}
-      </button>
+      </Button>
       {state.error !== null && (
-        <span role="alert" className="text-xs text-red-600">
+        <span role="alert" className="text-xs text-[color:var(--color-danger)]">
           {state.error}
         </span>
       )}

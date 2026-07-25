@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
 import { submitChangeOrderForReviewAction } from '@/modules/scope-variation';
+import { Button } from '@/core/ui';
 
 type FormState = { error: string | null };
 const initialState: FormState = { error: null };
@@ -19,15 +20,11 @@ export function SubmitForReviewForm({ changeOrderId }: { changeOrderId: string }
 
   return (
     <form action={formAction} className="flex items-center gap-3">
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-      >
+      <Button type="submit" disabled={isPending}>
         {isPending ? 'Mengirim...' : 'Ajukan untuk direview'}
-      </button>
+      </Button>
       {state.error !== null && (
-        <span role="alert" className="text-sm text-red-600">
+        <span role="alert" className="text-sm text-[color:var(--color-danger)]">
           {state.error}
         </span>
       )}

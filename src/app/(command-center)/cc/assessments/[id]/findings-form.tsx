@@ -1,9 +1,10 @@
 'use client';
 
-import { useActionState, useRef, useState } from 'react';
+import { useActionState, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { updateAssessmentFindingsAction } from '@/modules/assessment';
 import { generateAssessmentScopeDraftAction } from '@/modules/ai-scribe';
+import { Label, Textarea, Button } from '@/core/ui';
 
 type FormState = { error: string | null };
 
@@ -23,7 +24,7 @@ export function FindingsForm({
   disabled: boolean;
 }) {
   const router = useRouter();
-  const recommendedScopeRef = useRef<HTMLTextAreaElement>(null);
+  const [recommendedScopeValue, setRecommendedScopeValue] = useState(recommendedScope ?? '');
   const [assist, setAssist] = useState<AssistState>({ status: 'idle' });
 
   /** Draft only -- fills the same textarea the human still reviews and saves via the form below (ADR 0020 SS2). */
@@ -36,7 +37,7 @@ export function FindingsForm({
       return;
     }
 
-    if (recommendedScopeRef.current !== null) recommendedScopeRef.current.value = result.data.suggestedScope;
+    setRecommendedScopeValue(result.data.suggestedScope);
     setAssist({ status: 'suggested' });
   }
 
@@ -59,46 +60,37 @@ export function FindingsForm({
   return (
     <form action={formAction} className="max-w-lg space-y-4">
       <div>
-        <label htmlFor="siteConditions" className="block text-sm font-medium text-slate-700">
-          Kondisi lokasi
-        </label>
-        <textarea
+        <Label htmlFor="siteConditions">Kondisi lokasi</Label>
+        <Textarea
           id="siteConditions"
           name="siteConditions"
           rows={3}
           disabled={disabled}
           defaultValue={siteConditions ?? ''}
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 disabled:bg-slate-50 disabled:text-slate-500"
         />
       </div>
       <div>
-        <label htmlFor="recommendedScope" className="block text-sm font-medium text-slate-700">
-          Ruang lingkup direkomendasikan
-        </label>
-        <textarea
-          ref={recommendedScopeRef}
+        <Label htmlFor="recommendedScope">Ruang lingkup direkomendasikan</Label>
+        <Textarea
           id="recommendedScope"
           name="recommendedScope"
           rows={3}
           disabled={disabled}
-          defaultValue={recommendedScope ?? ''}
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 disabled:bg-slate-50 disabled:text-slate-500"
+          value={recommendedScopeValue}
+          onChange={(e) => setRecommendedScopeValue(e.target.value)}
         />
         {!disabled && (
           <div className="mt-1">
-            <button
-              type="button"
-              onClick={handleAssist}
-              disabled={assist.status === 'loading'}
-              className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 disabled:opacity-50"
-            >
+            <Button type="button" variant="secondary" size="sm" onClick={handleAssist} disabled={assist.status === 'loading'}>
               {assist.status === 'loading' ? 'Meminta saran...' : 'Saran otomatis (AI)'}
-            </button>
+            </Button>
             {assist.status === 'suggested' && (
-              <p className="mt-1 text-sm text-slate-600">Draf terisi otomatis -- periksa dan sunting sebelum menyimpan.</p>
+              <p className="mt-1 text-sm text-[color:var(--color-ink-secondary)]">
+                Draf terisi otomatis -- periksa dan sunting sebelum menyimpan.
+              </p>
             )}
             {assist.status === 'error' && (
-              <p role="alert" className="mt-1 text-sm text-red-600">
+              <p role="alert" className="mt-1 text-sm text-[color:var(--color-danger)]">
                 {assist.message}
               </p>
             )}
@@ -106,33 +98,20 @@ export function FindingsForm({
         )}
       </div>
       <div>
-        <label htmlFor="notes" className="block text-sm font-medium text-slate-700">
-          Catatan
-        </label>
-        <textarea
-          id="notes"
-          name="notes"
-          rows={2}
-          disabled={disabled}
-          defaultValue={notes ?? ''}
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 disabled:bg-slate-50 disabled:text-slate-500"
-        />
+        <Label htmlFor="notes">Catatan</Label>
+        <Textarea id="notes" name="notes" rows={2} disabled={disabled} defaultValue={notes ?? ''} />
       </div>
 
       {state.error !== null && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-[color:var(--color-danger)]">
           {state.error}
         </p>
       )}
 
       {!disabled && (
-        <button
-          type="submit"
-          disabled={isPending}
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-        >
+        <Button type="submit" disabled={isPending}>
           {isPending ? 'Menyimpan...' : 'Simpan temuan'}
-        </button>
+        </Button>
       )}
     </form>
   );

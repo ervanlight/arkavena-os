@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { listLeadsAction } from '@/modules/crm';
+import { Card, PageHeader, StatusBadge, EmptyState } from '@/core/ui';
 
 export const metadata = { title: 'Leads — BuildTrust OS' };
 
@@ -13,61 +14,63 @@ const STATUS_LABEL_ID: Record<string, string> = {
   lost: 'Lost',
 };
 
+const STATUS_TONE: Record<string, 'neutral' | 'info' | 'success' | 'danger' | 'warning'> = {
+  new: 'neutral',
+  contacted: 'info',
+  qualified: 'success',
+  assessment_scheduled: 'warning',
+  proposal_sent: 'info',
+  won: 'success',
+  lost: 'danger',
+};
+
 export default async function LeadsPage() {
   const result = await listLeadsAction(undefined);
   const leads = result.ok ? result.data : [];
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-lg font-semibold text-slate-900">Leads</h1>
-        <Link
-          href="/cc/leads/new"
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
-        >
-          Tambah lead
-        </Link>
-      </div>
+      <PageHeader
+        title="Leads"
+        actions={
+          <Link
+            href="/cc/leads/new"
+            className="inline-flex items-center justify-center gap-2 rounded-[var(--radius-control)] bg-[color:var(--color-accent)] px-4 py-2.5 text-[15px] font-medium text-white hover:bg-[color:var(--color-accent-hover)]"
+          >
+            Tambah lead
+          </Link>
+        }
+      />
 
       {!result.ok && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-[color:var(--color-danger)]">
           {result.error.message}
         </p>
       )}
 
-      {result.ok && leads.length === 0 && (
-        <p className="text-sm text-slate-500">Belum ada lead. Tambahkan lead pertama Anda.</p>
-      )}
+      {result.ok && leads.length === 0 && <EmptyState title="Belum ada lead" description="Tambahkan lead pertama Anda." />}
 
       {leads.length > 0 && (
-        <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-slate-500">
-              <tr>
-                <th className="px-4 py-2 font-medium">Kontak</th>
-                <th className="px-4 py-2 font-medium">Status</th>
-                <th className="px-4 py-2 font-medium">Sumber</th>
-                <th className="px-4 py-2 font-medium">Estimasi nilai</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {leads.map((lead) => (
-                <tr key={lead.id}>
-                  <td className="px-4 py-2 font-medium text-slate-900">
-                    <Link href={`/cc/leads/${lead.id}`} className="hover:underline">
-                      {lead.contact_name}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-2 text-slate-600">{STATUS_LABEL_ID[lead.status] ?? lead.status}</td>
-                  <td className="px-4 py-2 text-slate-600">{lead.source ?? '—'}</td>
-                  <td className="px-4 py-2 text-slate-600">
+        <Card>
+          <ul className="divide-y divide-[color:var(--color-hairline)]">
+            {leads.map((lead) => (
+              <li key={lead.id} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                <div className="min-w-0">
+                  <Link href={`/cc/leads/${lead.id}`} className="truncate text-[15px] font-medium text-[color:var(--color-ink)] hover:underline">
+                    {lead.contact_name}
+                  </Link>
+                  <p className="mt-0.5 text-xs text-[color:var(--color-ink-tertiary)]">
+                    {lead.source ?? '—'} ·{' '}
                     {lead.estimated_value !== null ? `Rp ${lead.estimated_value.toLocaleString('id-ID')}` : '—'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  </p>
+                </div>
+                <StatusBadge tone={STATUS_TONE[lead.status] ?? 'neutral'}>
+                  {STATUS_LABEL_ID[lead.status] ?? lead.status}
+                </StatusBadge>
+              </li>
+            ))}
+          </ul>
+        </Card>
       )}
     </div>
   );

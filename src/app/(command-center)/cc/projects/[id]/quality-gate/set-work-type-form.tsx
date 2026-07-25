@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
 import { updateWorkPackageAction } from '@/modules/projects';
+import { Button, Input } from '@/core/ui';
 
 type FormState = { error: string | null };
 const initialState: FormState = { error: null };
@@ -27,21 +28,12 @@ export function SetWorkTypeForm({ workPackageId }: { workPackageId: string }) {
 
   return (
     <form action={formAction} className="inline-flex items-center gap-2">
-      <input
-        name="workType"
-        required
-        placeholder="mis. waterproofing"
-        className="w-40 rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-      />
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-      >
+      <Input name="workType" required placeholder="mis. waterproofing" className="w-40" />
+      <Button type="submit" variant="secondary" size="sm" disabled={isPending}>
         {isPending ? 'Menyimpan...' : 'Tetapkan jenis pekerjaan'}
-      </button>
+      </Button>
       {state.error !== null && (
-        <span role="alert" className="text-xs text-red-600">
+        <span role="alert" className="text-xs text-[color:var(--color-danger)]">
           {state.error}
         </span>
       )}

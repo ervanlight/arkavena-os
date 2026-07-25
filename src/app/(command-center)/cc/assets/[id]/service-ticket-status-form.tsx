@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
 import { updateServiceTicketStatusAction } from '@/modules/maintenance-engine';
+import { Button } from '@/core/ui';
 
 type FormState = { error: string | null };
 
@@ -38,19 +39,20 @@ export function ServiceTicketStatusForm({ ticketId, currentStatus }: { ticketId:
   return (
     <form action={formAction} className="flex flex-wrap items-center gap-2">
       {options.map((option) => (
-        <button
+        <Button
           key={option.value}
           type="submit"
           name="status"
           value={option.value}
+          variant={option.value === 'cancelled' ? 'destructive' : 'secondary'}
+          size="sm"
           disabled={isPending}
-          className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
         >
           {option.label}
-        </button>
+        </Button>
       ))}
       {state.error !== null && (
-        <p role="alert" className="w-full text-sm text-red-600">
+        <p role="alert" className="w-full text-sm text-[color:var(--color-danger)]">
           {state.error}
         </p>
       )}

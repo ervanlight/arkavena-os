@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createPurchaseOrderAction, type Vendor, type VendorQuote } from '@/modules/procurement';
+import { Button, Input, Label, Select } from '@/core/ui';
 
 type FormState = { error: string | null };
 
@@ -44,78 +45,46 @@ export function CreatePurchaseOrderForm({
   return (
     <form action={formAction} className="grid grid-cols-1 gap-4 sm:grid-cols-4">
       <div>
-        <label htmlFor="vendorId" className="block text-sm font-medium text-slate-700">
-          Vendor *
-        </label>
-        <select
-          id="vendorId"
-          name="vendorId"
-          required
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        >
+        <Label htmlFor="vendorId">Vendor *</Label>
+        <Select id="vendorId" name="vendorId" required>
           <option value="">-- Pilih vendor --</option>
           {vendors.map((vendor) => (
             <option key={vendor.id} value={vendor.id}>
               {vendor.name}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
       <div>
-        <label htmlFor="vendorQuoteId" className="block text-sm font-medium text-slate-700">
-          Dari penawaran
-        </label>
-        <select
-          id="vendorQuoteId"
-          name="vendorQuoteId"
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        >
+        <Label htmlFor="vendorQuoteId">Dari penawaran</Label>
+        <Select id="vendorQuoteId" name="vendorQuoteId">
           <option value="">-- Langsung, tanpa penawaran --</option>
           {quotes.map((quote) => (
             <option key={quote.id} value={quote.id}>
               {quote.description}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-slate-700">
-          Deskripsi *
-        </label>
-        <input
-          id="description"
-          name="description"
-          required
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        />
+        <Label htmlFor="description">Deskripsi *</Label>
+        <Input id="description" name="description" required />
       </div>
       <div>
-        <label htmlFor="amount" className="block text-sm font-medium text-slate-700">
-          Nominal (Rp) *
-        </label>
-        <input
-          id="amount"
-          name="amount"
-          required
-          inputMode="numeric"
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        />
+        <Label htmlFor="amount">Nominal (Rp) *</Label>
+        <Input id="amount" name="amount" required inputMode="numeric" />
       </div>
 
       {state.error !== null && (
-        <p role="alert" className="col-span-full text-sm text-red-600">
+        <p role="alert" className="col-span-full text-sm text-[color:var(--color-danger)]">
           {state.error}
         </p>
       )}
 
       <div className="col-span-full">
-        <button
-          type="submit"
-          disabled={isPending}
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-        >
+        <Button type="submit" disabled={isPending}>
           {isPending ? 'Menerbitkan...' : 'Terbitkan PO'}
-        </button>
+        </Button>
       </div>
     </form>
   );

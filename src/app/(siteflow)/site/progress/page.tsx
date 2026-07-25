@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { createDailyLogAction, listDailyLogsForProjectAction } from '@/modules/field-reporting';
 import { listWorkPackagesForProjectAction } from '@/modules/projects';
 import { ProgressForm } from './progress-form';
+import { Card } from '@/core/ui';
 
 export const metadata = { title: 'Update Progress — SiteFlow' };
 
@@ -33,11 +34,13 @@ export default async function ProgressPage({ searchParams }: { searchParams: Pro
 
   return (
     <div className="space-y-4">
-      <h1 className="text-lg font-semibold text-slate-900">Update Progress</h1>
+      <h1 className="text-[19px] font-semibold text-[color:var(--color-ink)]">Update Progress</h1>
       {workPackages.length === 0 ? (
-        <p className="rounded-lg bg-white p-4 text-sm text-slate-600 shadow-sm">
-          Belum ada paket kerja di proyek ini. Hubungi kantor untuk menambahkan.
-        </p>
+        <Card>
+          <p className="text-sm text-[color:var(--color-ink-secondary)]">
+            Belum ada paket kerja di proyek ini. Hubungi kantor untuk menambahkan.
+          </p>
+        </Card>
       ) : (
         <ProgressForm projectId={projectId} dailyLogId={dailyLogId} workPackages={workPackages} />
       )}

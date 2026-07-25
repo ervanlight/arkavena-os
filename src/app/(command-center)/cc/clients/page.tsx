@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { listClientsAction } from '@/modules/crm';
+import { Card, PageHeader, EmptyState } from '@/core/ui';
 
 export const metadata = { title: 'Klien — BuildTrust OS' };
 
@@ -9,49 +10,43 @@ export default async function ClientsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-lg font-semibold text-slate-900">Klien</h1>
-        <Link
-          href="/cc/clients/new"
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
-        >
-          Tambah klien
-        </Link>
-      </div>
+      <PageHeader
+        title="Klien"
+        actions={
+          <Link
+            href="/cc/clients/new"
+            className="inline-flex items-center justify-center gap-2 rounded-[var(--radius-control)] bg-[color:var(--color-accent)] px-4 py-2.5 text-[15px] font-medium text-white hover:bg-[color:var(--color-accent-hover)]"
+          >
+            Tambah klien
+          </Link>
+        }
+      />
 
       {!result.ok && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-[color:var(--color-danger)]">
           {result.error.message}
         </p>
       )}
 
-      {result.ok && clients.length === 0 && (
-        <p className="text-sm text-slate-500">Belum ada klien. Tambahkan klien pertama Anda.</p>
-      )}
+      {result.ok && clients.length === 0 && <EmptyState title="Belum ada klien" description="Tambahkan klien pertama Anda." />}
 
       {clients.length > 0 && (
-        <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-slate-500">
-              <tr>
-                <th className="px-4 py-2 font-medium">Nama</th>
-                <th className="px-4 py-2 font-medium">Kontak</th>
-                <th className="px-4 py-2 font-medium">Email</th>
-                <th className="px-4 py-2 font-medium">Telepon</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {clients.map((client) => (
-                <tr key={client.id}>
-                  <td className="px-4 py-2 font-medium text-slate-900">{client.name}</td>
-                  <td className="px-4 py-2 text-slate-600">{client.contact_name ?? '—'}</td>
-                  <td className="px-4 py-2 text-slate-600">{client.email ?? '—'}</td>
-                  <td className="px-4 py-2 text-slate-600">{client.phone ?? '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Card>
+          <ul className="divide-y divide-[color:var(--color-hairline)]">
+            {clients.map((client) => (
+              <li key={client.id} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                <div className="min-w-0">
+                  <p className="truncate text-[15px] font-medium text-[color:var(--color-ink)]">{client.name}</p>
+                  <p className="mt-0.5 text-xs text-[color:var(--color-ink-tertiary)]">{client.contact_name ?? '—'}</p>
+                </div>
+                <div className="shrink-0 text-right text-xs text-[color:var(--color-ink-tertiary)]">
+                  <p>{client.email ?? '—'}</p>
+                  <p>{client.phone ?? '—'}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </Card>
       )}
     </div>
   );

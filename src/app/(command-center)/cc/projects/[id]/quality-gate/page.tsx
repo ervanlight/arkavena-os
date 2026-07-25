@@ -1,9 +1,9 @@
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
 import { getCurrentUser } from '@/core/auth/session';
 import { roleCan } from '@/core/permissions/matrix';
 import { getProjectAction, listWorkPackagesForProjectAction } from '@/modules/projects';
 import { listHoldPointStatusForWorkPackageAction, type HoldPointTemplate, type Inspection } from '@/modules/quality-gate';
+import { Card, StatusBadge, EmptyState } from '@/core/ui';
 import { SetWorkTypeForm } from './set-work-type-form';
 import { CreateInspectionForm } from './create-inspection-form';
 import { RecordInspectionResultForm } from './record-inspection-result-form';
@@ -17,10 +17,10 @@ const INSPECTION_STATUS_LABEL_ID: Record<string, string> = {
   failed: 'Tidak lulus',
 };
 
-const INSPECTION_STATUS_BADGE_CLASS: Record<string, string> = {
-  pending: 'bg-slate-100 text-slate-600',
-  passed: 'bg-emerald-100 text-emerald-800',
-  failed: 'bg-red-100 text-red-800',
+const INSPECTION_STATUS_TONE: Record<string, 'neutral' | 'success' | 'danger'> = {
+  pending: 'neutral',
+  passed: 'success',
+  failed: 'danger',
 };
 
 export default async function ProjectQualityGatePage({ params }: { params: Promise<{ id: string }> }) {
@@ -35,7 +35,7 @@ export default async function ProjectQualityGatePage({ params }: { params: Promi
   if (!projectResult.ok) {
     if (projectResult.error.code === 'NOT_FOUND') notFound();
     return (
-      <p role="alert" className="text-sm text-red-600">
+      <p role="alert" className="text-sm text-[color:var(--color-danger)]">
         {projectResult.error.message}
       </p>
     );
@@ -58,29 +58,23 @@ export default async function ProjectQualityGatePage({ params }: { params: Promi
   >(holdPointStatusEntries);
 
   return (
-    <div className="space-y-8">
-      <div>
-        <Link href={`/cc/projects/${project.id}`} className="text-sm text-slate-500 hover:text-slate-900">
-          ← {project.name}
-        </Link>
-        <h1 className="mt-1 text-lg font-semibold text-slate-900">Quality Gate — Hold Point</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Paket kerja terkunci di jenis pekerjaannya sampai semua hold point wajib lulus atau di-override Technical
-          Director -- terpisah dari Cash Gate, keduanya harus hijau.
-        </p>
-      </div>
+    <div className="space-y-6">
+      <p className="text-sm text-[color:var(--color-ink-secondary)]">
+        Paket kerja terkunci di jenis pekerjaannya sampai semua hold point wajib lulus atau di-override Technical
+        Director -- terpisah dari Cash Gate, keduanya harus hijau.
+      </p>
 
-      {workPackages.length === 0 && <p className="text-sm text-slate-500">Belum ada paket kerja pada proyek ini.</p>}
+      {workPackages.length === 0 && <EmptyState title="Belum ada paket kerja pada proyek ini" />}
 
       <div className="space-y-4">
         {workPackages.map((wp) => {
           const holdPoints = holdPointStatusByWorkPackageId.get(wp.id) ?? [];
           return (
-            <div key={wp.id} className="rounded-lg bg-white p-6 shadow-sm">
+            <Card key={wp.id}>
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <h2 className="text-base font-semibold text-slate-900">{wp.name}</h2>
-                  <p className="mt-0.5 text-xs text-slate-500">
+                  <h2 className="text-[17px] font-semibold text-[color:var(--color-ink)]">{wp.name}</h2>
+                  <p className="mt-0.5 text-xs text-[color:var(--color-ink-tertiary)]">
                     {wp.work_type !== null ? `Jenis pekerjaan: ${wp.work_type}` : 'Belum ada jenis pekerjaan'}
                   </p>
                 </div>
@@ -90,27 +84,25 @@ export default async function ProjectQualityGatePage({ params }: { params: Promi
               {wp.work_type !== null && (
                 <div className="mt-4 space-y-3">
                   {holdPoints.length === 0 && (
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-[color:var(--color-ink-tertiary)]">
                       Belum ada hold point untuk jenis pekerjaan &quot;{wp.work_type}&quot;.
                     </p>
                   )}
                   {holdPoints.map(({ template, inspection }) => (
-                    <div key={template.id} className="rounded-md border border-slate-200 p-3">
+                    <div key={template.id} className="rounded-[var(--radius-control)] border border-[color:var(--color-hairline)] p-3">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div>
-                          <p className="text-sm font-medium text-slate-900">{template.name}</p>
+                          <p className="text-sm font-medium text-[color:var(--color-ink)]">{template.name}</p>
                           {template.description !== null && (
-                            <p className="text-xs text-slate-500">{template.description}</p>
+                            <p className="text-xs text-[color:var(--color-ink-tertiary)]">{template.description}</p>
                           )}
                         </div>
                         {inspection !== null && (
-                          <span
-                            className={`rounded-full px-2 py-0.5 text-xs font-medium ${INSPECTION_STATUS_BADGE_CLASS[inspection.status] ?? 'bg-slate-100 text-slate-600'}`}
-                          >
+                          <StatusBadge tone={INSPECTION_STATUS_TONE[inspection.status] ?? 'neutral'}>
                             {inspection.overridden_by !== null
                               ? 'Di-override TD'
                               : (INSPECTION_STATUS_LABEL_ID[inspection.status] ?? inspection.status)}
-                          </span>
+                          </StatusBadge>
                         )}
                       </div>
 
@@ -124,7 +116,7 @@ export default async function ProjectQualityGatePage({ params }: { params: Promi
                               holdPointTemplateId={template.id}
                             />
                           ) : (
-                            <p className="text-xs text-slate-500">
+                            <p className="text-xs text-[color:var(--color-ink-tertiary)]">
                               Tetapkan zona pada paket kerja ini dahulu sebelum memulai pemeriksaan.
                             </p>
                           ))}
@@ -139,14 +131,16 @@ export default async function ProjectQualityGatePage({ params }: { params: Promi
                           isTechnicalDirector && <OverrideInspectionForm inspectionId={inspection.id} />}
 
                         {inspection?.override_reason != null && (
-                          <p className="mt-1 text-xs text-slate-500">Alasan override: {inspection.override_reason}</p>
+                          <p className="mt-1 text-xs text-[color:var(--color-ink-tertiary)]">
+                            Alasan override: {inspection.override_reason}
+                          </p>
                         )}
                       </div>
                     </div>
                   ))}
                 </div>
               )}
-            </div>
+            </Card>
           );
         })}
       </div>

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { listEstimatesForProjectAction } from '@/modules/estimating';
+import { Button, Card, EmptyState, StatusBadge } from '@/core/ui';
 
 export const metadata = { title: 'Estimasi — BuildTrust OS' };
 
@@ -11,6 +12,14 @@ const STATUS_LABEL_ID: Record<string, string> = {
   superseded: 'Digantikan',
 };
 
+const STATUS_TONE: Record<string, 'neutral' | 'info' | 'warning' | 'success' | 'danger'> = {
+  draft: 'info',
+  sent: 'warning',
+  accepted: 'success',
+  rejected: 'danger',
+  superseded: 'neutral',
+};
+
 export default async function ProjectEstimatesPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const result = await listEstimatesForProjectAction(id);
@@ -19,60 +28,43 @@ export default async function ProjectEstimatesPage({ params }: { params: Promise
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-semibold text-slate-900">Estimasi</h1>
-        <Link
-          href={`/cc/projects/${id}/estimates/new`}
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
-        >
-          Buat estimasi
+        <h2 className="text-[17px] font-semibold text-[color:var(--color-ink)]">Estimasi</h2>
+        <Link href={`/cc/projects/${id}/estimates/new`}>
+          <Button type="button">Buat estimasi</Button>
         </Link>
       </div>
 
       {!result.ok && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-[color:var(--color-danger)]">
           {result.error.message}
         </p>
       )}
 
-      {result.ok && estimates.length === 0 && (
-        <p className="text-sm text-slate-500">Belum ada estimasi untuk proyek ini.</p>
-      )}
+      {result.ok && estimates.length === 0 && <EmptyState title="Belum ada estimasi untuk proyek ini" />}
 
       {estimates.length > 0 && (
-        <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-slate-500">
-              <tr>
-                <th className="px-4 py-2 font-medium">Versi</th>
-                <th className="px-4 py-2 font-medium">Judul</th>
-                <th className="px-4 py-2 font-medium">Status</th>
-                <th className="px-4 py-2 font-medium">Baseline</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {estimates.map((estimate) => (
-                <tr key={estimate.id}>
-                  <td className="px-4 py-2 font-medium text-slate-900">
-                    <Link href={`/cc/projects/${id}/estimates/${estimate.id}`} className="hover:underline">
-                      V{estimate.version}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-2 text-slate-600">{estimate.title}</td>
-                  <td className="px-4 py-2 text-slate-600">{STATUS_LABEL_ID[estimate.status] ?? estimate.status}</td>
-                  <td className="px-4 py-2 text-slate-600">
-                    {estimate.is_baseline ? (
-                      <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">
-                        Baseline
-                      </span>
-                    ) : (
-                      '—'
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Card>
+          <ul className="divide-y divide-[color:var(--color-hairline)]">
+            {estimates.map((estimate) => (
+              <li key={estimate.id} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                <div className="min-w-0">
+                  <Link
+                    href={`/cc/projects/${id}/estimates/${estimate.id}`}
+                    className="truncate text-[15px] font-medium text-[color:var(--color-ink)] hover:underline"
+                  >
+                    V{estimate.version} — {estimate.title}
+                  </Link>
+                </div>
+                <div className="flex shrink-0 items-center gap-3">
+                  {estimate.is_baseline && <StatusBadge tone="success">Baseline</StatusBadge>}
+                  <StatusBadge tone={STATUS_TONE[estimate.status] ?? 'neutral'}>
+                    {STATUS_LABEL_ID[estimate.status] ?? estimate.status}
+                  </StatusBadge>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </Card>
       )}
     </div>
   );

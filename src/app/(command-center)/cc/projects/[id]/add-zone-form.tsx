@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createZoneAction } from '@/modules/projects';
+import { Label, Input, Button } from '@/core/ui';
 
 type FormState = { error: string | null };
 const initialState: FormState = { error: null };
@@ -28,36 +29,18 @@ export function AddZoneForm({ projectId }: { projectId: string }) {
   return (
     <form action={formAction} className="flex flex-wrap items-end gap-3">
       <div>
-        <label htmlFor="zoneName" className="block text-xs font-medium text-slate-700">
-          Nama zona
-        </label>
-        <input
-          id="zoneName"
-          name="name"
-          required
-          placeholder="mis. Lantai 1"
-          className="mt-1 rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        />
+        <Label htmlFor="zoneName">Nama zona</Label>
+        <Input id="zoneName" name="name" required placeholder="mis. Lantai 1" />
       </div>
       <div>
-        <label htmlFor="zoneDescription" className="block text-xs font-medium text-slate-700">
-          Keterangan
-        </label>
-        <input
-          id="zoneDescription"
-          name="description"
-          className="mt-1 rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        />
+        <Label htmlFor="zoneDescription">Keterangan</Label>
+        <Input id="zoneDescription" name="description" />
       </div>
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-      >
+      <Button type="submit" disabled={isPending} size="sm">
         {isPending ? 'Menambah...' : 'Tambah zona'}
-      </button>
+      </Button>
       {state.error !== null && (
-        <p role="alert" className="w-full text-sm text-red-600">
+        <p role="alert" className="w-full text-sm text-[color:var(--color-danger)]">
           {state.error}
         </p>
       )}

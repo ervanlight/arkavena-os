@@ -1,4 +1,5 @@
 import { listClientsAction } from '@/modules/crm';
+import { PageHeader } from '@/core/ui';
 import { NewProjectForm } from './new-project-form';
 
 export const metadata = { title: 'Tambah proyek — BuildTrust OS' };
@@ -9,7 +10,7 @@ export default async function NewProjectPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-lg font-semibold text-slate-900">Tambah proyek</h1>
+      <PageHeader title="Tambah proyek" />
       <NewProjectForm clients={clients} />
     </div>
   );

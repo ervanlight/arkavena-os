@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useActionState } from 'react';
 import { convertLeadToProjectAction, type Client, type Site } from '@/modules/crm';
+import { Input, Label, Select, Textarea, Button } from '@/core/ui';
 
 type FormState = { error: string | null };
 
@@ -56,23 +57,13 @@ export function ConvertLeadForm({
   return (
     <form action={formAction} className="max-w-lg space-y-4">
       <div>
-        <label htmlFor="projectName" className="block text-sm font-medium text-slate-700">
-          Nama proyek *
-        </label>
-        <input
-          id="projectName"
-          name="projectName"
-          required
-          defaultValue={defaultProjectName}
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        />
+        <Label htmlFor="projectName">Nama proyek *</Label>
+        <Input id="projectName" name="projectName" required defaultValue={defaultProjectName} />
       </div>
 
       <div>
-        <label htmlFor="clientId" className="block text-sm font-medium text-slate-700">
-          Klien
-        </label>
-        <select
+        <Label htmlFor="clientId">Klien</Label>
+        <Select
           id="clientId"
           name="clientId"
           value={clientChoice}
@@ -80,7 +71,6 @@ export function ConvertLeadForm({
             setClientChoice(e.target.value);
             setSiteChoice(NEW_SITE);
           }}
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
         >
           <option value={NEW_CLIENT}>-- Klien baru --</option>
           {clients.map((client) => (
@@ -88,81 +78,48 @@ export function ConvertLeadForm({
               {client.name}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
       {clientChoice === NEW_CLIENT && (
         <div>
-          <label htmlFor="newClientName" className="block text-sm font-medium text-slate-700">
-            Nama klien baru *
-          </label>
-          <input
-            id="newClientName"
-            name="newClientName"
-            required
-            className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-          />
+          <Label htmlFor="newClientName">Nama klien baru *</Label>
+          <Input id="newClientName" name="newClientName" required />
         </div>
       )}
 
       <div>
-        <label htmlFor="siteId" className="block text-sm font-medium text-slate-700">
-          Lokasi proyek
-        </label>
-        <select
-          id="siteId"
-          name="siteId"
-          value={siteChoice}
-          onChange={(e) => setSiteChoice(e.target.value)}
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        >
+        <Label htmlFor="siteId">Lokasi proyek</Label>
+        <Select id="siteId" name="siteId" value={siteChoice} onChange={(e) => setSiteChoice(e.target.value)}>
           <option value={NEW_SITE}>-- Lokasi baru --</option>
           {sitesForClient.map((site) => (
             <option key={site.id} value={site.id}>
               {site.name}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
       {siteChoice === NEW_SITE && (
         <>
           <div>
-            <label htmlFor="newSiteName" className="block text-sm font-medium text-slate-700">
-              Nama lokasi baru *
-            </label>
-            <input
-              id="newSiteName"
-              name="newSiteName"
-              required
-              className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-            />
+            <Label htmlFor="newSiteName">Nama lokasi baru *</Label>
+            <Input id="newSiteName" name="newSiteName" required />
           </div>
           <div>
-            <label htmlFor="newSiteAddress" className="block text-sm font-medium text-slate-700">
-              Alamat lokasi
-            </label>
-            <textarea
-              id="newSiteAddress"
-              name="newSiteAddress"
-              rows={2}
-              className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-            />
+            <Label htmlFor="newSiteAddress">Alamat lokasi</Label>
+            <Textarea id="newSiteAddress" name="newSiteAddress" rows={2} />
           </div>
         </>
       )}
 
       {state.error !== null && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-[color:var(--color-danger)]">
           {state.error}
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-      >
+      <Button type="submit" disabled={isPending}>
         {isPending ? 'Membuat proyek...' : 'Konversi ke proyek'}
-      </button>
+      </Button>
     </form>
   );
 }

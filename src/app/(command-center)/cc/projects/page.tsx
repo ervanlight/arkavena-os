@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { listProjectsAction } from '@/modules/projects';
+import { PageHeader, Card, EmptyState } from '@/core/ui';
 
 export const metadata = { title: 'Proyek — BuildTrust OS' };
 
@@ -17,53 +18,49 @@ export default async function ProjectsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-lg font-semibold text-slate-900">Proyek</h1>
-        <Link
-          href="/cc/projects/new"
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
-        >
-          Tambah proyek
-        </Link>
-      </div>
+      <PageHeader
+        title="Proyek"
+        actions={
+          <Link
+            href="/cc/projects/new"
+            className="inline-flex items-center justify-center gap-2 rounded-[var(--radius-control)] bg-[color:var(--color-accent)] px-4 py-2.5 text-[15px] font-medium text-white hover:bg-[color:var(--color-accent-hover)]"
+          >
+            Tambah proyek
+          </Link>
+        }
+      />
 
       {!result.ok && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-[color:var(--color-danger)]">
           {result.error.message}
         </p>
       )}
 
-      {result.ok && projects.length === 0 && (
-        <p className="text-sm text-slate-500">Belum ada proyek. Tambahkan proyek pertama Anda.</p>
-      )}
+      {result.ok && projects.length === 0 && <EmptyState title="Belum ada proyek. Tambahkan proyek pertama Anda." />}
 
       {projects.length > 0 && (
-        <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-slate-500">
-              <tr>
-                <th className="px-4 py-2 font-medium">Nama</th>
-                <th className="px-4 py-2 font-medium">Status</th>
-                <th className="px-4 py-2 font-medium">Mulai</th>
-                <th className="px-4 py-2 font-medium">Target selesai</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {projects.map((project) => (
-                <tr key={project.id}>
-                  <td className="px-4 py-2 font-medium text-slate-900">
-                    <Link href={`/cc/projects/${project.id}`} className="hover:underline">
-                      {project.name}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-2 text-slate-600">{STATUS_LABEL_ID[project.status] ?? project.status}</td>
-                  <td className="px-4 py-2 text-slate-600">{project.start_date ?? '—'}</td>
-                  <td className="px-4 py-2 text-slate-600">{project.target_end_date ?? '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Card>
+          <ul className="divide-y divide-[color:var(--color-hairline)]">
+            {projects.map((project) => (
+              <li key={project.id} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                <div className="min-w-0">
+                  <Link
+                    href={`/cc/projects/${project.id}`}
+                    className="truncate text-[15px] font-medium text-[color:var(--color-ink)] hover:underline"
+                  >
+                    {project.name}
+                  </Link>
+                  <p className="text-xs text-[color:var(--color-ink-tertiary)]">
+                    Mulai: {project.start_date ?? '—'} · Target selesai: {project.target_end_date ?? '—'}
+                  </p>
+                </div>
+                <span className="shrink-0 text-sm text-[color:var(--color-ink-secondary)]">
+                  {STATUS_LABEL_ID[project.status] ?? project.status}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </Card>
       )}
     </div>
   );

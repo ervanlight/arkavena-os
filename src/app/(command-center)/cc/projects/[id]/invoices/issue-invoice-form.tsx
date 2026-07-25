@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
 import { issueInvoiceAction } from '@/modules/billing';
+import { Button } from '@/core/ui';
 
 type FormState = { error: string | null };
 const initialState: FormState = { error: null };
@@ -26,22 +27,18 @@ export function IssueInvoiceForm({ invoiceId, blockedReasons }: { invoiceId: str
   return (
     <div>
       {blockedReasons.length > 0 && (
-        <ul className="mb-2 list-inside list-disc text-xs text-red-700">
+        <ul className="mb-2 list-inside list-disc text-xs text-[color:var(--color-danger)]">
           {blockedReasons.map((reason) => (
             <li key={reason}>{reason}</li>
           ))}
         </ul>
       )}
       <form action={formAction}>
-        <button
-          type="submit"
-          disabled={isPending || blockedReasons.length > 0}
-          className="rounded-md bg-emerald-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-800 disabled:opacity-50"
-        >
+        <Button type="submit" size="sm" disabled={isPending || blockedReasons.length > 0}>
           {isPending ? 'Menerbitkan...' : 'Setujui & terbitkan (Technical Director)'}
-        </button>
+        </Button>
         {state.error !== null && (
-          <span role="alert" className="ml-2 text-xs text-red-600">
+          <span role="alert" className="ml-2 text-xs text-[color:var(--color-danger)]">
             {state.error}
           </span>
         )}

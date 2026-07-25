@@ -5,6 +5,7 @@ import {
   listClientZoneProgressAction,
 } from '@/modules/client-portal';
 import { PortalNav } from '../../portal-nav';
+import { Card } from '@/core/ui';
 
 export const metadata = { title: 'Laporan Mingguan — BuildTrust OS' };
 
@@ -53,71 +54,74 @@ export default async function ClientPortalWeeklyReportPage({ params }: { params:
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-lg font-semibold text-slate-900">Laporan Mingguan</h1>
-        <p className="text-sm text-slate-500">
+        <h1 className="text-[19px] font-semibold text-[color:var(--color-ink)]">Laporan Mingguan</h1>
+        <p className="text-sm text-[color:var(--color-ink-tertiary)]">
           {weekStart.toLocaleDateString('id-ID')} &ndash; {today.toLocaleDateString('id-ID')}
         </p>
         <PortalNav projectId={projectId} active="/laporan-mingguan" />
       </div>
 
       {overview === null ? (
-        <p className="text-sm text-slate-500">Proyek tidak ditemukan.</p>
+        <p className="text-sm text-[color:var(--color-ink-secondary)]">Proyek tidak ditemukan.</p>
       ) : (
         <>
-          <section className="rounded-lg bg-white p-6 shadow-sm">
-            <h2 className="text-sm font-semibold text-slate-900">{overview.project_name}</h2>
+          <Card>
+            <h2 className="text-[15px] font-semibold text-[color:var(--color-ink)]">{overview.project_name}</h2>
             <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm sm:grid-cols-3">
               <div>
-                <dt className="text-slate-500">Status</dt>
-                <dd className="font-medium text-slate-900">{STATUS_LABEL_ID[overview.status] ?? overview.status}</dd>
+                <dt className="text-[color:var(--color-ink-tertiary)]">Status</dt>
+                <dd className="font-medium text-[color:var(--color-ink)]">{STATUS_LABEL_ID[overview.status] ?? overview.status}</dd>
               </div>
               <div>
-                <dt className="text-slate-500">Target selesai</dt>
-                <dd className="font-medium text-slate-900">{overview.target_end_date ?? '—'}</dd>
+                <dt className="text-[color:var(--color-ink-tertiary)]">Target selesai</dt>
+                <dd className="font-medium text-[color:var(--color-ink)]">{overview.target_end_date ?? '—'}</dd>
               </div>
               <div>
-                <dt className="text-slate-500">Nilai kontrak</dt>
-                <dd className="font-medium text-slate-900">
+                <dt className="text-[color:var(--color-ink-tertiary)]">Nilai kontrak</dt>
+                <dd className="font-medium text-[color:var(--color-ink)]">
                   {overview.contract_amount === null ? '—' : formatRp(overview.contract_amount)}
                 </dd>
               </div>
             </dl>
-          </section>
+          </Card>
 
-          <section className="rounded-lg bg-white p-6 shadow-sm">
-            <h2 className="text-sm font-semibold text-slate-900">Progres per zona</h2>
+          <Card>
+            <h2 className="text-[15px] font-semibold text-[color:var(--color-ink)]">Progres per zona</h2>
             <ul className="mt-3 space-y-3">
               {zones.map((zone) => (
                 <li key={zone.zone_id}>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-slate-900">{zone.zone_name}</span>
-                    <span className="text-slate-500">{zone.progress_percent}%</span>
+                    <span className="text-[color:var(--color-ink)]">{zone.zone_name}</span>
+                    <span className="text-[color:var(--color-ink-tertiary)]">{zone.progress_percent}%</span>
                   </div>
-                  <div className="mt-1 h-2 rounded-full bg-slate-100">
-                    <div className="h-2 rounded-full bg-emerald-600" style={{ width: `${zone.progress_percent}%` }} />
+                  <div className="mt-1 h-2 rounded-full bg-[color:var(--color-surface-secondary)]">
+                    <div
+                      className="h-2 rounded-full bg-[color:var(--color-success)]"
+                      style={{ width: `${zone.progress_percent}%` }}
+                    />
                   </div>
                 </li>
               ))}
             </ul>
-          </section>
+          </Card>
 
-          <section className="rounded-lg bg-white p-6 shadow-sm">
-            <h2 className="text-sm font-semibold text-slate-900">Kejadian minggu ini</h2>
+          <Card>
+            <h2 className="text-[15px] font-semibold text-[color:var(--color-ink)]">Kejadian minggu ini</h2>
             {eventsThisWeek.length === 0 && (
-              <p className="mt-2 text-sm text-slate-500">Tidak ada kejadian dalam 7 hari terakhir.</p>
+              <p className="mt-2 text-sm text-[color:var(--color-ink-secondary)]">Tidak ada kejadian dalam 7 hari terakhir.</p>
             )}
-            <ul className="mt-3 divide-y divide-slate-100">
+            <ul className="mt-3 divide-y divide-[color:var(--color-hairline)]">
               {eventsThisWeek.map((event) => (
-                <li key={`${event.event_type}-${event.source_id}`} className="py-2 text-sm">
-                  <p className="text-xs uppercase tracking-wide text-slate-400">
+                <li key={`${event.event_type}-${event.source_id}`} className="py-2 text-sm first:pt-0 last:pb-0">
+                  <p className="text-xs uppercase tracking-wide text-[color:var(--color-ink-tertiary)]">
                     {EVENT_TYPE_LABEL_ID[event.event_type] ?? event.event_type} ·{' '}
                     {new Date(event.event_at).toLocaleDateString('id-ID')}
                   </p>
-                  <p className="font-medium text-slate-900">{event.title}</p>
+                  <p className="font-medium text-[color:var(--color-ink)]">{event.title}</p>
                 </li>
               ))}
             </ul>
-          </section>
+          </Card>
         </>
       )}
     </div>

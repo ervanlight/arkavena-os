@@ -4,6 +4,7 @@ import { useActionState, useRef, useState } from 'react';
 import { createIssueAction } from '@/modules/field-reporting';
 import { generateIssueClassificationAction } from '@/modules/ai-scribe';
 import { submitOrQueueOffline } from '../../submit-with-offline-fallback';
+import { Card, Button, Input, Select, Textarea, Label } from '@/core/ui';
 
 type FormState = { status: 'idle' | 'ok' | 'offline' | 'error'; message: string | null };
 const initialState: FormState = { status: 'idle', message: null };
@@ -72,89 +73,68 @@ export function IssueForm({ projectId }: { projectId: string }) {
   }, initialState);
 
   return (
-    <form action={formAction} className="space-y-4 rounded-lg bg-white p-4 shadow-sm">
-      <div>
-        <label htmlFor="title" className="block text-sm font-medium text-slate-700">
-          Judul masalah
-        </label>
-        <input
-          ref={titleRef}
-          id="title"
-          name="title"
-          required
-          placeholder="mis. Retak dinding lantai 2"
-          className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-base text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        />
-      </div>
+    <Card>
+      <form action={formAction} className="space-y-4">
+        <div>
+          <Label htmlFor="title">Judul masalah</Label>
+          <Input ref={titleRef} id="title" name="title" required placeholder="mis. Retak dinding lantai 2" />
+        </div>
 
-      <div>
-        <label htmlFor="description" className="block text-sm font-medium text-slate-700">
-          Keterangan
-        </label>
-        <textarea
-          ref={descriptionRef}
-          id="description"
-          name="description"
-          rows={3}
-          placeholder="Jelaskan masalahnya (opsional)"
-          className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-base text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        />
-      </div>
+        <div>
+          <Label htmlFor="description">Keterangan</Label>
+          <Textarea
+            ref={descriptionRef}
+            id="description"
+            name="description"
+            rows={3}
+            placeholder="Jelaskan masalahnya (opsional)"
+          />
+        </div>
 
-      <div>
-        <button
-          type="button"
-          onClick={handleAssist}
-          disabled={assist.status === 'loading'}
-          className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 disabled:opacity-50"
-        >
-          {assist.status === 'loading' ? 'Meminta saran...' : 'Saran otomatis (AI)'}
-        </button>
-        {assist.status === 'suggested' && (
-          <p className="mt-1 text-sm text-slate-600">
-            Kategori tersarankan: <span className="font-medium">{assist.category}</span>. Tingkat keparahan di atas
-            sudah diisi otomatis -- periksa sebelum mengirim.
+        <div>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={handleAssist}
+            disabled={assist.status === 'loading'}
+            className="w-full"
+          >
+            {assist.status === 'loading' ? 'Meminta saran...' : 'Saran otomatis (AI)'}
+          </Button>
+          {assist.status === 'suggested' && (
+            <p className="mt-1 text-sm text-[color:var(--color-ink-secondary)]">
+              Kategori tersarankan: <span className="font-medium">{assist.category}</span>. Tingkat keparahan di atas
+              sudah diisi otomatis -- periksa sebelum mengirim.
+            </p>
+          )}
+          {assist.status === 'error' && (
+            <p role="alert" className="mt-1 text-sm text-[color:var(--color-danger)]">
+              {assist.message}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <Label htmlFor="severity">Tingkat keparahan</Label>
+          <Select ref={severityRef} id="severity" name="severity" defaultValue="medium">
+            <option value="low">Ringan</option>
+            <option value="medium">Sedang</option>
+            <option value="high">Berat</option>
+          </Select>
+        </div>
+
+        <Button type="submit" disabled={isPending} className="w-full">
+          {isPending ? 'Mengirim...' : 'Lapor Masalah'}
+        </Button>
+
+        {state.status === 'error' && (
+          <p role="alert" className="text-sm text-[color:var(--color-danger)]">
+            {state.message}
           </p>
         )}
-        {assist.status === 'error' && (
-          <p role="alert" className="mt-1 text-sm text-red-600">
-            {assist.message}
-          </p>
-        )}
-      </div>
-
-      <div>
-        <label htmlFor="severity" className="block text-sm font-medium text-slate-700">
-          Tingkat keparahan
-        </label>
-        <select
-          ref={severityRef}
-          id="severity"
-          name="severity"
-          defaultValue="medium"
-          className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-base text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        >
-          <option value="low">Ringan</option>
-          <option value="medium">Sedang</option>
-          <option value="high">Berat</option>
-        </select>
-      </div>
-
-      <button
-        type="submit"
-        disabled={isPending}
-        className="w-full rounded-md bg-slate-900 px-3 py-3 text-base font-medium text-white disabled:opacity-50"
-      >
-        {isPending ? 'Mengirim...' : 'Lapor Masalah'}
-      </button>
-
-      {state.status === 'error' && (
-        <p role="alert" className="text-sm text-red-600">
-          {state.message}
-        </p>
-      )}
-      {state.status === 'offline' && <p className="text-sm text-amber-600">{state.message}</p>}
-      {state.status === 'ok' && <p className="text-sm text-emerald-600">{state.message}</p>}
-    </form>
+        {state.status === 'offline' && <p className="text-sm text-[color:var(--color-warning)]">{state.message}</p>}
+        {state.status === 'ok' && <p className="text-sm text-[color:var(--color-success)]">{state.message}</p>}
+      </form>
+    </Card>
   );
 }

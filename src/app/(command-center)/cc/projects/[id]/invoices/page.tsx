@@ -11,6 +11,7 @@ import {
 } from '@/modules/projects';
 import { listChangeOrdersForProjectAction } from '@/modules/scope-variation';
 import { getInvoiceIssuanceStatusAction, listInvoicesForProjectAction, listPaymentsForInvoiceAction } from '@/modules/billing';
+import { Card, StatusBadge, EmptyState } from '@/core/ui';
 import { CreateInvoiceForm } from './create-invoice-form';
 import { IssueInvoiceForm } from './issue-invoice-form';
 import { CancelInvoiceForm } from './cancel-invoice-form';
@@ -25,11 +26,11 @@ const INVOICE_STATUS_LABEL_ID: Record<string, string> = {
   cancelled: 'Dibatalkan',
 };
 
-const INVOICE_STATUS_BADGE_CLASS: Record<string, string> = {
-  draft: 'bg-slate-100 text-slate-600',
-  issued: 'bg-blue-100 text-blue-800',
-  paid: 'bg-emerald-100 text-emerald-800',
-  cancelled: 'bg-red-100 text-red-800',
+const INVOICE_STATUS_TONE: Record<string, 'neutral' | 'info' | 'success' | 'danger'> = {
+  draft: 'neutral',
+  issued: 'info',
+  paid: 'success',
+  cancelled: 'danger',
 };
 
 export default async function ProjectInvoicesPage({ params }: { params: Promise<{ id: string }> }) {
@@ -46,7 +47,7 @@ export default async function ProjectInvoicesPage({ params }: { params: Promise<
   if (!projectResult.ok) {
     if (projectResult.error.code === 'NOT_FOUND') notFound();
     return (
-      <p role="alert" className="text-sm text-red-600">
+      <p role="alert" className="text-sm text-[color:var(--color-danger)]">
         {projectResult.error.message}
       </p>
     );
@@ -86,15 +87,8 @@ export default async function ProjectInvoicesPage({ params }: { params: Promise<
 
   return (
     <div className="space-y-8">
-      <div>
-        <Link href={`/cc/projects/${project.id}`} className="text-sm text-slate-500 hover:text-slate-900">
-          ← {project.name}
-        </Link>
-        <h1 className="mt-1 text-lg font-semibold text-slate-900">Invoice</h1>
-      </div>
-
-      <div className="rounded-lg bg-white p-6 shadow-sm">
-        <h2 className="text-base font-semibold text-slate-900">Buat invoice baru</h2>
+      <Card>
+        <h2 className="text-[17px] font-semibold text-[color:var(--color-ink)]">Buat invoice baru</h2>
         <div className="mt-4">
           <CreateInvoiceForm
             projectId={project.id}
@@ -102,29 +96,27 @@ export default async function ProjectInvoicesPage({ params }: { params: Promise<
             changeOrders={changeOrders.map((co) => ({ id: co.id, title: co.title }))}
           />
         </div>
-      </div>
+      </Card>
 
       <div className="space-y-4">
-        {invoices.length === 0 && <p className="text-sm text-slate-500">Belum ada invoice.</p>}
+        {invoices.length === 0 && <EmptyState title="Belum ada invoice." />}
         {invoices.map((invoice) => {
           const payments = paymentsByInvoiceId.get(invoice.id) ?? [];
           const paidTotal = toRupiah(payments.reduce((sum, p) => sum + p.amount, 0n));
           return (
-            <div key={invoice.id} className="rounded-lg bg-white p-6 shadow-sm">
+            <Card key={invoice.id}>
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <h3 className="text-sm font-semibold text-slate-900">{invoice.title}</h3>
-                  <p className="text-xs text-slate-500">
+                  <h3 className="text-[15px] font-semibold text-[color:var(--color-ink)]">{invoice.title}</h3>
+                  <p className="text-xs text-[color:var(--color-ink-tertiary)]">
                     Milestone: {milestoneNameById.get(invoice.milestone_id) ?? '—'} · Jatuh tempo: {invoice.due_date}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-slate-900">{formatRp(invoice.amount)}</span>
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-xs font-medium ${INVOICE_STATUS_BADGE_CLASS[invoice.status] ?? 'bg-slate-100 text-slate-600'}`}
-                  >
+                  <span className="text-[15px] font-medium text-[color:var(--color-ink)]">{formatRp(invoice.amount)}</span>
+                  <StatusBadge tone={INVOICE_STATUS_TONE[invoice.status] ?? 'neutral'}>
                     {INVOICE_STATUS_LABEL_ID[invoice.status] ?? invoice.status}
-                  </span>
+                  </StatusBadge>
                 </div>
               </div>
 
@@ -141,11 +133,11 @@ export default async function ProjectInvoicesPage({ params }: { params: Promise<
                 <div className="mt-3 space-y-2">
                   <Link
                     href={`/cc/projects/${project.id}/invoices/${invoice.id}/billing-pack` as Route}
-                    className="text-xs font-medium text-slate-600 underline"
+                    className="text-xs font-medium text-[color:var(--color-ink-secondary)] underline"
                   >
                     Lihat billing pack
                   </Link>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-[color:var(--color-ink-tertiary)]">
                     Dibayar: {formatRp(paidTotal)} / {formatRp(invoice.amount)}
                   </p>
                   {invoice.status === 'issued' && <RecordPaymentForm invoiceId={invoice.id} />}
@@ -153,9 +145,9 @@ export default async function ProjectInvoicesPage({ params }: { params: Promise<
               )}
 
               {invoice.status === 'cancelled' && invoice.cancelled_reason !== null && (
-                <p className="mt-2 text-xs text-slate-500">Alasan: {invoice.cancelled_reason}</p>
+                <p className="mt-2 text-xs text-[color:var(--color-ink-tertiary)]">Alasan: {invoice.cancelled_reason}</p>
               )}
-            </div>
+            </Card>
           );
         })}
       </div>

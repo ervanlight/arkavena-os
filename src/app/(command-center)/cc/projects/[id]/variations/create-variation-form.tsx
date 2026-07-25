@@ -2,6 +2,7 @@
 
 import { useActionState } from 'react';
 import { createChangeOrderAction } from '@/modules/scope-variation';
+import { Button, Input, Label, Textarea } from '@/core/ui';
 
 type FormState = { error: string | null };
 const initialState: FormState = { error: null };
@@ -28,38 +29,23 @@ export function CreateVariationForm({ projectId }: { projectId: string }) {
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label htmlFor="variationTitle" className="block text-xs font-medium text-slate-700">
-          Judul
-        </label>
-        <input
-          id="variationTitle"
-          name="title"
-          required
-          placeholder="mis. Tambah kamar mandi lantai 2"
-          className="mt-1 w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        />
+        <Label htmlFor="variationTitle">Judul</Label>
+        <Input id="variationTitle" name="title" required placeholder="mis. Tambah kamar mandi lantai 2" />
       </div>
       <div>
-        <label htmlFor="variationDescription" className="block text-xs font-medium text-slate-700">
-          Keterangan
-        </label>
-        <textarea
+        <Label htmlFor="variationDescription">Keterangan</Label>
+        <Textarea
           id="variationDescription"
           name="description"
           rows={2}
           placeholder="Detail permintaan perubahan dari klien"
-          className="mt-1 w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
         />
       </div>
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-      >
+      <Button type="submit" disabled={isPending}>
         {isPending ? 'Menyimpan...' : 'Buat draft variation'}
-      </button>
+      </Button>
       {state.error !== null && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-[color:var(--color-danger)]">
           {state.error}
         </p>
       )}

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { listAssessmentsAction } from '@/modules/assessment';
+import { Card, PageHeader, StatusBadge, EmptyState } from '@/core/ui';
 
 export const metadata = { title: 'Assessment — BuildTrust OS' };
 
@@ -8,59 +9,62 @@ const STATUS_LABEL_ID: Record<string, string> = {
   completed: 'Selesai',
 };
 
+const STATUS_TONE: Record<string, 'warning' | 'success'> = {
+  scheduled: 'warning',
+  completed: 'success',
+};
+
 export default async function AssessmentsPage() {
   const result = await listAssessmentsAction(undefined);
   const assessments = result.ok ? result.data : [];
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-lg font-semibold text-slate-900">Assessment</h1>
-        <Link
-          href="/cc/assessments/new"
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
-        >
-          Tambah assessment
-        </Link>
-      </div>
+      <PageHeader
+        title="Assessment"
+        actions={
+          <Link
+            href="/cc/assessments/new"
+            className="inline-flex items-center justify-center gap-2 rounded-[var(--radius-control)] bg-[color:var(--color-accent)] px-4 py-2.5 text-[15px] font-medium text-white hover:bg-[color:var(--color-accent-hover)]"
+          >
+            Tambah assessment
+          </Link>
+        }
+      />
 
       {!result.ok && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-[color:var(--color-danger)]">
           {result.error.message}
         </p>
       )}
 
       {result.ok && assessments.length === 0 && (
-        <p className="text-sm text-slate-500">Belum ada assessment. Tambahkan assessment pertama Anda.</p>
+        <EmptyState title="Belum ada assessment" description="Tambahkan assessment pertama Anda." />
       )}
 
       {assessments.length > 0 && (
-        <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-slate-500">
-              <tr>
-                <th className="px-4 py-2 font-medium">Status</th>
-                <th className="px-4 py-2 font-medium">Ruang lingkup direkomendasikan</th>
-                <th className="px-4 py-2 font-medium">Dibuat</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {assessments.map((assessment) => (
-                <tr key={assessment.id}>
-                  <td className="px-4 py-2 font-medium text-slate-900">
-                    <Link href={`/cc/assessments/${assessment.id}`} className="hover:underline">
-                      {STATUS_LABEL_ID[assessment.status] ?? assessment.status}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-2 text-slate-600">{assessment.recommended_scope ?? '—'}</td>
-                  <td className="px-4 py-2 text-slate-600">
-                    {new Date(assessment.created_at).toLocaleDateString('id-ID')}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Card>
+          <ul className="divide-y divide-[color:var(--color-hairline)]">
+            {assessments.map((assessment) => (
+              <li key={assessment.id} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                <div className="min-w-0">
+                  <Link
+                    href={`/cc/assessments/${assessment.id}`}
+                    className="truncate text-[15px] font-medium text-[color:var(--color-ink)] hover:underline"
+                  >
+                    {STATUS_LABEL_ID[assessment.status] ?? assessment.status}
+                  </Link>
+                  <p className="mt-0.5 truncate text-xs text-[color:var(--color-ink-tertiary)]">
+                    {assessment.recommended_scope ?? '—'} · {new Date(assessment.created_at).toLocaleDateString('id-ID')}
+                  </p>
+                </div>
+                <StatusBadge tone={STATUS_TONE[assessment.status] ?? 'neutral'}>
+                  {STATUS_LABEL_ID[assessment.status] ?? assessment.status}
+                </StatusBadge>
+              </li>
+            ))}
+          </ul>
+        </Card>
       )}
     </div>
   );

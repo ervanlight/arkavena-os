@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { generateQuoteSummaryAction, type QuoteSummaryResult } from '@/modules/ai-scribe';
+import { Button } from '@/core/ui';
 
 type WidgetState =
   | { status: 'idle' }
@@ -25,16 +26,11 @@ export function QuoteSummaryWidget({ vendorQuoteId }: { vendorQuoteId: string })
 
   return (
     <div>
-      <button
-        type="button"
-        onClick={handleCompare}
-        disabled={state.status === 'loading'}
-        className="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 disabled:opacity-50"
-      >
+      <Button type="button" variant="secondary" size="sm" onClick={handleCompare} disabled={state.status === 'loading'}>
         {state.status === 'loading' ? 'Membandingkan...' : 'Bandingkan (AI)'}
-      </button>
+      </Button>
       {state.status === 'done' && (
-        <div className="mt-2 rounded-md bg-slate-50 p-3 text-xs text-slate-600">
+        <div className="mt-2 rounded-[var(--radius-control)] bg-[color:var(--color-surface-secondary)] p-3 text-xs text-[color:var(--color-ink-secondary)]">
           <p>{state.result.summary}</p>
           <ul className="mt-1 list-inside list-disc">
             {state.result.quotes.map((q, i) => (
@@ -46,7 +42,7 @@ export function QuoteSummaryWidget({ vendorQuoteId }: { vendorQuoteId: string })
         </div>
       )}
       {state.status === 'error' && (
-        <p role="alert" className="mt-1 text-xs text-red-600">
+        <p role="alert" className="mt-1 text-xs text-[color:var(--color-danger)]">
           {state.message}
         </p>
       )}

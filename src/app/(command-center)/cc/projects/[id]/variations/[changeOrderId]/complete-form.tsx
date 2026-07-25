@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
 import { completeChangeOrderAction } from '@/modules/scope-variation';
+import { Button } from '@/core/ui';
 
 type FormState = { error: string | null };
 const initialState: FormState = { error: null };
@@ -19,15 +20,11 @@ export function CompleteForm({ changeOrderId }: { changeOrderId: string }) {
 
   return (
     <form action={formAction} className="flex items-center gap-3">
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-      >
+      <Button type="submit" disabled={isPending}>
         {isPending ? 'Menandai...' : 'Tandai variation selesai dikerjakan'}
-      </button>
+      </Button>
       {state.error !== null && (
-        <span role="alert" className="text-sm text-red-600">
+        <span role="alert" className="text-sm text-[color:var(--color-danger)]">
           {state.error}
         </span>
       )}

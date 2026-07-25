@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { formatRp } from '@/core/money/rupiah';
 import { getChangeOrderAction } from '@/modules/scope-variation';
 import { ClientDecisionForm } from './client-decision-form';
+import { Card } from '@/core/ui';
 
 export const metadata = { title: 'Persetujuan Variation — BuildTrust OS' };
 
@@ -25,7 +26,7 @@ export default async function ApproveVariationPage({ params }: { params: Promise
   if (!result.ok) {
     if (result.error.code === 'NOT_FOUND') notFound();
     return (
-      <p role="alert" className="text-sm text-red-600">
+      <p role="alert" className="text-sm text-[color:var(--color-danger)]">
         {result.error.message}
       </p>
     );
@@ -36,31 +37,31 @@ export default async function ApproveVariationPage({ params }: { params: Promise
 
   return (
     <div className="mx-auto max-w-lg space-y-6">
-      <h1 className="text-xl font-semibold text-slate-900">{changeOrder.title}</h1>
+      <h1 className="text-[19px] font-semibold text-[color:var(--color-ink)]">{changeOrder.title}</h1>
 
-      <div className="rounded-lg bg-white p-6 shadow-sm">
+      <Card>
         <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
-          <dt className="text-slate-500">Keterangan</dt>
-          <dd className="text-slate-900">{changeOrder.description ?? '—'}</dd>
-          <dt className="text-slate-500">Dampak biaya</dt>
-          <dd className="font-medium text-slate-900">
+          <dt className="text-[color:var(--color-ink-tertiary)]">Keterangan</dt>
+          <dd className="text-[color:var(--color-ink)]">{changeOrder.description ?? '—'}</dd>
+          <dt className="text-[color:var(--color-ink-tertiary)]">Dampak biaya</dt>
+          <dd className="font-medium text-[color:var(--color-ink)]">
             {changeOrder.cost_impact_amount === null ? '—' : formatRp(changeOrder.cost_impact_amount)}
           </dd>
-          <dt className="text-slate-500">Dampak jadwal</dt>
-          <dd className="text-slate-900">
+          <dt className="text-[color:var(--color-ink-tertiary)]">Dampak jadwal</dt>
+          <dd className="text-[color:var(--color-ink)]">
             {changeOrder.schedule_impact_days === null ? '—' : `${changeOrder.schedule_impact_days} hari`}
           </dd>
         </dl>
-      </div>
+      </Card>
 
       {alreadyDecided ? (
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-[color:var(--color-ink-secondary)]">
           Variation ini sudah diputuskan sebelumnya (status saat ini: {changeOrder.status}).
         </p>
       ) : (
-        <div className="rounded-lg bg-white p-6 shadow-sm">
+        <Card>
           <ClientDecisionForm changeOrderId={changeOrder.id} />
-        </div>
+        </Card>
       )}
     </div>
   );

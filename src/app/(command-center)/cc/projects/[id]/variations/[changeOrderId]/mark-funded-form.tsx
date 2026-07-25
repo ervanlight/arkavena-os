@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
 import { markChangeOrderFundedAction } from '@/modules/scope-variation';
+import { Button } from '@/core/ui';
 
 type FormState = { error: string | null };
 const initialState: FormState = { error: null };
@@ -20,15 +21,11 @@ export function MarkFundedForm({ changeOrderId }: { changeOrderId: string }) {
 
   return (
     <form action={formAction} className="flex items-center gap-3">
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded-md bg-emerald-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-800 disabled:opacity-50"
-      >
+      <Button type="submit" disabled={isPending}>
         {isPending ? 'Menandai...' : 'Tandai dana masuk'}
-      </button>
+      </Button>
       {state.error !== null && (
-        <span role="alert" className="text-sm text-red-600">
+        <span role="alert" className="text-sm text-[color:var(--color-danger)]">
           {state.error}
         </span>
       )}

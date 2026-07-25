@@ -7,6 +7,7 @@ import { photoStoragePath, photoThumbnailStoragePath } from '@/core/storage/path
 import { createPhotoAction } from '@/modules/field-reporting';
 import { enqueueMutation } from '@/core/offline/outbox';
 import { indexedDbOutboxStore } from '@/core/offline/indexeddb-store';
+import { Card, Button, Input, Select, Label } from '@/core/ui';
 
 type Zone = { id: string; name: string };
 type WorkPackage = { id: string; name: string };
@@ -106,88 +107,63 @@ export function PhotoForm({
   }, initialState);
 
   return (
-    <form action={formAction} className="space-y-4 rounded-lg bg-white p-4 shadow-sm">
-      <div>
-        <label htmlFor="photo" className="block text-sm font-medium text-slate-700">
-          Foto
-        </label>
-        <input
-          id="photo"
-          name="photo"
-          type="file"
-          accept="image/*"
-          capture="environment"
-          required
-          className="mt-1 w-full text-sm text-slate-700"
-        />
-      </div>
-
-      <div>
-        <label htmlFor="zoneId" className="block text-sm font-medium text-slate-700">
-          Zona
-        </label>
-        <select
-          id="zoneId"
-          name="zoneId"
-          required
-          className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-base text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        >
-          {zones.map((zone) => (
-            <option key={zone.id} value={zone.id}>
-              {zone.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {workPackages.length > 0 && (
+    <Card>
+      <form action={formAction} className="space-y-4">
         <div>
-          <label htmlFor="workPackageId" className="block text-sm font-medium text-slate-700">
-            Paket kerja (opsional)
-          </label>
-          <select
-            id="workPackageId"
-            name="workPackageId"
-            defaultValue=""
-            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-base text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-          >
-            <option value="">— Tidak terkait —</option>
-            {workPackages.map((wp) => (
-              <option key={wp.id} value={wp.id}>
-                {wp.name}
+          <Label htmlFor="photo">Foto</Label>
+          <input
+            id="photo"
+            name="photo"
+            type="file"
+            accept="image/*"
+            capture="environment"
+            required
+            className="mt-1 w-full text-sm text-[color:var(--color-ink-secondary)]"
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="zoneId">Zona</Label>
+          <Select id="zoneId" name="zoneId" required>
+            {zones.map((zone) => (
+              <option key={zone.id} value={zone.id}>
+                {zone.name}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
-      )}
 
-      <div>
-        <label htmlFor="caption" className="block text-sm font-medium text-slate-700">
-          Keterangan
-        </label>
-        <input
-          id="caption"
-          name="caption"
-          placeholder="Keterangan foto (opsional)"
-          className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-base text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        />
-      </div>
+        {workPackages.length > 0 && (
+          <div>
+            <Label htmlFor="workPackageId">Paket kerja (opsional)</Label>
+            <Select id="workPackageId" name="workPackageId" defaultValue="">
+              <option value="">— Tidak terkait —</option>
+              {workPackages.map((wp) => (
+                <option key={wp.id} value={wp.id}>
+                  {wp.name}
+                </option>
+              ))}
+            </Select>
+          </div>
+        )}
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="w-full rounded-md bg-slate-900 px-3 py-3 text-base font-medium text-white disabled:opacity-50"
-      >
-        {isPending ? 'Menyimpan...' : 'Simpan Foto'}
-      </button>
+        <div>
+          <Label htmlFor="caption">Keterangan</Label>
+          <Input id="caption" name="caption" placeholder="Keterangan foto (opsional)" />
+        </div>
 
-      {state.status === 'error' && (
-        <p role="alert" className="text-sm text-red-600">
-          {state.message}
-        </p>
-      )}
-      {state.status === 'offline' && <p className="text-sm text-amber-600">{state.message}</p>}
-      {state.status === 'ok' && <p className="text-sm text-emerald-600">{state.message}</p>}
-    </form>
+        <Button type="submit" disabled={isPending} className="w-full">
+          {isPending ? 'Menyimpan...' : 'Simpan Foto'}
+        </Button>
+
+        {state.status === 'error' && (
+          <p role="alert" className="text-sm text-[color:var(--color-danger)]">
+            {state.message}
+          </p>
+        )}
+        {state.status === 'offline' && <p className="text-sm text-[color:var(--color-warning)]">{state.message}</p>}
+        {state.status === 'ok' && <p className="text-sm text-[color:var(--color-success)]">{state.message}</p>}
+      </form>
+    </Card>
   );
 }

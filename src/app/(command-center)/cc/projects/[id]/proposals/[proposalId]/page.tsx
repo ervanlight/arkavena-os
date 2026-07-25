@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getProposalAction } from '@/modules/estimating';
+import { Card, StatusBadge, Button } from '@/core/ui';
 import { SendProposalForm } from './send-form';
 import { DecideProposalForm } from './decide-form';
 
@@ -11,6 +12,13 @@ const STATUS_LABEL_ID: Record<string, string> = {
   sent: 'Terkirim',
   accepted: 'Diterima',
   rejected: 'Ditolak',
+};
+
+const STATUS_TONE: Record<string, 'neutral' | 'info' | 'warning' | 'success' | 'danger'> = {
+  draft: 'info',
+  sent: 'warning',
+  accepted: 'success',
+  rejected: 'danger',
 };
 
 export default async function ProposalDetailPage({
@@ -24,7 +32,7 @@ export default async function ProposalDetailPage({
   if (!result.ok) {
     if (result.error.code === 'NOT_FOUND') notFound();
     return (
-      <p role="alert" className="text-sm text-red-600">
+      <p role="alert" className="text-sm text-[color:var(--color-danger)]">
         {result.error.message}
       </p>
     );
@@ -34,49 +42,48 @@ export default async function ProposalDetailPage({
 
   return (
     <div className="space-y-8">
-      <div className="rounded-lg bg-white p-6 shadow-sm">
+      <Card>
         <div className="flex items-center justify-between">
-          <h1 className="text-lg font-semibold text-slate-900">Proposal</h1>
+          <h2 className="text-[19px] font-semibold text-[color:var(--color-ink)]">Proposal</h2>
           <div className="flex items-center gap-2">
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
+            <StatusBadge tone={STATUS_TONE[proposal.status] ?? 'neutral'}>
               {STATUS_LABEL_ID[proposal.status] ?? proposal.status}
-            </span>
-            <Link
-              href={`/cc/projects/${id}/estimates`}
-              className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
-            >
-              Kembali ke estimasi
+            </StatusBadge>
+            <Link href={`/cc/projects/${id}/estimates`}>
+              <Button type="button" variant="secondary" size="sm">
+                Kembali ke estimasi
+              </Button>
             </Link>
           </div>
         </div>
         <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
-          <dt className="text-slate-500">Terkirim pada</dt>
-          <dd className="text-slate-900">
+          <dt className="text-[color:var(--color-ink-tertiary)]">Terkirim pada</dt>
+          <dd className="text-[color:var(--color-ink)]">
             {proposal.sent_at !== null ? new Date(proposal.sent_at).toLocaleString('id-ID') : '—'}
           </dd>
           {proposal.decided_at !== null && (
             <>
-              <dt className="text-slate-500">Diputuskan pada</dt>
-              <dd className="text-slate-900">{new Date(proposal.decided_at).toLocaleString('id-ID')}</dd>
-              <dt className="text-slate-500">Alasan</dt>
-              <dd className="text-slate-900">{proposal.decision_reason ?? '—'}</dd>
+              <dt className="text-[color:var(--color-ink-tertiary)]">Diputuskan pada</dt>
+              <dd className="text-[color:var(--color-ink)]">{new Date(proposal.decided_at).toLocaleString('id-ID')}</dd>
+              <dt className="text-[color:var(--color-ink-tertiary)]">Alasan</dt>
+              <dd className="text-[color:var(--color-ink)]">{proposal.decision_reason ?? '—'}</dd>
             </>
           )}
         </dl>
-      </div>
+      </Card>
 
       {proposal.status === 'draft' && (
-        <div className="space-y-4 rounded-lg bg-white p-6 shadow-sm">
-          <h2 className="text-base font-semibold text-slate-900">Kirim proposal</h2>
+        <Card className="space-y-4">
+          <h2 className="text-[17px] font-semibold text-[color:var(--color-ink)]">Kirim proposal</h2>
           <SendProposalForm proposalId={proposal.id} />
-        </div>
+        </Card>
       )}
 
       {proposal.status === 'sent' && (
-        <div className="space-y-4 rounded-lg bg-white p-6 shadow-sm">
-          <h2 className="text-base font-semibold text-slate-900">Keputusan klien</h2>
+        <Card className="space-y-4">
+          <h2 className="text-[17px] font-semibold text-[color:var(--color-ink)]">Keputusan klien</h2>
           <DecideProposalForm proposalId={proposal.id} />
-        </div>
+        </Card>
       )}
     </div>
   );

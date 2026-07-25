@@ -6,6 +6,7 @@ import {
   listVendorQuotesForProjectAction,
   listVendorsAction,
 } from '@/modules/procurement';
+import { Card, EmptyState, StatusBadge } from '@/core/ui';
 import { CreateVendorQuoteForm } from './vendor-quote-form';
 import { CreatePurchaseOrderForm } from './purchase-order-form';
 import { OverridePurchaseOrderForm } from './override-purchase-order-form';
@@ -18,6 +19,12 @@ const QUOTE_STATUS_LABEL_ID: Record<string, string> = {
   received: 'Diterima',
   accepted: 'Disetujui',
   rejected: 'Ditolak',
+};
+
+const QUOTE_STATUS_TONE: Record<string, 'neutral' | 'info' | 'warning' | 'success' | 'danger'> = {
+  received: 'info',
+  accepted: 'success',
+  rejected: 'danger',
 };
 
 export default async function ProjectProcurementPage({ params }: { params: Promise<{ id: string }> }) {
@@ -44,81 +51,73 @@ export default async function ProjectProcurementPage({ params }: { params: Promi
 
   return (
     <div className="space-y-8">
-      <h1 className="text-lg font-semibold text-slate-900">Prokuremen</h1>
+      <h2 className="text-[17px] font-semibold text-[color:var(--color-ink)]">Prokuremen</h2>
 
-      <div className="space-y-4 rounded-lg bg-white p-6 shadow-sm">
-        <h2 className="text-base font-semibold text-slate-900">Penawaran vendor (vendor quotes)</h2>
-        {quotes.length === 0 && <p className="text-sm text-slate-500">Belum ada penawaran vendor.</p>}
+      <Card className="space-y-4">
+        <h2 className="text-[17px] font-semibold text-[color:var(--color-ink)]">Penawaran vendor (vendor quotes)</h2>
+        {quotes.length === 0 && <EmptyState title="Belum ada penawaran vendor" />}
         {quotes.length > 0 && (
-          <div className="overflow-hidden rounded-lg border border-slate-200">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 text-slate-500">
-                <tr>
-                  <th className="px-4 py-2 font-medium">Deskripsi</th>
-                  <th className="px-4 py-2 font-medium">Nominal</th>
-                  <th className="px-4 py-2 font-medium">Status</th>
-                  <th className="px-4 py-2 font-medium"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {quotes.map((quote) => (
-                  <tr key={quote.id}>
-                    <td className="px-4 py-2 font-medium text-slate-900">{quote.description}</td>
-                    <td className="px-4 py-2 text-slate-600">Rp {quote.amount.toLocaleString('id-ID')}</td>
-                    <td className="px-4 py-2 text-slate-600">
-                      {QUOTE_STATUS_LABEL_ID[quote.status] ?? quote.status}
-                    </td>
-                    <td className="px-4 py-2">
-                      <QuoteSummaryWidget vendorQuoteId={quote.id} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <ul className="divide-y divide-[color:var(--color-hairline)]">
+            {quotes.map((quote) => (
+              <li key={quote.id} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                <div className="min-w-0">
+                  <p className="truncate text-[15px] font-medium text-[color:var(--color-ink)]">{quote.description}</p>
+                  <p className="text-xs text-[color:var(--color-ink-tertiary)]">
+                    Rp {quote.amount.toLocaleString('id-ID')}
+                  </p>
+                </div>
+                <div className="flex shrink-0 items-center gap-3">
+                  <StatusBadge tone={QUOTE_STATUS_TONE[quote.status] ?? 'neutral'}>
+                    {QUOTE_STATUS_LABEL_ID[quote.status] ?? quote.status}
+                  </StatusBadge>
+                  <QuoteSummaryWidget vendorQuoteId={quote.id} />
+                </div>
+              </li>
+            ))}
+          </ul>
         )}
-        <div className="rounded-lg border border-dashed border-slate-300 p-4">
+        <Card className="border border-dashed border-[color:var(--color-hairline)] shadow-none">
           <CreateVendorQuoteForm projectId={id} vendors={vendors} />
-        </div>
-      </div>
+        </Card>
+      </Card>
 
-      <div className="space-y-4 rounded-lg bg-white p-6 shadow-sm">
-        <h2 className="text-base font-semibold text-slate-900">Purchase order</h2>
-        {purchaseOrders.length === 0 && <p className="text-sm text-slate-500">Belum ada purchase order.</p>}
+      <Card className="space-y-4">
+        <h2 className="text-[17px] font-semibold text-[color:var(--color-ink)]">Purchase order</h2>
+        {purchaseOrders.length === 0 && <EmptyState title="Belum ada purchase order" />}
         {purchaseOrders.length > 0 && (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {purchaseOrders.map((po) => {
               const deliveriesResult = deliveriesByPo.get(po.id);
               const deliveries = deliveriesResult?.ok ? deliveriesResult.data : [];
               return (
-                <div key={po.id} className="rounded-lg border border-slate-200 p-4">
+                <Card key={po.id} className="border border-[color:var(--color-hairline)] shadow-none">
                   <div className="flex items-center justify-between">
-                    <p className="font-medium text-slate-900">{po.description}</p>
-                    <p className="text-sm text-slate-600">Rp {po.amount.toLocaleString('id-ID')}</p>
+                    <p className="font-medium text-[color:var(--color-ink)]">{po.description}</p>
+                    <p className="text-sm text-[color:var(--color-ink-secondary)]">
+                      Rp {po.amount.toLocaleString('id-ID')}
+                    </p>
                   </div>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs text-[color:var(--color-ink-tertiary)]">
                     {deliveries.length} pengiriman tercatat
                   </p>
                   <div className="mt-3">
                     <CreateDeliveryForm purchaseOrderId={po.id} />
                   </div>
-                </div>
+                </Card>
               );
             })}
           </div>
         )}
-        <div className="space-y-4 rounded-lg border border-dashed border-slate-300 p-4">
+        <Card className="space-y-4 border border-dashed border-[color:var(--color-hairline)] shadow-none">
           <CreatePurchaseOrderForm projectId={id} vendors={vendors} quotes={quotes} />
-        </div>
+        </Card>
         {canOverride && (
-          <div className="space-y-4 rounded-lg border border-dashed border-amber-300 bg-amber-50 p-4">
-            <h3 className="text-sm font-semibold text-amber-900">
-              Override Cash Gate (hanya Owner)
-            </h3>
+          <Card className="space-y-4 border border-dashed border-[color:var(--color-warning)]/50 bg-[color:var(--color-warning)]/10 shadow-none">
+            <h3 className="text-sm font-semibold text-[#a05a00]">Override Cash Gate (hanya Owner)</h3>
             <OverridePurchaseOrderForm projectId={id} vendors={vendors} quotes={quotes} />
-          </div>
+          </Card>
         )}
-      </div>
+      </Card>
     </div>
   );
 }

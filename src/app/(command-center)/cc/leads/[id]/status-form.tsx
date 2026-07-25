@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
 import { updateLeadStatusAction } from '@/modules/crm';
+import { Input, Label, Select, Button } from '@/core/ui';
 
 type FormState = { error: string | null };
 
@@ -46,46 +47,29 @@ export function LeadStatusForm({ leadId, currentStatus }: { leadId: string; curr
   return (
     <form action={formAction} className="max-w-md space-y-4">
       <div>
-        <label htmlFor="status" className="block text-sm font-medium text-slate-700">
-          Status baru
-        </label>
-        <select
-          id="status"
-          name="status"
-          defaultValue={currentStatus}
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        >
+        <Label htmlFor="status">Status baru</Label>
+        <Select id="status" name="status" defaultValue={currentStatus}>
           {STATUSES.map((s) => (
             <option key={s.value} value={s.value}>
               {s.label}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
       <div>
-        <label htmlFor="lostReason" className="block text-sm font-medium text-slate-700">
-          Alasan lost (wajib jika status Lost)
-        </label>
-        <input
-          id="lostReason"
-          name="lostReason"
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        />
+        <Label htmlFor="lostReason">Alasan lost (wajib jika status Lost)</Label>
+        <Input id="lostReason" name="lostReason" />
       </div>
 
       {state.error !== null && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-[color:var(--color-danger)]">
           {state.error}
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-      >
+      <Button type="submit" disabled={isPending}>
         {isPending ? 'Menyimpan...' : 'Ubah status'}
-      </button>
+      </Button>
     </form>
   );
 }

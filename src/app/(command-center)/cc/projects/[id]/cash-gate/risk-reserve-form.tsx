@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
 import { setRiskReserveAction } from '@/modules/cash-gate';
+import { Label, Input, Button } from '@/core/ui';
 
 type FormState = { error: string | null };
 const initialState: FormState = { error: null };
@@ -27,28 +28,22 @@ export function RiskReserveForm({ projectId, currentAmount }: { projectId: strin
   return (
     <form action={formAction} className="flex flex-wrap items-end gap-3">
       <div>
-        <label htmlFor="riskReserveAmount" className="block text-xs font-medium text-slate-700">
-          Nominal cadangan (Rp)
-        </label>
-        <input
+        <Label htmlFor="riskReserveAmount">Nominal cadangan (Rp)</Label>
+        <Input
           id="riskReserveAmount"
           name="riskReserveAmount"
           required
           inputMode="numeric"
           pattern="\d+"
           defaultValue={currentAmount}
-          className="mt-1 w-40 rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+          className="w-40"
         />
       </div>
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-      >
+      <Button type="submit" disabled={isPending} size="sm">
         {isPending ? 'Menyimpan...' : 'Simpan'}
-      </button>
+      </Button>
       {state.error !== null && (
-        <p role="alert" className="w-full text-sm text-red-600">
+        <p role="alert" className="w-full text-sm text-[color:var(--color-danger)]">
           {state.error}
         </p>
       )}

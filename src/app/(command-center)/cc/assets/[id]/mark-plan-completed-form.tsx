@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
 import { markMaintenancePlanCompletedAction } from '@/modules/maintenance-engine';
+import { Button } from '@/core/ui';
 
 type FormState = { error: string | null };
 
@@ -22,15 +23,11 @@ export function MarkPlanCompletedForm({ planId }: { planId: string }) {
 
   return (
     <form action={formAction}>
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-      >
+      <Button type="submit" variant="secondary" size="sm" disabled={isPending}>
         {isPending ? 'Menyimpan...' : 'Tandai selesai hari ini'}
-      </button>
+      </Button>
       {state.error !== null && (
-        <p role="alert" className="mt-1 text-sm text-red-600">
+        <p role="alert" className="mt-1 text-sm text-[color:var(--color-danger)]">
           {state.error}
         </p>
       )}

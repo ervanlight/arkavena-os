@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getAssessmentReportAction } from '@/modules/assessment';
+import { Card, StatusBadge } from '@/core/ui';
 import { FindingsForm } from './findings-form';
 import { CompleteAssessmentForm } from './complete-form';
 
@@ -10,6 +11,11 @@ const STATUS_LABEL_ID: Record<string, string> = {
   completed: 'Selesai',
 };
 
+const STATUS_TONE: Record<string, 'warning' | 'success'> = {
+  scheduled: 'warning',
+  completed: 'success',
+};
+
 export default async function AssessmentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
@@ -17,7 +23,7 @@ export default async function AssessmentDetailPage({ params }: { params: Promise
   if (!result.ok) {
     if (result.error.code === 'NOT_FOUND') notFound();
     return (
-      <p role="alert" className="text-sm text-red-600">
+      <p role="alert" className="text-sm text-[color:var(--color-danger)]">
         {result.error.message}
       </p>
     );
@@ -26,22 +32,22 @@ export default async function AssessmentDetailPage({ params }: { params: Promise
   const { assessment, site, lead } = result.data;
 
   return (
-    <div className="space-y-8">
-      <div className="rounded-lg bg-white p-6 shadow-sm">
+    <div className="space-y-6">
+      <Card>
         <div className="flex items-center justify-between">
-          <h1 className="text-lg font-semibold text-slate-900">Assessment — {site.name}</h1>
-          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
+          <h1 className="text-[19px] font-semibold text-[color:var(--color-ink)]">Assessment — {site.name}</h1>
+          <StatusBadge tone={STATUS_TONE[assessment.status] ?? 'neutral'}>
             {STATUS_LABEL_ID[assessment.status] ?? assessment.status}
-          </span>
+          </StatusBadge>
         </div>
         <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
-          <dt className="text-slate-500">Lokasi</dt>
-          <dd className="text-slate-900">{site.name}</dd>
+          <dt className="text-[color:var(--color-ink-tertiary)]">Lokasi</dt>
+          <dd className="text-[color:var(--color-ink)]">{site.name}</dd>
           {lead !== null && (
             <>
-              <dt className="text-slate-500">Lead</dt>
-              <dd className="text-slate-900">
-                <a href={`/cc/leads/${lead.id}`} className="text-slate-700 underline">
+              <dt className="text-[color:var(--color-ink-tertiary)]">Lead</dt>
+              <dd className="text-[color:var(--color-ink)]">
+                <a href={`/cc/leads/${lead.id}`} className="text-[color:var(--color-accent)] underline">
                   {lead.contact_name}
                 </a>
               </dd>
@@ -49,9 +55,9 @@ export default async function AssessmentDetailPage({ params }: { params: Promise
           )}
           {assessment.project_id !== null && (
             <>
-              <dt className="text-slate-500">Proyek</dt>
-              <dd className="text-slate-900">
-                <a href={`/cc/projects/${assessment.project_id}`} className="text-slate-700 underline">
+              <dt className="text-[color:var(--color-ink-tertiary)]">Proyek</dt>
+              <dd className="text-[color:var(--color-ink)]">
+                <a href={`/cc/projects/${assessment.project_id}`} className="text-[color:var(--color-accent)] underline">
                   Lihat proyek
                 </a>
               </dd>
@@ -59,17 +65,17 @@ export default async function AssessmentDetailPage({ params }: { params: Promise
           )}
           {assessment.status === 'completed' && (
             <>
-              <dt className="text-slate-500">Selesai pada</dt>
-              <dd className="text-slate-900">
+              <dt className="text-[color:var(--color-ink-tertiary)]">Selesai pada</dt>
+              <dd className="text-[color:var(--color-ink)]">
                 {assessment.assessed_at !== null ? new Date(assessment.assessed_at).toLocaleString('id-ID') : '—'}
               </dd>
             </>
           )}
         </dl>
-      </div>
+      </Card>
 
-      <div className="space-y-4 rounded-lg bg-white p-6 shadow-sm">
-        <h2 className="text-base font-semibold text-slate-900">Temuan</h2>
+      <Card className="space-y-4">
+        <h2 className="text-[17px] font-semibold text-[color:var(--color-ink)]">Temuan</h2>
         <FindingsForm
           assessmentId={assessment.id}
           siteConditions={assessment.site_conditions}
@@ -77,13 +83,13 @@ export default async function AssessmentDetailPage({ params }: { params: Promise
           notes={assessment.notes}
           disabled={assessment.status === 'completed'}
         />
-      </div>
+      </Card>
 
       {assessment.status === 'scheduled' && (
-        <div className="space-y-4 rounded-lg bg-white p-6 shadow-sm">
-          <h2 className="text-base font-semibold text-slate-900">Selesaikan assessment</h2>
+        <Card className="space-y-4">
+          <h2 className="text-[17px] font-semibold text-[color:var(--color-ink)]">Selesaikan assessment</h2>
           <CompleteAssessmentForm assessmentId={assessment.id} />
-        </div>
+        </Card>
       )}
     </div>
   );

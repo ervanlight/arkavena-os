@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createDeliveryAction } from '@/modules/procurement';
+import { Button, Input, Label } from '@/core/ui';
 
 type FormState = { error: string | null };
 
@@ -26,24 +27,16 @@ export function CreateDeliveryForm({ purchaseOrderId }: { purchaseOrderId: strin
   return (
     <form action={formAction} className="flex items-end gap-2">
       <div className="flex-1">
-        <label htmlFor={`notes-${purchaseOrderId}`} className="block text-xs font-medium text-slate-700">
+        <Label htmlFor={`notes-${purchaseOrderId}`} className="text-xs">
           Catatan pengiriman
-        </label>
-        <input
-          id={`notes-${purchaseOrderId}`}
-          name="notes"
-          className="mt-1 block w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-        />
+        </Label>
+        <Input id={`notes-${purchaseOrderId}`} name="notes" className="py-1.5" />
       </div>
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-      >
+      <Button type="submit" variant="secondary" size="sm" disabled={isPending}>
         {isPending ? 'Mencatat...' : 'Catat pengiriman'}
-      </button>
+      </Button>
       {state.error !== null && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-[color:var(--color-danger)]">
           {state.error}
         </p>
       )}
