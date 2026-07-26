@@ -2,7 +2,7 @@ import type { Route } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { formatRp } from '@/core/money/rupiah';
-import { getBillingPackAction } from '@/modules/billing';
+import { getBillingPackAction } from '@/modules/invoice-generator';
 import { Card } from '@/core/ui';
 
 export const metadata = { title: 'Billing Pack — Arkavena OS' };

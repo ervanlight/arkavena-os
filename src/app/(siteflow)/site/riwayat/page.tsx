@@ -4,7 +4,7 @@ import {
   listIssuesForProjectAction,
   listMaterialRequestsForProjectAction,
   listProjectPhotosWithUrlsAction,
-} from '@/modules/field-reporting';
+} from '@/modules/daily-report-inbox';
 import { Card, EmptyState, StatusBadge } from '@/core/ui';
 
 export const metadata = { title: 'Riwayat Laporan — SiteFlow' };

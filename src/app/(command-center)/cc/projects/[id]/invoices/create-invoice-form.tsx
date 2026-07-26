@@ -2,7 +2,7 @@
 
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createInvoiceAction } from '@/modules/billing';
+import { createInvoiceAction } from '@/modules/invoice-generator';
 import { Label, Input, Select, Button } from '@/core/ui';
 
 type FormState = { error: string | null };

@@ -1,4 +1,4 @@
-import type { DecisionClockTier } from '@/modules/client-portal';
+import type { DecisionClockTier } from '@/modules/client-feed';
 import { StatusBadge } from '@/core/ui';
 
 const TIER_LABEL_ID: Record<DecisionClockTier, string> = {

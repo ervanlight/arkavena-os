@@ -5,13 +5,12 @@ import {
   listClientTimelineEventsAction,
   listClientStatusUpdatesForProjectAction,
   listPendingClientDecisionsAction,
-} from '@/modules/client-portal';
+} from '@/modules/client-feed';
 import { listClientVisibleEvidenceWithUrlsForProjectAction } from '@/modules/evidence';
-import { listInvoicesForProjectAction } from '@/modules/billing';
-import { formatRp } from '@/core/money/rupiah';
+import { listInvoicesForProjectAction } from '@/modules/invoice-generator';
 import { PortalNav } from '../portal-nav';
 import { DecisionClockBadge } from '../decision-clock-badge';
-import { Activity, BarChart2, Clock, CheckCircle, MessageSquare } from 'lucide-react';
+import { Activity, Clock, CheckCircle, MessageSquare } from 'lucide-react';
 
 export const metadata = { title: 'Beranda — Arkavena OS' };
 
@@ -66,8 +65,7 @@ export default async function ClientPortalHomePage({ params }: { params: Promise
   const evidence = evidenceResult.ok ? evidenceResult.data : [];
   const timelineEvents = timelineResult.ok ? timelineResult.data : [];
   
-  const allInvoices = invoicesResult.ok ? invoicesResult.data : [];
-  
+
   const recentFeed: FeedItem[] = [
     ...timelineEvents.map((e) => ({
       key: `${e.event_type}-${e.source_id}`,
@@ -94,31 +92,38 @@ export default async function ClientPortalHomePage({ params }: { params: Promise
     .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
     .slice(0, 5);
 
-  const activeStatusStr = latestStatus ? (CLIENT_STATUS_LABEL_ID[latestStatus.status] ?? latestStatus.status) : 'In Progress';
   const tone = latestStatus ? CLIENT_STATUS_TONE[latestStatus.status] : 'success';
   const statusColor = tone === 'success' ? 'text-green-500' : tone === 'warning' ? 'text-yellow-500' : 'text-blue-500';
 
   return (
     <div className="space-y-6">
-      {/* Header section similar to image */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#2A2A2A]">
-            <Activity className="text-gray-400" size={20} />
-          </div>
+      {/* Header section: Project Status Card (Reassurance) */}
+      <div className="rounded-xl border border-white/10 bg-[#1A1A1A] p-6 lg:p-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <h1 className="text-xl font-semibold text-white">{overview.project_name}</h1>
-            <p className="text-sm text-gray-500">ProjectView Demo</p>
+            <p className="text-[13px] font-semibold tracking-wider text-gray-500 uppercase mb-2">STATUS PROYEK</p>
+            <h1 className="text-2xl lg:text-3xl font-semibold text-white mb-2">{overview.project_name}</h1>
+            <div className="flex items-center gap-2 mt-4">
+              <div className={`flex h-6 w-6 items-center justify-center rounded-full ${tone === 'success' ? 'bg-green-500/20 text-green-500' : tone === 'warning' ? 'bg-yellow-500/20 text-yellow-500' : 'bg-blue-500/20 text-blue-500'}`}>
+                {tone === 'success' ? <CheckCircle size={14} /> : <Activity size={14} />}
+              </div>
+              <p className={`text-lg font-medium ${statusColor}`}>
+                {latestStatus?.headline ?? 'Pekerjaan berjalan sesuai jadwal.'}
+              </p>
+            </div>
+            {latestStatus?.detail && (
+              <p className="text-gray-400 mt-2 max-w-2xl text-sm leading-relaxed">
+                {latestStatus.detail}
+              </p>
+            )}
           </div>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="text-right">
-            <p className="text-[11px] uppercase tracking-wider text-gray-500">Status</p>
-            <p className={`text-sm font-medium ${statusColor}`}>{activeStatusStr}</p>
+          <div className="rounded-lg bg-[#222] border border-white/5 p-4 min-w-[200px]">
+            <p className="text-[11px] uppercase tracking-wider text-gray-500 mb-1">PEMBARUAN BERIKUTNYA</p>
+            <p className="text-sm font-medium text-gray-200 flex items-center gap-2">
+              <Clock size={14} className="text-blue-400" />
+              Setiap Jumat Sore
+            </p>
           </div>
-          <button className="rounded-md bg-[#2A2A2A] px-4 py-2 text-sm font-medium text-gray-400 transition-colors hover:text-white hover:bg-[#333]">
-            Open Demo
-          </button>
         </div>
       </div>
 
@@ -127,45 +132,36 @@ export default async function ClientPortalHomePage({ params }: { params: Promise
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Left Column */}
         <div className="space-y-6 lg:col-span-2">
-          {/* OVERALL PROGRESS */}
-          <div className="rounded-xl border border-white/10 bg-[#1A1A1A] p-6">
-             <h2 className="mb-6 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
-               <BarChart2 size={16} /> OVERALL PROGRESS
+          {/* RECENT ACTIVITY (WHAT'S NEW) */}
+          <div className="rounded-xl border border-white/10 bg-[#1A1A1A] p-6 lg:p-8">
+             <h2 className="mb-6 flex items-center gap-2 text-[13px] font-semibold uppercase tracking-wider text-gray-500">
+               <Clock size={16} /> WHAT'S NEW
              </h2>
-             <div className="mb-2 flex justify-between text-sm text-gray-400">
-               <span>Target: 42%</span>
-               <span>Actual: 45%</span>
-             </div>
-             <div className="mb-4 h-2 w-full overflow-hidden rounded-full bg-[#2A2A2A]">
-               <div className="h-full bg-gray-400" style={{ width: '45%' }} />
-             </div>
-             <p className="text-sm text-gray-400">+3% ahead of schedule.</p>
-          </div>
-
-          {/* RECENT ACTIVITY */}
-          <div className="rounded-xl border border-white/10 bg-[#1A1A1A] p-6">
-             <h2 className="mb-6 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
-               <Clock size={16} /> RECENT ACTIVITY
-             </h2>
+             <p className="text-sm text-gray-400 mb-8">
+               Pembaruan sejak kunjungan terakhir Anda.
+             </p>
              
              {recentFeed.length === 0 ? (
-               <p className="text-sm text-gray-500">Belum ada pembaruan.</p>
+               <div className="rounded-lg border border-white/5 bg-[#222] p-6 text-center">
+                 <p className="text-sm text-gray-500">Belum ada pembaruan baru hari ini.</p>
+               </div>
              ) : (
-               <div className="space-y-6">
+               <div className="space-y-8">
                  {recentFeed.map((item, idx) => (
                    <div key={item.key} className="flex gap-4">
                      <div className="flex flex-col items-center">
-                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#2A2A2A]">
+                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#2A2A2A] text-white">
                          {item.icon}
                        </div>
                        {idx < recentFeed.length - 1 && (
-                         <div className="mt-2 h-full w-[1px] bg-white/10" />
+                         <div className="mt-3 h-full w-[1px] bg-white/10" />
                        )}
                      </div>
-                     <div className="pb-6 pt-1">
-                       <p className="text-sm font-medium text-gray-300">{item.text}</p>
-                       <p className="text-xs text-gray-500">
-                         {item.label} &middot; {new Date(item.at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                     <div className="pb-2 pt-2">
+                       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">{item.label}</p>
+                       <p className="text-[15px] font-medium text-gray-200">{item.text}</p>
+                       <p className="mt-1 text-xs text-gray-500">
+                         {new Date(item.at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}
                        </p>
                      </div>
                    </div>
@@ -178,75 +174,60 @@ export default async function ClientPortalHomePage({ params }: { params: Promise
         {/* Right Column */}
         <div className="space-y-6">
           {/* ACTION REQUIRED */}
-          <div className="rounded-xl border border-white/10 bg-[#1A1A1A] p-6">
-             <h2 className="mb-6 text-xs font-semibold uppercase tracking-wider text-gray-500">
-               ACTION REQUIRED
+          <div className="rounded-xl border border-white/10 bg-[#1A1A1A] p-6 lg:p-8 sticky top-24">
+             <h2 className="mb-6 text-[13px] font-semibold uppercase tracking-wider text-gray-500">
+               YOUR ACTIONS
              </h2>
              {pendingDecisions.length === 0 ? (
-               <p className="text-sm text-gray-500">Tidak ada aksi yang menunggu.</p>
+               <div className="rounded-lg border border-green-500/20 bg-green-500/5 p-6 text-center">
+                 <CheckCircle size={32} className="mx-auto text-green-500 mb-3 opacity-80" />
+                 <p className="text-sm font-medium text-green-400">Tidak ada aksi yang memerlukan perhatian Anda hari ini.</p>
+               </div>
              ) : (
                <div className="space-y-4">
+                 <div className="mb-4 rounded-lg bg-blue-500/10 p-3 border border-blue-500/20">
+                   <p className="text-xs text-blue-400">Terdapat beberapa keputusan yang menunggu persetujuan Anda untuk melanjutkan pekerjaan.</p>
+                 </div>
                  {pendingDecisions.map((decision) => (
-                   <div key={`decision-${decision.id}`} className="rounded-lg border border-white/10 bg-[#222] p-4">
+                   <div key={`decision-${decision.id}`} className="rounded-lg border border-white/10 bg-[#222] p-5 shadow-sm transition-colors hover:border-white/20 hover:bg-[#282828]">
                      <div className="mb-3 flex items-center justify-between">
-                       <span className="text-sm font-medium text-gray-200">
-                         {decision.change_order_id ? `Variation Order` : decision.proposal_id ? `Proposal` : `Persetujuan`}
+                       <span className="text-sm font-semibold text-white">
+                         {decision.change_order_id ? `Persetujuan Variation` : decision.proposal_id ? `Persetujuan Material` : `Persetujuan Dokumen`}
                        </span>
                        <DecisionClockBadge tier={decision.clockTier} />
                      </div>
-                     <p className="mb-4 text-sm text-gray-500">
+                     <p className="mb-5 text-sm text-gray-400 leading-relaxed">
                        {decision.client_summary ?? 'Ada keputusan yang menunggu konfirmasi Anda.'}
                      </p>
                      
                      {decision.change_order_id !== null && (
                        <Link
                          href={`/variations/${decision.change_order_id}/approve`}
-                         className="block w-full rounded-md bg-[#333] py-2 text-center text-sm font-medium text-gray-300 transition-colors hover:bg-[#444] hover:text-white"
+                         className="block w-full rounded-md bg-white py-2.5 text-center text-sm font-semibold text-black transition-colors hover:bg-gray-200"
                        >
-                         Review
+                         Tinjau Detail
                        </Link>
                      )}
                      {decision.proposal_id !== null && (
                        <Link
                          href={`/proposals/${decision.proposal_id}/decide`}
-                         className="block w-full rounded-md bg-[#333] py-2 text-center text-sm font-medium text-gray-300 transition-colors hover:bg-[#444] hover:text-white"
+                         className="block w-full rounded-md bg-white py-2.5 text-center text-sm font-semibold text-black transition-colors hover:bg-gray-200"
                        >
-                         Review
+                         Tinjau Detail
                        </Link>
                      )}
                      {decision.handover_signoff && (
                        <Link
                          href={`/handover/${decision.id}/accept`}
-                         className="block w-full rounded-md bg-[#333] py-2 text-center text-sm font-medium text-gray-300 transition-colors hover:bg-[#444] hover:text-white"
+                         className="block w-full rounded-md bg-white py-2.5 text-center text-sm font-semibold text-black transition-colors hover:bg-gray-200"
                        >
-                         Review
+                         Tinjau Detail
                        </Link>
                      )}
                    </div>
                  ))}
                </div>
              )}
-          </div>
-
-          {/* PAYMENT TERMS */}
-          <div className="rounded-xl border border-white/10 bg-[#1A1A1A] p-6">
-             <h2 className="mb-6 text-xs font-semibold uppercase tracking-wider text-gray-500">
-               PAYMENT TERMS
-             </h2>
-             <div className="space-y-4">
-               {allInvoices.length === 0 ? (
-                 <p className="text-sm text-gray-500">Belum ada tagihan.</p>
-               ) : (
-                 allInvoices.map((inv, index) => (
-                   <div key={inv.id} className="flex items-center justify-between">
-                     <span className="text-sm text-gray-400">Termin {index + 1} &mdash; {formatRp(inv.amount)}</span>
-                     <span className={`text-sm ${inv.status === 'paid' ? 'text-green-500' : 'text-gray-500'}`}>
-                       {inv.status === 'paid' ? 'Paid' : 'Pending'}
-                     </span>
-                   </div>
-                 ))
-               )}
-             </div>
           </div>
         </div>
       </div>

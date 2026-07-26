@@ -1,4 +1,4 @@
-import { listProjectPhotosWithUrlsAction } from '@/modules/field-reporting';
+import { listProjectPhotosWithUrlsAction } from '@/modules/daily-report-inbox';
 import { EmptyState } from '@/core/ui';
 
 export const metadata = { title: 'Foto proyek — Arkavena OS' };

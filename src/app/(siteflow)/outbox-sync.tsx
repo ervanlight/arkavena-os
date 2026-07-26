@@ -10,7 +10,7 @@ import {
   createMaterialRequestAction,
   createPhotoAction,
   createProgressEntryAction,
-} from '@/modules/field-reporting';
+} from '@/modules/daily-report-inbox';
 
 /**
  * Registers what the offline outbox (core/offline) replays each mutation

@@ -2,7 +2,7 @@
 
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
-import { markChangeOrderFundedAction } from '@/modules/scope-variation';
+import { markChangeOrderFundedAction } from '@/modules/variations';
 import { Button } from '@/core/ui';
 
 type FormState = { error: string | null };

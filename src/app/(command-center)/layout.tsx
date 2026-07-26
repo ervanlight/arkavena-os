@@ -11,7 +11,6 @@ import {
   Receipt,
   FileText,
   Users,
-  BarChart3,
   ClipboardList,
   Bell,
   UsersRound,
@@ -31,7 +30,6 @@ const NAV_ITEMS = [
   { href: '/cc/billing', label: '7. Invoice Generator', icon: Receipt },
   { href: '/cc/documents', label: '8. Dokumen', icon: FileText },
   { href: '/cc/subcontractors', label: '9. Subkontraktor', icon: Users },
-  { href: '/cc/analytics', label: '10. Analytics', icon: BarChart3 },
 ];
 
 const SECONDARY_NAV = [

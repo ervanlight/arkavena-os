@@ -9,8 +9,8 @@ import {
   listContractsForProjectAction,
   listMilestonesForContractAction,
 } from '@/modules/projects';
-import { listChangeOrdersForProjectAction } from '@/modules/scope-variation';
-import { getInvoiceIssuanceStatusAction, listInvoicesForProjectAction, listPaymentsForInvoiceAction } from '@/modules/billing';
+import { listChangeOrdersForProjectAction } from '@/modules/variations';
+import { getInvoiceIssuanceStatusAction, listInvoicesForProjectAction, listPaymentsForInvoiceAction } from '@/modules/invoice-generator';
 import { Card, StatusBadge, EmptyState } from '@/core/ui';
 import { CreateInvoiceForm } from './create-invoice-form';
 import { IssueInvoiceForm } from './issue-invoice-form';

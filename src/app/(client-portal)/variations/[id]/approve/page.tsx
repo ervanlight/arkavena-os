@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
-import { getChangeOrderAction } from '@/modules/scope-variation';
+import { getChangeOrderAction } from '@/modules/variations';
 import { ClientDecisionForm } from './client-decision-form';
-import { Card } from '@/core/ui';
+import { FileText, Image as ImageIcon, CheckCircle, Info } from 'lucide-react';
 
 export const metadata = { title: 'Persetujuan Variation — Arkavena OS' };
 
@@ -57,23 +57,57 @@ export default async function ApproveVariationPage({ params }: { params: Promise
   const alreadyDecided = changeOrder.status !== 'awaiting_client_approval';
 
   return (
-    <div className="mx-auto max-w-lg space-y-6">
-      <h1 className="text-[19px] font-semibold text-[color:var(--color-ink)]">Variation untuk proyek Anda</h1>
+    <div className="mx-auto max-w-2xl space-y-8 pb-12 pt-4">
+      <div>
+        <h1 className="text-2xl font-semibold text-white">Persetujuan Pekerjaan Tambahan</h1>
+        <p className="text-sm text-gray-500 mt-1">Ref: VO-{id.split('-')[0]}</p>
+      </div>
 
-      <Card>
-        <p className="text-sm text-[color:var(--color-ink)]">
-          {changeOrder.client_summary ?? 'Ada keputusan yang menunggu konfirmasi Anda'}
-        </p>
-      </Card>
+      <div className="rounded-xl border border-white/10 bg-[#1A1A1A] overflow-hidden">
+        <div className="bg-blue-500/10 border-b border-blue-500/20 p-4 flex items-start gap-3">
+          <Info className="text-blue-400 shrink-0 mt-0.5" size={18} />
+          <p className="text-sm text-blue-100 leading-relaxed">
+            {changeOrder.client_summary ?? 'Ada keputusan yang menunggu konfirmasi Anda'}
+          </p>
+        </div>
+        
+        <div className="p-6">
+          <h3 className="text-[13px] font-semibold tracking-wider text-gray-500 uppercase mb-4">DOKUMEN PENDUKUNG</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+            <div className="flex items-center gap-3 p-3 rounded-lg border border-white/5 bg-[#222] hover:bg-[#2A2A2A] transition-colors cursor-pointer">
+              <div className="h-10 w-10 bg-red-500/10 rounded flex items-center justify-center text-red-500">
+                <FileText size={20} />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-200">RAB_Revisi_Atap.pdf</p>
+                <p className="text-xs text-gray-500">1.2 MB &bull; Ketuk untuk melihat</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-3 rounded-lg border border-white/5 bg-[#222] hover:bg-[#2A2A2A] transition-colors cursor-pointer">
+              <div className="h-10 w-10 bg-blue-500/10 rounded flex items-center justify-center text-blue-500">
+                <ImageIcon size={20} />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-200">Foto_Kondisi_Lap...</p>
+                <p className="text-xs text-gray-500">3 Gambar &bull; Ketuk untuk melihat</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {alreadyDecided ? (
-        <p className="text-sm text-[color:var(--color-ink-secondary)]">
-          Variation ini {STATUS_LABEL_ID[changeOrder.status] ?? 'sudah diputuskan sebelumnya'}.
-        </p>
+        <div className="rounded-xl border border-white/10 bg-[#1A1A1A] p-6 text-center">
+          <CheckCircle size={32} className="mx-auto text-green-500 mb-3" />
+          <p className="text-[15px] font-medium text-white">
+            Variation ini {STATUS_LABEL_ID[changeOrder.status] ?? 'sudah diputuskan sebelumnya'}.
+          </p>
+        </div>
       ) : (
-        <Card>
+        <div className="rounded-xl border border-white/10 bg-[#1A1A1A] p-6">
+          <h3 className="text-[13px] font-semibold tracking-wider text-gray-500 uppercase mb-4">KEPUTUSAN ANDA</h3>
           <ClientDecisionForm changeOrderId={changeOrder.id} />
-        </Card>
+        </div>
       )}
     </div>
   );

@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
-import { createChangeOrderAction } from '@/modules/scope-variation';
+import { createChangeOrderAction } from '@/modules/variations';
 import { Button, Input, Label, Textarea } from '@/core/ui';
 
 type FormState = { error: string | null };

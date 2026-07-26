@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState, useRef, useState } from 'react';
-import { createIssueAction } from '@/modules/field-reporting';
+import { createIssueAction } from '@/modules/daily-report-inbox';
 import { generateIssueClassificationAction } from '@/modules/ai-scribe';
 import { submitOrQueueOffline } from '../../submit-with-offline-fallback';
 import { Card, Button, Input, Select, Textarea, Label } from '@/core/ui';

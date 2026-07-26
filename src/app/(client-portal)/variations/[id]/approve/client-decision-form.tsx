@@ -2,7 +2,7 @@
 
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
-import { clientApproveChangeOrderAction, clientRejectChangeOrderAction } from '@/modules/scope-variation';
+import { clientApproveChangeOrderAction, clientRejectChangeOrderAction } from '@/modules/variations';
 import { Button, Input, Textarea, Label } from '@/core/ui';
 
 type FormState = { error: string | null; ok: boolean };

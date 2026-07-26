@@ -2,7 +2,7 @@ import {
   listPartnerDeliveriesForPurchaseOrderAction,
   listPartnerPurchaseOrdersAction,
   listPartnerVendorQuotesAction,
-} from '@/modules/partner-desk';
+} from '@/modules/subcontractors';
 import { Card, PageHeader, StatusBadge, EmptyState } from '@/core/ui';
 import { formatRp, toRupiah } from '@/core/money/rupiah';
 

@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getClientDecisionForProposalAction } from '@/modules/client-portal';
+import { getClientDecisionForProposalAction } from '@/modules/client-feed';
 import { ClientProposalDecisionForm } from './client-proposal-decision-form';
 import { Card } from '@/core/ui';
 

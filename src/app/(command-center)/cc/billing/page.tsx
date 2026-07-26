@@ -1,7 +1,7 @@
 import type { Route } from 'next';
 import Link from 'next/link';
 import { formatRp } from '@/core/money/rupiah';
-import { listAgingDashboardAction, type InvoiceAgingTier } from '@/modules/billing';
+import { listAgingDashboardAction, type InvoiceAgingTier } from '@/modules/invoice-generator';
 import { Card, PageHeader, StatusBadge, EmptyState } from '@/core/ui';
 
 export const metadata = { title: 'Aging Dashboard — Arkavena OS' };

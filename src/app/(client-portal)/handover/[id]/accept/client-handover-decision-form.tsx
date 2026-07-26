@@ -2,7 +2,7 @@
 
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
-import { clientAcceptHandoverAction } from '@/modules/client-portal';
+import { clientAcceptHandoverAction } from '@/modules/client-feed';
 import { Button, Input, Textarea, Label } from '@/core/ui';
 
 type FormState = { error: string | null; ok: boolean };

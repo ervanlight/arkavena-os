@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { formatRp } from '@/core/money/rupiah';
 import { getProjectAction } from '@/modules/projects';
-import { listChangeOrdersForProjectAction } from '@/modules/scope-variation';
+import { listChangeOrdersForProjectAction } from '@/modules/variations';
 import { Card, StatusBadge, EmptyState } from '@/core/ui';
 import { CreateVariationForm } from './create-variation-form';
 

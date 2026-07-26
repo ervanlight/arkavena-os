@@ -86,21 +86,19 @@ arkavena-os/
 │   │   │   ├── schemas.ts         # Zod schemas input
 │   │   │   ├── types.ts           # Domain types (derive dari database.types)
 │   │   │   └── index.ts           # PUBLIC API modul — satu-satunya pintu impor
-│   │   ├── cash-gate/             # funding_receipts, cash_forecasts + FCR engine
-│   │   ├── scope-variation/       # change_orders + ScopeLock state machine
-│   │   ├── field-reporting/       # daily_logs, progress_entries, photos,
-│   │   │                          #   material_requests, issues (SiteFlow backend)
-│   │   ├── quality-gate/          # inspections, nonconformities, hold points
-│   │   ├── client-portal/         # client_decisions, tampilan klien (baca lintas modul
-│   │   │                          #   via public API modul lain — tidak punya banyak tabel sendiri)
-│   │   ├── billing/               # invoices, payments, billing pack, collection
+│   │   ├── dashboard/             # Decision Inbox, eksekutif alerts
+│   │   ├── projects/              # Shared kernel: proyek, zona, member
+│   │   ├── daily-report-inbox/    # Laporan lapangan harian dari Subkon
+│   │   ├── review-center/         # Persetujuan terpusat (RAB, Laporan, Mutu)
+│   │   ├── client-feed/           # Publikasi ke portal klien (anti-cemas)
+│   │   ├── variations/            # Manajemen addendum tambah-kurang
+│   │   ├── invoice-generator/     # Tagihan ke klien berdasarkan milestone
+│   │   ├── documents/             # Sentralisasi BAST, garansi, SPK
+│   │   ├── subcontractors/        # Manajemen subkon, alokasi kerja
+│   │   ├── performance-analytics/ # Analitik performa proyek & subkon
 │   │   ├── crm/                   # leads, clients, client_users, sites
 │   │   ├── assessment/            # assessments + report generator
-│   │   ├── estimating/            # cost_library, estimates, estimate_items, proposals
-│   │   ├── procurement/           # vendors, vendor_quotes, purchase_orders, deliveries
-│   │   ├── maintenance-engine/    # assets, maintenance_plans, service_tickets,
-│   │   │                          #   warranties, handover_items (Facility Passport)
-│   │   └── ai-scribe/             # Claude API calls, prompt templates, draft outputs
+│   │   └── ai-scribe/             # Claude API calls, prompt templates
 │   └── lib/                       # Util generik (date, slug, dsb) — tanpa domain
 ├── e2e/                           # Playwright: alur kritis end-to-end
 └── package.json

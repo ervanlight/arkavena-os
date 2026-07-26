@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { getCurrentUser } from '@/core/auth/session';
 import { listOrgActivityAction, listProjectsAction } from '@/modules/projects';
+import { listPendingInboxItemsAction } from '@/modules/review-center';
 import { Card, PageHeader, StatusBadge, EmptyState, Button } from '@/core/ui';
 import { ActivityFeed } from '../_components/activity-feed';
 
@@ -35,10 +36,11 @@ const PROJECT_STATUS_TONE: Record<string, 'neutral' | 'info' | 'warning' | 'succ
 const ACTIVE_STATUSES = new Set(['planning', 'in_progress', 'on_hold']);
 
 export default async function CommandCenterHome() {
-  const [user, projectsResult, activityResult] = await Promise.all([
+  const [user, projectsResult, activityResult, inboxResult] = await Promise.all([
     getCurrentUser(),
     listProjectsAction(undefined),
     listOrgActivityAction(undefined),
+    listPendingInboxItemsAction({}),
   ]);
 
   const hour = new Date().getHours();
@@ -47,6 +49,12 @@ export default async function CommandCenterHome() {
   const allProjects = projectsResult.ok ? projectsResult.data : [];
   const activeProjects = allProjects.filter((p) => ACTIVE_STATUSES.has(p.status));
   const recentActivity = activityResult.ok ? activityResult.data : [];
+
+  const result = await listPendingInboxItemsAction({});
+  const pendingInbox = result.ok ? result.data : [];
+
+  const pendingQuality = pendingInbox.filter((i: any) => i.type === 'hold_point').length;
+  const pendingProcurement = pendingInbox.filter((i: any) => i.type === 'subcon_quote').length;
 
   return (
     <div className="space-y-8">
@@ -87,7 +95,7 @@ export default async function CommandCenterHome() {
                 <CheckSquare size={16} />
                 <span className="text-xs font-bold tracking-wider uppercase">RAB Subkontraktor</span>
               </div>
-              <h3 className="text-xl font-bold text-[color:var(--color-ink)]">4 <span className="text-sm font-normal text-[color:var(--color-ink-secondary)]">penawaran baru</span></h3>
+              <h3 className="text-xl font-bold text-[color:var(--color-ink)]">{pendingQuotes} <span className="text-sm font-normal text-[color:var(--color-ink-secondary)]">penawaran baru</span></h3>
             </div>
             <div className="mt-4">
               <Link href={"/cc/review-center" as never}>
@@ -98,25 +106,43 @@ export default async function CommandCenterHome() {
             </div>
           </Card>
 
-          {/* Action Card: Variations / Addendums */}
+          {/* Action Card: Quality Hold Points */}
           <Card className="flex flex-col justify-between border-l-4 border-l-purple-500 p-5 shadow-sm">
             <div>
               <div className="flex items-center gap-2 text-purple-600 mb-1">
-                <GitPullRequest size={16} />
-                <span className="text-xs font-bold tracking-wider uppercase">Permintaan Addendum</span>
+                <CheckSquare size={16} />
+                <span className="text-xs font-bold tracking-wider uppercase">Persetujuan Mutu</span>
               </div>
-              <h3 className="text-xl font-bold text-[color:var(--color-ink)]">2 <span className="text-sm font-normal text-[color:var(--color-ink-secondary)]">dari klien</span></h3>
+              <h3 className="text-xl font-bold text-[color:var(--color-ink)]">{pendingHoldPoints} <span className="text-sm font-normal text-[color:var(--color-ink-secondary)]">inspeksi menanti</span></h3>
             </div>
             <div className="mt-4">
-              <Link href={"/cc/variations" as never}>
+              <Link href={"/cc/review-center" as never}>
                 <Button size="sm" variant="secondary" className="w-full justify-between">
-                  Tinjau Permintaan <ChevronRight size={14} />
+                  Tinjau Inspeksi <ChevronRight size={14} />
                 </Button>
               </Link>
             </div>
           </Card>
 
-          {/* Action Card: Invoices */}
+          {/* Action Card: Invoices to Generate */}
+          <Card className="flex flex-col justify-between border-l-4 border-l-orange-500 p-5 shadow-sm">
+            <div>
+              <div className="flex items-center gap-2 text-orange-600 mb-1">
+                <Receipt size={16} />
+                <span className="text-xs font-bold tracking-wider uppercase">Buat Tagihan</span>
+              </div>
+              <h3 className="text-xl font-bold text-[color:var(--color-ink)]">2 <span className="text-sm font-normal text-[color:var(--color-ink-secondary)]">termin siap ditagih</span></h3>
+            </div>
+            <div className="mt-4">
+              <Link href={"/cc/billing" as never}>
+                <Button size="sm" variant="secondary" className="w-full justify-between">
+                  Buat Invoice <ChevronRight size={14} />
+                </Button>
+              </Link>
+            </div>
+          </Card>
+
+          {/* Action Card: Overdue Invoices */}
           <Card className="flex flex-col justify-between border-l-4 border-l-red-500 p-5 shadow-sm">
             <div>
               <div className="flex items-center gap-2 text-red-600 mb-1">
@@ -126,7 +152,7 @@ export default async function CommandCenterHome() {
               <h3 className="text-xl font-bold text-[color:var(--color-ink)]">1 <span className="text-sm font-normal text-[color:var(--color-ink-secondary)]">invoice menunggak</span></h3>
             </div>
             <div className="mt-4">
-              <Link href="/cc/billing">
+              <Link href={"/cc/billing" as never}>
                 <Button size="sm" variant="secondary" className="w-full justify-between">
                   Tindak Lanjuti <ChevronRight size={14} />
                 </Button>
@@ -160,12 +186,12 @@ export default async function CommandCenterHome() {
           Tindakan Cepat
         </h2>
         <div className="flex flex-wrap gap-3">
-          <Link href="/cc/projects/new">
+          <Link href={"/cc/projects/new" as never}>
             <Button size="sm" variant="secondary" className="gap-1.5 rounded-full px-4 border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] shadow-[var(--shadow-card)]">
               <Plus size={14} /> Buat Proyek
             </Button>
           </Link>
-          <Link href="/cc/billing">
+          <Link href={"/cc/billing" as never}>
             <Button size="sm" variant="secondary" className="gap-1.5 rounded-full px-4 border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] shadow-[var(--shadow-card)]">
               <Plus size={14} /> Buat Invoice
             </Button>
@@ -178,6 +204,11 @@ export default async function CommandCenterHome() {
           <Link href={"/cc/subcontractors" as never}>
             <Button size="sm" variant="secondary" className="gap-1.5 rounded-full px-4 border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] shadow-[var(--shadow-card)]">
               <Plus size={14} /> Tambah Subkon
+            </Button>
+          </Link>
+          <Link href={"/cc/documents/upload" as never}>
+            <Button size="sm" variant="secondary" className="gap-1.5 rounded-full px-4 border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] shadow-[var(--shadow-card)]">
+              <Plus size={14} /> Unggah Dokumen
             </Button>
           </Link>
         </div>
@@ -199,14 +230,20 @@ export default async function CommandCenterHome() {
                     <Link href={`/cc/projects/${project.id}` as never} className="block hover:bg-[color:var(--color-surface-hover)] transition-colors p-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[color:var(--color-canvas)] text-[color:var(--color-ink-secondary)]">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color:var(--color-canvas)] text-[color:var(--color-ink-secondary)]">
                             <Building2 size={20} strokeWidth={1.5} />
                           </div>
                           <div>
                             <p className="text-[15px] font-semibold text-[color:var(--color-ink)]">{project.name}</p>
-                            <p className="text-xs text-[color:var(--color-ink-tertiary)] mt-0.5">
-                              Laporan terakhir: Hari ini
-                            </p>
+                            <p className="text-[13px] text-[color:var(--color-ink-secondary)] mt-0.5">Klien: Bapak Budi Santoso</p>
+                            <div className="flex items-center gap-3 mt-1.5">
+                              <p className="text-xs text-[color:var(--color-ink-tertiary)]">
+                                Progress: 45%
+                              </p>
+                              <p className="text-xs text-[color:var(--color-ink-tertiary)]">
+                                Laporan terakhir: Hari ini
+                              </p>
+                            </div>
                           </div>
                         </div>
                         <StatusBadge tone={PROJECT_STATUS_TONE[project.status] ?? 'neutral'}>

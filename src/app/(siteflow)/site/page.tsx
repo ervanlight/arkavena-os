@@ -1,62 +1,61 @@
 import Link from 'next/link';
 import type { Route } from 'next';
-import { ClipboardList, TrendingUp, Camera, Boxes, TriangleAlert, History, type LucideIcon } from 'lucide-react';
+import { FileUp, FileCheck2, Camera, AlertTriangle, CheckCircle2, AlertCircle } from 'lucide-react';
 import { getCurrentUser } from '@/core/auth/session';
-import { listMyFieldProjectsAction, listProjectActivityAction } from '@/modules/projects';
-import { Card } from '@/core/ui';
+import { listMyFieldProjectsAction } from '@/modules/projects';
+import { Card, Button, StatusBadge } from '@/core/ui';
 
 export const metadata = { title: 'SiteFlow — Arkavena OS' };
 
-const MENU: { href: string; label: string; hint: string; icon: LucideIcon; tint: string }[] = [
-  { href: 'laporan-harian', label: 'Laporan Harian', hint: 'Cuaca, jumlah pekerja, catatan hari ini', icon: ClipboardList, tint: '#0a84ff' },
-  { href: 'progress', label: 'Update Progress', hint: 'Persentase pekerjaan per paket kerja', icon: TrendingUp, tint: '#34c759' },
-  { href: 'foto', label: 'Ambil Foto', hint: 'Foto lokasi, terikat proyek + zona', icon: Camera, tint: '#af52de' },
-  { href: 'material', label: 'Minta Material', hint: 'Ajukan kebutuhan material ke kantor', icon: Boxes, tint: '#ff9f0a' },
-  { href: 'masalah', label: 'Lapor Masalah', hint: 'Catat kendala di lapangan', icon: TriangleAlert, tint: '#ff453a' },
-  { href: 'riwayat', label: 'Riwayat Laporan', hint: 'Lihat laporan yang sudah diinput', icon: History, tint: '#6e6e73' },
+// Mock data for Task Inbox (in a real app, this would come from a server action)
+const MOCK_TASKS = [
+  {
+    id: 't-1',
+    projectId: 'p-1',
+    projectName: 'Rumah Bapak Andi',
+    title: 'Laporan Harian',
+    type: 'upload_report',
+    dueDate: 'Hari Ini',
+    status: 'pending',
+    priority: 'high',
+    href: '/site/laporan-harian',
+    actionText: 'Isi Laporan',
+    icon: FileUp,
+    iconColor: 'text-blue-500',
+  },
+  {
+    id: 't-2',
+    projectId: 'p-2',
+    projectName: 'Cafe ABC',
+    title: 'Revisi Foto Kurang Jelas',
+    type: 'revision_requested',
+    dueDate: 'Secepatnya',
+    status: 'revision_required',
+    priority: 'high',
+    href: '/site/tasks/revision',
+    actionText: 'Perbaiki Sekarang',
+    icon: AlertCircle,
+    iconColor: 'text-red-500',
+  },
+  {
+    id: 't-3',
+    projectId: 'p-1',
+    projectName: 'Rumah Bapak Andi',
+    title: 'Pengajuan RAB Addendum Atap',
+    type: 'submit_rab',
+    dueDate: 'Besok',
+    status: 'pending',
+    priority: 'medium',
+    href: '/site/tasks/rab',
+    actionText: 'Buat RAB',
+    icon: FileCheck2,
+    iconColor: 'text-orange-500',
+  }
 ];
 
-const TODAY_ENTITY_LABEL: Record<string, string> = {
-  daily_logs: 'laporan harian',
-  photos: 'foto',
-  progress_entries: 'update progres',
-  material_requests: 'permintaan material',
-  issues: 'masalah dilaporkan',
-};
-
-/** Small "what's already logged today" summary -- so a mandor sees at a glance whether today's report is still missing before adding more. */
-function TodayActivitySummary({ counts }: { counts: Map<string, number> }) {
-  if (counts.size === 0) {
-    return (
-      <Card className="border border-dashed border-[color:var(--color-hairline)] shadow-none">
-        <p className="text-sm text-[color:var(--color-ink-tertiary)]">Belum ada aktivitas dicatat hari ini.</p>
-      </Card>
-    );
-  }
-
-  return (
-    <Card>
-      <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--color-ink-tertiary)]">Hari ini</p>
-      <p className="mt-1.5 text-[14px] text-[color:var(--color-ink)]">
-        {[...counts.entries()]
-          .map(([table, count]) => `${count} ${TODAY_ENTITY_LABEL[table] ?? table}`)
-          .join(' · ')}
-      </p>
-    </Card>
-  );
-}
-
-export default async function SiteFlowHomePage({
-  searchParams,
-}: {
-  searchParams: Promise<{ projectId?: string }>;
-}) {
-  const [user, projectsResult, { projectId }] = await Promise.all([
-    getCurrentUser(),
-    listMyFieldProjectsAction(undefined),
-    searchParams,
-  ]);
-
+export default async function SiteFlowHomePage() {
+  const user = await getCurrentUser();
+  const projectsResult = await listMyFieldProjectsAction(undefined);
   const projects = projectsResult.ok ? projectsResult.data : [];
 
   if (projects.length === 0) {
@@ -65,81 +64,87 @@ export default async function SiteFlowHomePage({
         <p className="text-sm text-[color:var(--color-ink-secondary)]">Halo,</p>
         <p className="text-[19px] font-semibold text-[color:var(--color-ink)]">{user?.fullName}</p>
         <p className="mt-3 text-sm text-[color:var(--color-ink-secondary)]">
-          Anda belum terdaftar sebagai site coordinator/mandor di proyek manapun. Hubungi admin kantor.
+          Anda belum terdaftar sebagai site coordinator/mandor di proyek manapun. Hubungi admin kantor Arkavena.
         </p>
       </Card>
     );
   }
 
-  const selectedProject = projectId !== undefined ? (projects.find((p) => p.id === projectId) ?? null) : null;
-
-  if (selectedProject === null && projects.length > 1) {
-    return (
-      <div className="space-y-3">
-        <p className="px-1 text-sm font-medium text-[color:var(--color-ink-secondary)]">Pilih proyek</p>
-        {projects.map((project) => (
-          <Link key={project.id} href={`/site?projectId=${project.id}`}>
-            <Card interactive className="text-[17px] font-medium text-[color:var(--color-ink)] active:scale-[0.98]">
-              {project.name}
-            </Card>
-          </Link>
-        ))}
-      </div>
-    );
-  }
-
-  const project = selectedProject ?? projects[0]!;
-
-  const activityResult = await listProjectActivityAction(project.id);
-  const todayCounts = new Map<string, number>();
-  if (activityResult.ok) {
-    const today = new Date().toDateString();
-    for (const event of activityResult.data) {
-      if (new Date(event.occurredAt).toDateString() !== today) continue;
-      todayCounts.set(event.entityTable, (todayCounts.get(event.entityTable) ?? 0) + 1);
-    }
-  }
-
   return (
-    <div className="space-y-5">
-      <Card>
-        <p className="text-sm text-[color:var(--color-ink-secondary)]">Proyek</p>
-        <p className="text-[19px] font-semibold text-[color:var(--color-ink)]">{project.name}</p>
-        {projects.length > 1 && (
-          <Link href="/site" className="mt-1 inline-block text-xs font-medium text-[color:var(--color-accent)]">
-            Ganti proyek
-          </Link>
-        )}
-      </Card>
+    <div className="space-y-6 pb-20">
+      <header className="mb-2">
+        <h1 className="text-2xl font-bold text-[color:var(--color-ink)]">Tugas Hari Ini</h1>
+        <p className="text-[15px] text-[color:var(--color-ink-secondary)] mt-1">
+          Selesaikan tugas di bawah ini untuk melaporkan progres lapangan.
+        </p>
+      </header>
 
-      <TodayActivitySummary counts={todayCounts} />
-
-      <div className="grid grid-cols-2 gap-3.5">
-        {MENU.map((item) => {
-          const Icon = item.icon;
+      <section className="space-y-4">
+        {MOCK_TASKS.map(task => {
+          const Icon = task.icon;
           return (
-            <Link
-              key={item.href}
-              // typedRoutes only recognises literal route strings, not a
-              // template built from an array element -- these six are all
-              // real pages under (siteflow)/site/, so the cast is safe.
-              href={`/site/${item.href}?projectId=${project.id}` as Route}
-            >
-              <Card interactive className="flex min-h-[136px] flex-col justify-between active:scale-[0.97]">
-                <div
-                  className="flex h-10 w-10 items-center justify-center rounded-[11px]"
-                  style={{ backgroundColor: `${item.tint}1f` }}
-                >
-                  <Icon size={20} color={item.tint} strokeWidth={2.2} />
+            <Card key={task.id} className="p-4 border-l-4" style={{ borderLeftColor: task.iconColor.replace('text-', '').replace('-500', '') === 'blue' ? '#3b82f6' : task.iconColor.includes('red') ? '#ef4444' : '#f97316' }}>
+              <div className="flex justify-between items-start mb-3">
+                <div className="flex items-center gap-2">
+                  <Icon className={task.iconColor} size={18} />
+                  <span className="text-xs font-bold tracking-wider uppercase text-[color:var(--color-ink-secondary)]">{task.type.replace('_', ' ')}</span>
                 </div>
-                <div>
-                  <p className="text-[15px] font-semibold text-[color:var(--color-ink)]">{item.label}</p>
-                  <p className="mt-0.5 text-xs leading-snug text-[color:var(--color-ink-tertiary)]">{item.hint}</p>
+                {task.priority === 'high' && (
+                  <span className="bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded uppercase">Urgent</span>
+                )}
+              </div>
+              
+              <h3 className="text-lg font-bold text-[color:var(--color-ink)]">{task.title}</h3>
+              <p className="text-sm text-[color:var(--color-ink-secondary)] mb-4">Proyek: <span className="font-medium text-[color:var(--color-ink)]">{task.projectName}</span></p>
+              
+              <div className="flex items-center justify-between mt-2 pt-3 border-t border-[color:var(--color-hairline)]">
+                <p className="text-xs font-medium text-[color:var(--color-ink-tertiary)] flex items-center gap-1">
+                  Batas waktu: <span className="text-[color:var(--color-ink)]">{task.dueDate}</span>
+                </p>
+                <Link href={`${task.href}?projectId=${task.projectId}` as Route}>
+                  <Button size="sm" variant={task.priority === 'high' ? 'primary' : 'secondary'}>
+                    {task.actionText}
+                  </Button>
+                </Link>
+              </div>
+            </Card>
+          );
+        })}
+      </section>
+
+      <section className="pt-6">
+        <h2 className="text-lg font-bold text-[color:var(--color-ink)] mb-3">Proyek Aktif</h2>
+        <div className="space-y-3">
+          {projects.map(project => (
+            <Link key={project.id} href={`/site/projects/${project.id}` as Route} className="block">
+              <Card interactive className="active:scale-[0.98] p-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-semibold text-[15px] text-[color:var(--color-ink)]">{project.name}</h3>
+                    <p className="text-[13px] text-[color:var(--color-ink-secondary)] mt-0.5">Fase Struktur</p>
+                  </div>
+                  <StatusBadge tone="info">Berjalan</StatusBadge>
                 </div>
               </Card>
             </Link>
-          );
-        })}
+          ))}
+        </div>
+      </section>
+
+      {/* Quick Actions Footer for ad-hoc submissions */}
+      <div className="fixed bottom-0 left-0 right-0 bg-[color:var(--color-canvas)] border-t border-[color:var(--color-hairline)] p-4 glass flex justify-around pb-safe">
+         <Link href={"/site/payments" as never} className="flex flex-col items-center gap-1 text-[color:var(--color-ink-secondary)] hover:text-[color:var(--color-ink)]">
+            <CheckCircle2 size={24} strokeWidth={1.5} />
+            <span className="text-[11px] font-medium">Pembayaran</span>
+         </Link>
+         <Link href="/site/foto" className="flex flex-col items-center gap-1 text-[color:var(--color-ink-secondary)] hover:text-[color:var(--color-ink)]">
+            <Camera size={24} strokeWidth={1.5} />
+            <span className="text-[11px] font-medium">Kamera</span>
+         </Link>
+         <Link href="/site/masalah" className="flex flex-col items-center gap-1 text-[color:var(--color-ink-secondary)] hover:text-[color:var(--color-ink)]">
+            <AlertTriangle size={24} strokeWidth={1.5} />
+            <span className="text-[11px] font-medium">Lapor Masalah</span>
+         </Link>
       </div>
     </div>
   );

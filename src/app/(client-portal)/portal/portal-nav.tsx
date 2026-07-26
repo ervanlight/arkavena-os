@@ -3,10 +3,10 @@ import Link from 'next/link';
 import { Activity, BarChart2, ShieldCheck, Wallet } from 'lucide-react';
 
 const TABS = [
-  { href: '', label: 'Overview', icon: Activity },
-  { href: '/progress', label: 'Progress', icon: BarChart2 },
-  { href: '/quality', label: 'Quality', icon: ShieldCheck },
-  { href: '/financial', label: 'Financial', icon: Wallet },
+  { href: '', label: 'Beranda', icon: Activity },
+  { href: '/timeline', label: 'Timeline & Progress', icon: BarChart2 },
+  { href: '/decisions', label: 'Persetujuan', icon: ShieldCheck },
+  { href: '/documents', label: 'Dokumen & Tagihan', icon: Wallet },
 ] as const;
 
 export function PortalNav({ projectId, active }: { projectId: string; active: string }) {

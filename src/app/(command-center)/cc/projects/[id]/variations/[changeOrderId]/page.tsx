@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { formatRp } from '@/core/money/rupiah';
 import { getCurrentUser } from '@/core/auth/session';
 import { roleCan } from '@/core/permissions/matrix';
-import { getChangeOrderAction } from '@/modules/scope-variation';
+import { getChangeOrderAction } from '@/modules/variations';
 import { getProjectAction } from '@/modules/projects';
 import { Card } from '@/core/ui';
 import { SetImpactForm } from './set-impact-form';

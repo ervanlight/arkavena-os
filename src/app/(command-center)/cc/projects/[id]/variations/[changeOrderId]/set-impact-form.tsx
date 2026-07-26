@@ -2,7 +2,7 @@
 
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
-import { setChangeOrderImpactAction } from '@/modules/scope-variation';
+import { setChangeOrderImpactAction } from '@/modules/variations';
 import { Button, Input, Label } from '@/core/ui';
 
 type FormState = { error: string | null };

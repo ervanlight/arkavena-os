@@ -1,5 +1,5 @@
 import { CloudSun, Users } from 'lucide-react';
-import { listDailyLogsForProjectAction } from '@/modules/field-reporting';
+import { listDailyLogsForProjectAction } from '@/modules/daily-report-inbox';
 import { Card, EmptyState } from '@/core/ui';
 
 export const metadata = { title: 'Laporan harian — Arkavena OS' };

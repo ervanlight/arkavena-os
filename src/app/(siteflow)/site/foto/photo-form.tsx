@@ -4,7 +4,7 @@ import { useActionState } from 'react';
 import { createBrowserSupabase } from '@/core/db/client.browser';
 import { compressPhoto } from '@/core/storage/compress-image';
 import { photoStoragePath, photoThumbnailStoragePath } from '@/core/storage/paths';
-import { createPhotoAction } from '@/modules/field-reporting';
+import { createPhotoAction } from '@/modules/daily-report-inbox';
 import { enqueueMutation } from '@/core/offline/outbox';
 import { indexedDbOutboxStore } from '@/core/offline/indexeddb-store';
 import { Card, Button, Input, Select, Label } from '@/core/ui';
