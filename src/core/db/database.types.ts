@@ -4474,6 +4474,7 @@ export type Database = {
         | "client_viewer"
         | "supplier"
         | "subcontractor"
+        | "photo_uploader"
       project_status:
         | "planning"
         | "in_progress"
@@ -4689,6 +4690,7 @@ export const Constants = {
         "client_viewer",
         "supplier",
         "subcontractor",
+        "photo_uploader",
       ],
       project_status: [
         "planning",

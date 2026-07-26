@@ -73,6 +73,8 @@ export const PROJECT_ROLES = [
   'client_viewer',
   'supplier',
   'subcontractor',
+  /** Subordinat dari subkontraktor. Hanya boleh upload foto dan lihat riwayat upload sendiri. */
+  'photo_uploader',
 ] as const satisfies readonly Enums<'project_role'>[];
 export type ProjectRole = (typeof PROJECT_ROLES)[number];
 
@@ -285,8 +287,8 @@ export const PERMISSIONS = {
   },
 
   photo: {
-    view: [...ORG_ROLES, 'site_coordinator', 'mandor'],
-    create: [...ORG_ROLES, 'site_coordinator', 'mandor'],
+    view: [...ORG_ROLES, 'site_coordinator', 'mandor', 'photo_uploader'],
+    create: [...ORG_ROLES, 'site_coordinator', 'mandor', 'photo_uploader'],
     update: [...ORG_ROLES, 'site_coordinator', 'mandor'],
   },
 
