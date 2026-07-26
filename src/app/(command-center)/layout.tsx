@@ -15,6 +15,7 @@ import {
   Bell,
   UsersRound,
   LogOut,
+  TrendingUp,
 } from 'lucide-react';
 import { getCurrentUser } from '@/core/auth/session';
 import { signOut } from '@/core/auth/login';
@@ -30,6 +31,7 @@ const NAV_ITEMS = [
   { href: '/cc/billing', label: '7. Invoice Generator', icon: Receipt },
   { href: '/cc/documents', label: '8. Dokumen', icon: FileText },
   { href: '/cc/subcontractors', label: '9. Subkontraktor', icon: Users },
+  { href: '/cc/performance-analytics', label: '10. Analitik Performa', icon: TrendingUp },
 ];
 
 const SECONDARY_NAV = [
