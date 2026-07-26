@@ -10,7 +10,7 @@ import {
   GitPullRequest,
   Receipt,
   FileText,
-  Users,
+  UserRound,
   ClipboardList,
   Bell,
   UsersRound,
@@ -30,7 +30,7 @@ const NAV_ITEMS = [
   { href: '/cc/variations', label: '6. Variations', icon: GitPullRequest },
   { href: '/cc/billing', label: '7. Invoice Generator', icon: Receipt },
   { href: '/cc/documents', label: '8. Dokumen', icon: FileText },
-  { href: '/cc/subcontractors', label: '9. Subkontraktor', icon: Users },
+  { href: '/cc/akun', label: '9. Akun Pengguna', icon: UserRound },
   { href: '/cc/performance-analytics', label: '10. Analitik Performa', icon: TrendingUp },
 ];
 
