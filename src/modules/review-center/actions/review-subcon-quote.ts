@@ -1,3 +1,5 @@
+'use server';
+
 import { z } from 'zod';
 import { safeAction } from '@/core/actions/safe-action';
 import { getActionContext } from '@/core/auth/session';

@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { Card, Button } from '@/core/ui';
 import { formatRp } from '@/core/money/rupiah';
-import type { ReviewInboxItem } from '@/modules/review-center';
-import { reviewHoldPointAction, reviewSubconQuoteAction } from '@/modules/review-center';
+import type { ReviewInboxItem } from '@/modules/review-center/types';
+import { reviewHoldPointAction } from '@/modules/review-center/actions/review-hold-point';
+import { reviewSubconQuoteAction } from '@/modules/review-center/actions/review-subcon-quote';
 import { ShieldCheck, Receipt, Building2, MapPin, Calendar } from 'lucide-react';
 
 

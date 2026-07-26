@@ -1,3 +1,5 @@
+'use server';
+
 import { safeAction } from '@/core/actions/safe-action';
 import { getActionContext } from '@/core/auth/session';
 import { listPendingInspections } from '../data/quality-repository';
