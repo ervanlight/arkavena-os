@@ -3,9 +3,10 @@
 import { useState } from 'react';
 import { Card, Button } from '@/core/ui';
 import { formatRp } from '@/core/money/rupiah';
-import { ReviewInboxItem, reviewHoldPointAction, reviewSubconQuoteAction } from '@/modules/review-center';
+import type { ReviewInboxItem } from '@/modules/review-center';
+import { reviewHoldPointAction, reviewSubconQuoteAction } from '@/modules/review-center';
 import { ShieldCheck, Receipt, Building2, MapPin, Calendar } from 'lucide-react';
-import { toast } from 'sonner';
+
 
 export function ReviewCard({ item }: { item: ReviewInboxItem }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -30,12 +31,12 @@ export function ReviewCard({ item }: { item: ReviewInboxItem }) {
       }
 
       if (result && !result.ok) {
-        toast.error(result.error.message);
+        console.error(result.error.message);
       } else {
-        toast.success(`Berhasil memproses ${item.type === 'hold_point' ? 'inspeksi' : 'RAB'}`);
+        // Success
       }
     } catch (e) {
-      toast.error('Terjadi kesalahan sistem');
+      console.error('Terjadi kesalahan sistem');
     } finally {
       setIsSubmitting(false);
     }
@@ -72,7 +73,7 @@ export function ReviewCard({ item }: { item: ReviewInboxItem }) {
             {item.amountRp !== undefined && item.amountRp !== null && (
               <div className="text-right">
                 <p className="text-xs text-[color:var(--color-ink-tertiary)] mb-0.5">Nilai Pengajuan</p>
-                <p className="text-lg font-bold text-[color:var(--color-ink)]">{formatRp(item.amountRp)}</p>
+                <p className="text-lg font-bold text-[color:var(--color-ink)]">{formatRp(BigInt(item.amountRp) as any)}</p>
               </div>
             )}
           </div>

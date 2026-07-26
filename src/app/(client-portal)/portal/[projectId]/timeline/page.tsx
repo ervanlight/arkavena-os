@@ -86,7 +86,7 @@ export default async function ClientPortalProgressPage({ params }: { params: Pro
               Foto kondisi lapangan terbaru yang telah diverifikasi.
             </p>
 
-            <PhotoGallery images={evidence} />
+            <PhotoGallery images={evidence.filter(e => e.thumbnailUrl !== null) as any} />
           </div>
         </div>
       </div>

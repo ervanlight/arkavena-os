@@ -7,20 +7,13 @@ import {
   listPendingClientDecisionsAction,
 } from '@/modules/client-feed';
 import { listClientVisibleEvidenceWithUrlsForProjectAction } from '@/modules/evidence';
-import { listInvoicesForProjectAction } from '@/modules/invoice-generator';
 import { PortalNav } from '../portal-nav';
 import { DecisionClockBadge } from '../decision-clock-badge';
 import { Activity, Clock, CheckCircle, MessageSquare } from 'lucide-react';
 
 export const metadata = { title: 'Beranda — Arkavena OS' };
 
-const CLIENT_STATUS_LABEL_ID: Record<string, string> = {
-  on_track: 'In Progress', // Using "In Progress" as in the image instead of 'Berjalan sesuai rencana'
-  waiting_client_decision: 'Menunggu keputusan Anda',
-  external_dependency: 'Menunggu pihak luar',
-  schedule_adjustment: 'Penyesuaian jadwal',
-  completed: 'Selesai',
-};
+
 
 const CLIENT_STATUS_TONE: Record<string, 'neutral' | 'success' | 'warning' | 'info'> = {
   on_track: 'success',
@@ -40,13 +33,12 @@ type FeedItem = { key: string; at: string; label: string; text: string; icon: Re
 export default async function ClientPortalHomePage({ params }: { params: Promise<{ projectId: string }> }) {
   const { projectId } = await params;
 
-  const [overviewResult, statusResult, pendingResult, evidenceResult, timelineResult, invoicesResult] = await Promise.all([
+  const [overviewResult, statusResult, pendingResult, evidenceResult, timelineResult] = await Promise.all([
     getClientProjectOverviewAction(projectId),
     listClientStatusUpdatesForProjectAction(projectId),
     listPendingClientDecisionsAction(projectId),
     listClientVisibleEvidenceWithUrlsForProjectAction(projectId),
     listClientTimelineEventsAction(projectId),
-    listInvoicesForProjectAction(projectId),
   ]);
 
   if (!overviewResult.ok) {

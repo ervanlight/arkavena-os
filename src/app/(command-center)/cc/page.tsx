@@ -4,7 +4,6 @@ import {
   CheckSquare, 
   Receipt, 
   FileText, 
-  GitPullRequest,
   Plus,
   Building2,
   ChevronRight
@@ -50,11 +49,9 @@ export default async function CommandCenterHome() {
   const activeProjects = allProjects.filter((p) => ACTIVE_STATUSES.has(p.status));
   const recentActivity = activityResult.ok ? activityResult.data : [];
 
-  const result = await listPendingInboxItemsAction({});
-  const pendingInbox = result.ok ? result.data : [];
-
-  const pendingQuality = pendingInbox.filter((i: any) => i.type === 'hold_point').length;
-  const pendingProcurement = pendingInbox.filter((i: any) => i.type === 'subcon_quote').length;
+  const pendingInbox = (inboxResult.ok ? inboxResult.data : []) as any[];
+  const pendingHoldPoints = pendingInbox.filter((i: any) => i.type === 'hold_point').length;
+  const pendingQuotes = pendingInbox.filter((i: any) => i.type === 'subcon_quote').length;
 
   return (
     <div className="space-y-8">

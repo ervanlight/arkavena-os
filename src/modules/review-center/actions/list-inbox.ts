@@ -1,6 +1,5 @@
 import { safeAction } from '@/core/actions/safe-action';
 import { getActionContext } from '@/core/auth/session';
-import { requirePermission } from '@/core/permissions/guard';
 import { listPendingInspections } from '../data/quality-repository';
 import { listPendingQuotes } from '../data/quotes-repository';
 import type { ReviewInboxItem } from '../types';
@@ -13,7 +12,7 @@ export const listPendingInboxItemsAction = safeAction(
     loadContext: getActionContext,
     permission: { resource: 'inspection', action: 'view' },
   },
-  async (input, ctx) => {
+  async (input, _ctx) => {
 
     const [inspections, quotes] = await Promise.all([
       listPendingInspections(input.projectId),

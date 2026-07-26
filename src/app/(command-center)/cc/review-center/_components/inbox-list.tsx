@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ReviewInboxItem } from '@/modules/review-center';
+import type { ReviewInboxItem } from '@/modules/review-center';
 import { ReviewCard } from './review-card';
 
 export function InboxList({ initialItems }: { initialItems: ReviewInboxItem[] }) {

@@ -3,7 +3,7 @@
 import { useActionState } from 'react';
 import { createDailyLogAction } from '@/modules/daily-report-inbox';
 import { submitOrQueueOffline } from '../../submit-with-offline-fallback';
-import { Card, Button, Input, Textarea, Label } from '@/core/ui';
+import { Card, Button, Textarea, Label } from '@/core/ui';
 
 type FormState = { status: 'idle' | 'ok' | 'offline' | 'error'; message: string | null };
 const initialState: FormState = { status: 'idle', message: null };

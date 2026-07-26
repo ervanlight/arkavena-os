@@ -2,7 +2,6 @@ import { z } from 'zod';
 import { safeAction } from '@/core/actions/safe-action';
 import { getActionContext } from '@/core/auth/session';
 import { createAuditGateway } from '@/core/audit/gateway.server';
-import { requirePermission } from '@/core/permissions/guard';
 import { withAudit } from '@/core/audit/audit';
 import { createServerSupabase } from '@/core/db/client.server';
 import { getQuote } from '../data/quotes-repository';
@@ -22,7 +21,7 @@ export const reviewSubconQuoteAction = safeAction(
     loadContext: getActionContext,
     permission: { resource: 'vendor_quote', action: 'update' }
   },
-  async (input, ctx) => {
+  async (input, _ctx) => {
     // 2. Load state
     const current = await getQuote(input.quoteId);
     if (!current) {
