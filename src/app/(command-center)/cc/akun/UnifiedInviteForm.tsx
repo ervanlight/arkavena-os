@@ -10,12 +10,23 @@ type ModalData = { name: string; email: string; password: string } | null;
 type FormState = { error: string | null; ok: boolean };
 const initial: FormState = { error: null, ok: false };
 
-const ROLE_OPTIONS = [
+type RoleOption = {
+  value: 'subcontractor' | 'photo_uploader' | 'client_approver' | 'client_viewer';
+  label: string;
+  desc: string;
+};
+
+type RoleGroup = {
+  group: string;
+  options: RoleOption[];
+};
+
+const ROLE_OPTIONS: RoleGroup[] = [
   {
     group: 'Subkontraktor',
     options: [
       { value: 'subcontractor', label: 'Subkontraktor', desc: 'Akses Partner Desk, pengajuan RAB, lihat PO' },
-      { value: 'photo_uploader', label: 'Pengawas Foto', desc: 'Hanya bisa upload foto lapangan & lihat riwayat upload' },
+      { value: 'photo_uploader', label: 'Pengawas', desc: 'Hanya bisa upload foto lapangan & lihat riwayat upload' },
     ],
   },
   {
@@ -25,9 +36,9 @@ const ROLE_OPTIONS = [
       { value: 'client_viewer', label: 'Klien Viewer', desc: 'Hanya bisa melihat progres proyek' },
     ],
   },
-] as const;
+];
 
-const ALL_ROLES = ROLE_OPTIONS.flatMap((g) => g.options);
+const ALL_ROLES: RoleOption[] = ROLE_OPTIONS.flatMap((g) => g.options);
 
 interface Props {
   projects: Project[];
