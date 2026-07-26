@@ -5,6 +5,7 @@ import {
 } from '@/modules/subcontractors';
 import { Card, PageHeader, StatusBadge, EmptyState } from '@/core/ui';
 import { formatRp, toRupiah } from '@/core/money/rupiah';
+import Link from 'next/link';
 
 export const metadata = { title: 'Partner Desk — Arkavena OS' };
 
@@ -50,12 +51,21 @@ export default async function PartnerDeskProjectPage({ params }: { params: Promi
             {quotes.map((quote) => (
               <li key={quote.id} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
                 <div>
-                  <p className="text-[15px] font-medium text-[color:var(--color-ink)]">{quote.description}</p>
+                  <Link href={`/partner/${projectId}/quotes/${quote.id}`} className="text-[15px] font-medium text-[color:var(--color-ink)] hover:underline">
+                    {quote.description}
+                  </Link>
                   <p className="text-sm text-[color:var(--color-ink-secondary)]">{formatRp(toRupiah(quote.amount))}</p>
                 </div>
-                <StatusBadge tone={QUOTE_STATUS_TONE[quote.status] ?? 'neutral'}>
-                  {QUOTE_STATUS_LABEL_ID[quote.status] ?? quote.status}
-                </StatusBadge>
+                <div className="flex items-center gap-3">
+                  {quote.status === 'received' && (
+                    <Link href={`/partner/${projectId}/quotes/${quote.id}`} className="text-xs font-medium text-[color:var(--color-primary)] hover:underline">
+                      Isi RAB
+                    </Link>
+                  )}
+                  <StatusBadge tone={QUOTE_STATUS_TONE[quote.status] ?? 'neutral'}>
+                    {QUOTE_STATUS_LABEL_ID[quote.status] ?? quote.status}
+                  </StatusBadge>
+                </div>
               </li>
             ))}
           </ul>

@@ -1135,6 +1135,7 @@ export type Database = {
           deleted_at: string | null
           description: string
           estimate_id: string
+          group_name: string | null
           id: string
           organization_id: string
           quantity: number
@@ -1150,6 +1151,7 @@ export type Database = {
           deleted_at?: string | null
           description: string
           estimate_id: string
+          group_name?: string | null
           id?: string
           organization_id: string
           quantity: number
@@ -1165,6 +1167,7 @@ export type Database = {
           deleted_at?: string | null
           description?: string
           estimate_id?: string
+          group_name?: string | null
           id?: string
           organization_id?: string
           quantity?: number
@@ -3423,6 +3426,87 @@ export type Database = {
           },
         ]
       }
+      vendor_quote_items: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          description: string
+          group_name: string | null
+          id: string
+          organization_id: string
+          project_id: string
+          quantity: number
+          unit: string
+          unit_cost: number
+          updated_at: string
+          vendor_quote_id: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          description: string
+          group_name?: string | null
+          id?: string
+          organization_id: string
+          project_id: string
+          quantity?: number
+          unit?: string
+          unit_cost?: number
+          updated_at?: string
+          vendor_quote_id: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          description?: string
+          group_name?: string | null
+          id?: string
+          organization_id?: string
+          project_id?: string
+          quantity?: number
+          unit?: string
+          unit_cost?: number
+          updated_at?: string
+          vendor_quote_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_quote_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_quote_items_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_quote_items_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_project_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "vendor_quote_items_vendor_quote_id_fkey"
+            columns: ["vendor_quote_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_quote_items_vendor_quote_id_fkey"
+            columns: ["vendor_quote_id"]
+            isOneToOne: false
+            referencedRelation: "vw_partner_vendor_quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendor_quotes: {
         Row: {
           amount: number
@@ -4023,6 +4107,34 @@ export type Database = {
           },
         ]
       }
+      vw_partner_vendor_quote_items: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          group_name: string | null
+          id: string | null
+          unit: string | null
+          unit_cost: number | null
+          vendor_quote_id: string | null
+          volume: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_quote_items_vendor_quote_id_fkey"
+            columns: ["vendor_quote_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_quote_items_vendor_quote_id_fkey"
+            columns: ["vendor_quote_id"]
+            isOneToOne: false
+            referencedRelation: "vw_partner_vendor_quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vw_partner_vendor_quotes: {
         Row: {
           amount: number | null
@@ -4540,6 +4652,7 @@ export const Constants = {
         "completed",
       ],
       contract_status: ["draft", "active", "completed", "terminated"],
+      daily_log_status: ["draft", "pending_review", "published", "rejected"],
       estimate_status: ["draft", "sent", "accepted", "rejected", "superseded"],
       evidence_qc_result: ["pass", "fail", "not_applicable"],
       evidence_type: ["photo", "video", "document"],
