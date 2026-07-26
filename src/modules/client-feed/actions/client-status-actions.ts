@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { getActionContext } from '@/core/auth/session';
 import { safeAction } from '@/core/actions/safe-action';
 import { createServerSupabase } from '@/core/db/client.server';
-import { insertClientStatusUpdate, listClientStatusUpdatesForProject } from '../data/client-status-repository';
+import { insertClientStatusUpdate, listClientStatusUpdatesForProject, listAllClientStatusUpdates, type ClientStatusUpdateWithProject } from '../data/client-status-repository';
 import { publishClientStatusSchema } from '../schemas';
 import type { ClientStatusUpdate } from '../types';
 
@@ -50,5 +50,18 @@ export const listClientStatusUpdatesForProjectAction = safeAction(
   async (projectId): Promise<ClientStatusUpdate[]> => {
     const supabase = await createServerSupabase();
     return listClientStatusUpdatesForProject(supabase, projectId);
+  },
+);
+
+export const listAllClientStatusUpdatesAction = safeAction(
+  {
+    schema: z.void(),
+    permission: { resource: 'client_status', action: 'view' },
+    loadContext: getActionContext,
+    name: 'clientPortal.listAllClientStatusUpdates',
+  },
+  async (): Promise<ClientStatusUpdateWithProject[]> => {
+    const supabase = await createServerSupabase();
+    return listAllClientStatusUpdates(supabase);
   },
 );

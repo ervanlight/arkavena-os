@@ -38,7 +38,7 @@ export {
   listPendingClientDecisionsAction,
 } from './actions/client-portal-actions';
 
-export { publishClientStatusAction, listClientStatusUpdatesForProjectAction } from './actions/client-status-actions';
+export { publishClientStatusAction, listClientStatusUpdatesForProjectAction, listAllClientStatusUpdatesAction } from './actions/client-status-actions';
 
 export { clientDecideProposalAction } from './actions/client-proposal-decision-actions';
 

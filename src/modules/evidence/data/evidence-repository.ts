@@ -45,6 +45,25 @@ export async function listClientVisibleEvidenceForProject(supabase: ServerSupaba
   return data;
 }
 
+export type EvidenceWithProject = Evidence & {
+  project_name: string;
+};
+
+export async function listDocumentEvidence(supabase: ServerSupabase): Promise<EvidenceWithProject[]> {
+  const { data, error } = await supabase
+    .from('evidence')
+    .select('*, projects(name)')
+    .eq('evidence_type', 'document')
+    .is('deleted_at', null)
+    .order('captured_at', { ascending: false });
+
+  if (error !== null) throw error;
+  return data.map((row: any) => ({
+    ...row,
+    project_name: row.projects?.name ?? 'Unknown Project',
+  }));
+}
+
 /** The Client Timeline's own read, with browser-loadable thumbnail URLs resolved (ADR 0026 §4.2 "Hari Ini"/"Update Terbaru"). */
 export async function listClientVisibleEvidenceWithUrlsForProject(
   supabase: ServerSupabase,
@@ -59,6 +78,21 @@ export async function listClientVisibleEvidenceWithUrlsForProject(
       return { ...rest, thumbnailUrl: signed?.signedUrl ?? null };
     }),
   );
+}
+
+export async function updateEvidenceVisibilityForActivity(
+  supabase: ServerSupabase,
+  activityTable: string,
+  activityId: string,
+  visibility: Evidence['visibility'],
+): Promise<void> {
+  const { error } = await supabase
+    .from('evidence')
+    .update({ visibility })
+    .eq('activity_table', activityTable)
+    .eq('activity_id', activityId);
+
+  if (error !== null) throw error;
 }
 
 /** ADR 0026 §3.3: promotes a held-back row to client_visible, the side effect of another module's own approval action. */

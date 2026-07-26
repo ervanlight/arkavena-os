@@ -47,7 +47,13 @@ export {
   type UpdateProgressEntryInput,
 } from './schemas';
 
-export { createDailyLogAction, listDailyLogsForProjectAction, updateDailyLogAction } from './actions/daily-log-actions';
+export { 
+  createDailyLogAction, 
+  listDailyLogsForProjectAction, 
+  updateDailyLogAction,
+  listPendingDailyLogsAction,
+  reviewDailyLogAction
+} from './actions/daily-log-actions';
 export {
   createProgressEntryAction,
   listProgressEntriesForDailyLogAction,

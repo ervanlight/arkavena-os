@@ -29,6 +29,24 @@ export async function listChangeOrdersForProject(
   return data.map(toChangeOrder);
 }
 
+export type ChangeOrderWithProject = ChangeOrder & {
+  project_name: string;
+};
+
+export async function listAllChangeOrders(supabase: ServerSupabase): Promise<ChangeOrderWithProject[]> {
+  const { data, error } = await supabase
+    .from('change_orders')
+    .select('*, projects(name)')
+    .is('deleted_at', null)
+    .order('created_at', { ascending: false });
+
+  if (error !== null) throw error;
+  return data.map((row: any) => ({
+    ...toChangeOrder(row),
+    project_name: row.projects?.name ?? 'Unknown Project',
+  }));
+}
+
 export async function getChangeOrder(supabase: ServerSupabase, id: string): Promise<ChangeOrder> {
   const { data, error } = await supabase
     .from('change_orders')

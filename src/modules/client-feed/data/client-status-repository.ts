@@ -28,3 +28,20 @@ export async function listClientStatusUpdatesForProject(
   if (error !== null) throw error;
   return data;
 }
+
+export type ClientStatusUpdateWithProject = ClientStatusUpdate & {
+  project_name: string;
+};
+
+export async function listAllClientStatusUpdates(supabase: ServerSupabase): Promise<ClientStatusUpdateWithProject[]> {
+  const { data, error } = await supabase
+    .from('client_status_updates')
+    .select('*, projects(name)')
+    .order('published_at', { ascending: false });
+
+  if (error !== null) throw error;
+  return data.map((row: any) => ({
+    ...row,
+    project_name: row.projects?.name ?? 'Unknown Project',
+  }));
+}

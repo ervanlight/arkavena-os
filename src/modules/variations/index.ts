@@ -26,6 +26,7 @@ export {
   createChangeOrderAction,
   getChangeOrderAction,
   listChangeOrdersForProjectAction,
+  listAllChangeOrdersAction,
   markChangeOrderFundedAction,
   rejectChangeOrderAction,
   sendChangeOrderToClientAction,

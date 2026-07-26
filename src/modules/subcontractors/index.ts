@@ -17,3 +17,5 @@ export {
   listPartnerPurchaseOrdersAction,
   listPartnerVendorQuotesAction,
 } from './actions/partner-desk-actions';
+
+export { listVendorsAction } from './actions/vendor-actions';

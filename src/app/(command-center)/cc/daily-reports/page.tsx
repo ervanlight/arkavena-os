@@ -1,9 +1,13 @@
-import { Inbox, Check, X, RotateCcw } from 'lucide-react';
-import { Card } from '@/core/ui';
+import { Check } from 'lucide-react';
+import { listPendingDailyLogsAction } from '@/modules/daily-report-inbox';
+import { DailyReportInboxItem } from './daily-report-inbox-item';
 
 export const metadata = { title: 'Daily Report Inbox — Arkavena OS' };
 
-export default function DailyReportInboxPage() {
+export default async function DailyReportInboxPage() {
+  const result = await listPendingDailyLogsAction(undefined);
+  const pendingLogs = result.ok ? result.data : [];
+
   return (
     <div className="space-y-6">
       <div>
@@ -13,38 +17,23 @@ export default function DailyReportInboxPage() {
         </p>
       </div>
 
-      <Card className="border border-[color:var(--color-hairline)] p-6 space-y-4">
-        <div className="flex items-center justify-between border-b border-[color:var(--color-hairline)] pb-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600">
-              <Inbox size={20} />
-            </div>
-            <div>
-              <p className="text-base font-semibold text-[color:var(--color-ink)]">Laporan Pengecoran Pelat Lantai 2</p>
-              <p className="text-xs text-[color:var(--color-ink-tertiary)]">Subkontraktor: PT Mandiri Beton &middot; Proyek Renovasi Rumah Tinggal</p>
-            </div>
+      {pendingLogs.length === 0 ? (
+        <div className="rounded-[12px] border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] p-12 text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[color:var(--color-surface-secondary)]">
+            <Check size={24} className="text-[color:var(--color-ink-tertiary)]" />
           </div>
-          <span className="rounded-full bg-yellow-500/10 px-3 py-1 text-xs font-semibold text-yellow-600">
-            Menunggu Review PM
-          </span>
+          <h3 className="mt-4 text-sm font-semibold text-[color:var(--color-ink)]">Inbox Kosong</h3>
+          <p className="mt-1 text-sm text-[color:var(--color-ink-secondary)]">
+            Tidak ada laporan harian yang menunggu review saat ini.
+          </p>
         </div>
-
-        <p className="text-sm text-[color:var(--color-ink-secondary)]">
-          Pekerjaan struktur lantai 2 telah rampung 100%. Pengujian slump tes beton K-300 sesuai spesifikasi.
-        </p>
-
-        <div className="flex items-center justify-end gap-3 pt-2">
-          <button className="flex items-center gap-1.5 rounded-lg border border-[color:var(--color-hairline)] px-3 py-1.5 text-xs font-medium text-[color:var(--color-ink-secondary)] hover:bg-gray-100">
-            <RotateCcw size={14} /> Minta Revisi
-          </button>
-          <button className="flex items-center gap-1.5 rounded-lg bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-500/20">
-            <X size={14} /> Tolak
-          </button>
-          <button className="flex items-center gap-1.5 rounded-lg bg-[color:var(--color-accent)] px-4 py-1.5 text-xs font-medium text-white hover:bg-[color:var(--color-accent-hover)]">
-            <Check size={14} /> Disetujui &amp; Terbitkan ke Klien
-          </button>
+      ) : (
+        <div className="space-y-4">
+          {pendingLogs.map((log) => (
+            <DailyReportInboxItem key={log.id} log={log} />
+          ))}
         </div>
-      </Card>
+      )}
     </div>
   );
 }

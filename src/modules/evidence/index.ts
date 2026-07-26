@@ -12,6 +12,7 @@ export {
   listEvidenceForActivityAction,
   listClientVisibleEvidenceForProjectAction,
   listClientVisibleEvidenceWithUrlsForProjectAction,
+  listDocumentEvidenceAction,
   listEvidenceOverridesForProjectAction,
   overrideEvidenceGateAction,
 } from './actions/evidence-actions';

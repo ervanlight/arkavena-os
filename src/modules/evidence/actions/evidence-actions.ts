@@ -12,6 +12,8 @@ import {
   listEvidenceForActivity,
   listClientVisibleEvidenceForProject,
   listClientVisibleEvidenceWithUrlsForProject,
+  listDocumentEvidence,
+  type EvidenceWithProject,
 } from '../data/evidence-repository';
 import { listOverridesForProject, overrideEvidenceGate } from '../data/evidence-overrides-repository';
 import { overrideEvidenceGateSchema } from '../schemas';
@@ -27,6 +29,19 @@ export const listEvidenceForActivityAction = safeAction(
   async ({ activityTable, activityId }): Promise<Evidence[]> => {
     const supabase = await createServerSupabase();
     return listEvidenceForActivity(supabase, activityTable, activityId);
+  },
+);
+
+export const listDocumentEvidenceAction = safeAction(
+  {
+    schema: z.void(),
+    permission: { resource: 'evidence', action: 'view' },
+    loadContext: getActionContext,
+    name: 'evidence.listDocumentEvidence',
+  },
+  async (): Promise<EvidenceWithProject[]> => {
+    const supabase = await createServerSupabase();
+    return listDocumentEvidence(supabase);
   },
 );
 

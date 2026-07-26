@@ -1,9 +1,13 @@
 import { GitPullRequest, DollarSign, Send } from 'lucide-react';
-import { Card } from '@/core/ui';
+import { Card, EmptyState } from '@/core/ui';
+import { listAllChangeOrdersAction } from '@/modules/variations';
 
 export const metadata = { title: 'Variations — Arkavena OS' };
 
-export default function VariationsPage() {
+export default async function VariationsPage() {
+  const result = await listAllChangeOrdersAction(undefined);
+  const variations = result.ok ? result.data : [];
+
   return (
     <div className="space-y-6">
       <div>
@@ -13,46 +17,50 @@ export default function VariationsPage() {
         </p>
       </div>
 
-      <Card className="border border-[color:var(--color-hairline)] p-6 space-y-4">
-        <div className="flex items-center justify-between border-b border-[color:var(--color-hairline)] pb-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10 text-purple-600">
-              <GitPullRequest size={20} />
-            </div>
-            <div>
-              <p className="text-base font-semibold text-[color:var(--color-ink)]">VO-02: Penambahan Titik Lampu Fasad</p>
-              <p className="text-xs text-[color:var(--color-ink-tertiary)]">Permintaan Klien &middot; Proyek Renovasi Rumah Tinggal</p>
-            </div>
-          </div>
-          <span className="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-600">
-            Penyesuaian Harga Jual
-          </span>
-        </div>
+      {variations.length === 0 ? (
+        <EmptyState
+          title="Belum ada Variation Order"
+          description="Tidak ada pekerjaan tambah/kurang (VO) yang sedang berjalan di proyek mana pun."
+        />
+      ) : (
+        <div className="space-y-4">
+          {variations.map((vo) => (
+            <Card key={vo.id} className="border border-[color:var(--color-hairline)] p-6 space-y-4">
+              <div className="flex items-center justify-between border-b border-[color:var(--color-hairline)] pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10 text-purple-600">
+                    <GitPullRequest size={20} />
+                  </div>
+                  <div>
+                    <p className="text-base font-semibold text-[color:var(--color-ink)]">{vo.title}</p>
+                    <p className="text-xs text-[color:var(--color-ink-tertiary)]">Proyek: {vo.project_name}</p>
+                  </div>
+                </div>
+                <span className="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-600 uppercase">
+                  {vo.status.replace(/_/g, ' ')}
+                </span>
+              </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs bg-[color:var(--color-surface-secondary)] p-3 rounded-lg">
-          <div>
-            <span className="text-[color:var(--color-ink-tertiary)]">HPP Subkontraktor:</span>
-            <p className="font-semibold text-[color:var(--color-ink)]">Rp 3.500.000</p>
-          </div>
-          <div>
-            <span className="text-[color:var(--color-ink-tertiary)]">Margin Arkavena:</span>
-            <p className="font-semibold text-green-600">20% (Rp 700.000)</p>
-          </div>
-          <div>
-            <span className="text-[color:var(--color-ink-tertiary)]">Harga Jual Klien:</span>
-            <p className="font-semibold text-[color:var(--color-ink)]">Rp 4.200.000</p>
-          </div>
-        </div>
+              {vo.description && (
+                <p className="text-sm text-[color:var(--color-ink-secondary)] line-clamp-3">
+                  {vo.description}
+                </p>
+              )}
 
-        <div className="flex items-center justify-end gap-3 pt-2">
-          <button className="flex items-center gap-1.5 rounded-lg border border-[color:var(--color-hairline)] px-3 py-1.5 text-xs font-medium text-[color:var(--color-ink)] hover:bg-gray-50">
-            <DollarSign size={14} /> Edit Selling Price
-          </button>
-          <button className="flex items-center gap-1.5 rounded-lg bg-[color:var(--color-accent)] px-4 py-1.5 text-xs font-medium text-white hover:bg-[color:var(--color-accent-hover)]">
-            <Send size={14} /> Terbitkan Proposal Addendum ke Klien
-          </button>
+              <div className="flex justify-between items-center pt-2">
+                <div className="flex gap-2">
+                  <button className="flex items-center gap-2 rounded-lg bg-[color:var(--color-ink)] px-4 py-2 text-sm font-medium text-[color:var(--color-surface)] hover:bg-[color:var(--color-ink-secondary)] transition-colors">
+                    <DollarSign size={16} /> Kalkulasi HPP
+                  </button>
+                  <button className="flex items-center gap-2 rounded-lg border border-[color:var(--color-hairline)] px-4 py-2 text-sm font-medium text-[color:var(--color-ink)] hover:bg-[color:var(--color-surface-secondary)] transition-colors">
+                    <Send size={16} /> Ajukan ke Klien
+                  </button>
+                </div>
+              </div>
+            </Card>
+          ))}
         </div>
-      </Card>
+      )}
     </div>
   );
 }

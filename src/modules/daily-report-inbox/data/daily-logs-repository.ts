@@ -17,6 +17,25 @@ export async function listDailyLogsForProject(supabase: ServerSupabase, projectI
   return data;
 }
 
+export type PendingDailyLog = DailyLog & {
+  project_name: string;
+};
+
+export async function listPendingDailyLogs(supabase: ServerSupabase): Promise<PendingDailyLog[]> {
+  const { data, error } = await supabase
+    .from('daily_logs')
+    .select('*, projects(name)')
+    .eq('status', 'pending_review')
+    .is('deleted_at', null)
+    .order('log_date', { ascending: true });
+
+  if (error !== null) throw error;
+  return data.map((row: any) => ({
+    ...row,
+    project_name: row.projects?.name ?? 'Unknown Project',
+  }));
+}
+
 export async function getDailyLog(supabase: ServerSupabase, id: string): Promise<DailyLog> {
   const { data, error } = await supabase.from('daily_logs').select('*').eq('id', id).is('deleted_at', null).maybeSingle();
 

@@ -16,6 +16,8 @@ import {
   getChangeOrder,
   insertChangeOrder,
   listChangeOrdersForProject,
+  listAllChangeOrders,
+  type ChangeOrderWithProject,
   updateChangeOrder,
 } from '../data/change-orders-repository';
 import {
@@ -217,6 +219,19 @@ export const listChangeOrdersForProjectAction = safeAction(
   async (projectId): Promise<ChangeOrder[]> => {
     const supabase = await createServerSupabase();
     return listChangeOrdersForProject(supabase, projectId);
+  },
+);
+
+export const listAllChangeOrdersAction = safeAction(
+  {
+    schema: z.void(),
+    permission: { resource: 'change_order', action: 'view' },
+    loadContext: getActionContext,
+    name: 'scopeVariation.listAllChangeOrders',
+  },
+  async (): Promise<ChangeOrderWithProject[]> => {
+    const supabase = await createServerSupabase();
+    return listAllChangeOrders(supabase);
   },
 );
 

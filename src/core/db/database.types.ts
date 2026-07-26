@@ -1000,6 +1000,7 @@ export type Database = {
           organization_id: string
           project_id: string
           reported_by: string
+          status: Database["public"]["Enums"]["daily_log_status"]
           updated_at: string
           weather: string | null
         }
@@ -1013,6 +1014,7 @@ export type Database = {
           organization_id: string
           project_id: string
           reported_by: string
+          status?: Database["public"]["Enums"]["daily_log_status"]
           updated_at?: string
           weather?: string | null
         }
@@ -1026,6 +1028,7 @@ export type Database = {
           organization_id?: string
           project_id?: string
           reported_by?: string
+          status?: Database["public"]["Enums"]["daily_log_status"]
           updated_at?: string
           weather?: string | null
         }
@@ -4319,6 +4322,7 @@ export type Database = {
         | "schedule_adjustment"
         | "completed"
       contract_status: "draft" | "active" | "completed" | "terminated"
+      daily_log_status: "draft" | "pending_review" | "published" | "rejected"
       estimate_status: "draft" | "sent" | "accepted" | "rejected" | "superseded"
       evidence_qc_result: "pass" | "fail" | "not_applicable"
       evidence_type: "photo" | "video" | "document"
