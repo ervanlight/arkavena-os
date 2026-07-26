@@ -53,6 +53,6 @@ export const listPendingInboxItemsAction = safeAction(
     }
 
     // Sort newest first
-    return { ok: true, data: items.sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()) };
+    return items.sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
   }
 );
