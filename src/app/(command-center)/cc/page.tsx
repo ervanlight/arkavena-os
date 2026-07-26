@@ -11,6 +11,9 @@ import {
 import { getCurrentUser } from '@/core/auth/session';
 import { listOrgActivityAction, listProjectsAction } from '@/modules/projects';
 import { listPendingInboxItemsAction } from '@/modules/review-center';
+import { listPendingDailyLogsAction } from '@/modules/daily-report-inbox';
+import { listAgingDashboardAction } from '@/modules/invoice-generator';
+import { listDocumentEvidenceAction } from '@/modules/evidence';
 import { Card, PageHeader, StatusBadge, EmptyState, Button } from '@/core/ui';
 import { ActivityFeed } from '../_components/activity-feed';
 
@@ -40,6 +43,9 @@ export default async function CommandCenterHome() {
     listProjectsAction(undefined),
     listOrgActivityAction(undefined),
     listPendingInboxItemsAction({}),
+    listPendingDailyLogsAction(undefined),
+    listAgingDashboardAction(undefined),
+    listDocumentEvidenceAction(undefined),
   ]);
 
   const hour = new Date().getHours();
@@ -52,6 +58,17 @@ export default async function CommandCenterHome() {
   const pendingInbox = (inboxResult.ok ? inboxResult.data : []) as any[];
   const pendingHoldPoints = pendingInbox.filter((i: any) => i.type === 'hold_point').length;
   const pendingQuotes = pendingInbox.filter((i: any) => i.type === 'subcon_quote').length;
+
+  const pendingDailyLogsResult = await listPendingDailyLogsAction(undefined);
+  const pendingDailyLogs = pendingDailyLogsResult.ok ? pendingDailyLogsResult.data.length : 0;
+
+  const agingDashboardResult = await listAgingDashboardAction(undefined);
+  const agingDashboard = agingDashboardResult.ok ? agingDashboardResult.data : [];
+  const invoicesToGenerate = agingDashboard.filter(i => i.agingTier === 'current').length;
+  const overdueInvoices = agingDashboard.filter(i => i.agingTier !== 'current').length;
+
+  const documentEvidenceResult = await listDocumentEvidenceAction(undefined);
+  const pendingDocuments = documentEvidenceResult.ok ? documentEvidenceResult.data.length : 0;
 
   return (
     <div className="space-y-8">
@@ -74,7 +91,7 @@ export default async function CommandCenterHome() {
                 <Inbox size={16} />
                 <span className="text-xs font-bold tracking-wider uppercase">Laporan Harian</span>
               </div>
-              <h3 className="text-xl font-bold text-[color:var(--color-ink)]">18 <span className="text-sm font-normal text-[color:var(--color-ink-secondary)]">menunggu tinjauan</span></h3>
+              <h3 className="text-xl font-bold text-[color:var(--color-ink)]">{pendingDailyLogs} <span className="text-sm font-normal text-[color:var(--color-ink-secondary)]">menunggu tinjauan</span></h3>
             </div>
             <div className="mt-4">
               <Link href={"/cc/daily-reports" as never}>
@@ -128,7 +145,7 @@ export default async function CommandCenterHome() {
                 <Receipt size={16} />
                 <span className="text-xs font-bold tracking-wider uppercase">Buat Tagihan</span>
               </div>
-              <h3 className="text-xl font-bold text-[color:var(--color-ink)]">2 <span className="text-sm font-normal text-[color:var(--color-ink-secondary)]">termin siap ditagih</span></h3>
+              <h3 className="text-xl font-bold text-[color:var(--color-ink)]">{invoicesToGenerate} <span className="text-sm font-normal text-[color:var(--color-ink-secondary)]">termin siap ditagih</span></h3>
             </div>
             <div className="mt-4">
               <Link href={"/cc/billing" as never}>
@@ -146,7 +163,7 @@ export default async function CommandCenterHome() {
                 <Receipt size={16} />
                 <span className="text-xs font-bold tracking-wider uppercase">Tagihan Jatuh Tempo</span>
               </div>
-              <h3 className="text-xl font-bold text-[color:var(--color-ink)]">1 <span className="text-sm font-normal text-[color:var(--color-ink-secondary)]">invoice menunggak</span></h3>
+              <h3 className="text-xl font-bold text-[color:var(--color-ink)]">{overdueInvoices} <span className="text-sm font-normal text-[color:var(--color-ink-secondary)]">invoice menunggak</span></h3>
             </div>
             <div className="mt-4">
               <Link href={"/cc/billing" as never}>
@@ -164,7 +181,7 @@ export default async function CommandCenterHome() {
                 <FileText size={16} />
                 <span className="text-xs font-bold tracking-wider uppercase">Persetujuan Dokumen</span>
               </div>
-              <h3 className="text-xl font-bold text-[color:var(--color-ink)]">3 <span className="text-sm font-normal text-[color:var(--color-ink-secondary)]">dokumen penting</span></h3>
+              <h3 className="text-xl font-bold text-[color:var(--color-ink)]">{pendingDocuments} <span className="text-sm font-normal text-[color:var(--color-ink-secondary)]">dokumen penting</span></h3>
             </div>
             <div className="mt-4">
               <Link href={"/cc/documents" as never}>
