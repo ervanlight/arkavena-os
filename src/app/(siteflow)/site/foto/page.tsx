@@ -1,17 +1,34 @@
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/core/auth/session';
-import { listWorkPackagesForProjectAction, listZonesForProjectAction } from '@/modules/projects';
+import { listWorkPackagesForProjectAction, listZonesForProjectAction, listMyFieldProjectsAction } from '@/modules/projects';
 import { PhotoForm } from './photo-form';
 import { Card } from '@/core/ui';
 
 export const metadata = { title: 'Ambil Foto — SiteFlow' };
 
 export default async function PhotoPage({ searchParams }: { searchParams: Promise<{ projectId?: string }> }) {
-  const { projectId } = await searchParams;
-  if (projectId === undefined) redirect('/site');
+  const user = await getCurrentUser();
+  if (user === null) redirect('/login');
 
-  const [user, zonesResult, workPackagesResult] = await Promise.all([
-    getCurrentUser(),
+  const { projectId: rawProjectId } = await searchParams;
+  let projectId = rawProjectId;
+
+  if (!projectId) {
+    const projectsResult = await listMyFieldProjectsAction(undefined);
+    const projects = projectsResult.ok ? projectsResult.data : [];
+    if (projects.length === 0) {
+      return (
+        <Card>
+          <p className="text-sm text-[color:var(--color-ink-secondary)] font-medium">
+            Anda belum terdaftar sebagai pengawas di proyek manapun. Hubungi admin kantor Arkavena.
+          </p>
+        </Card>
+      );
+    }
+    projectId = projects[0].id;
+  }
+
+  const [zonesResult, workPackagesResult] = await Promise.all([
     listZonesForProjectAction(projectId),
     listWorkPackagesForProjectAction(projectId),
   ]);

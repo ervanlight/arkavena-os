@@ -21,9 +21,9 @@ export default async function SiteFlowHomePage() {
   const roles = rolesResult.ok ? rolesResult.data : [];
   const isPhotoUploaderOnly = roles.includes('photo_uploader') && !roles.includes('site_coordinator') && !roles.includes('mandor');
 
-  // If user is purely a Pengawas (photo_uploader), redirect straight to photo uploader page
-  if (isPhotoUploaderOnly) {
-    redirect('/site/foto');
+  // If user is purely a Pengawas (photo_uploader), redirect straight to photo uploader page with project ID
+  if (isPhotoUploaderOnly && projects.length > 0) {
+    redirect(`/site/foto?projectId=${projects[0].id}`);
   }
 
   if (projects.length === 0) {
