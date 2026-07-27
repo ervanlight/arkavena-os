@@ -68,6 +68,7 @@ export function DailyReportInboxItem({
 
       <div className="flex items-center justify-end gap-3 pt-2">
         <button
+          onClick={() => handleReview('reject')}
           disabled={isPending}
           className="flex items-center gap-1.5 rounded-lg border border-[color:var(--color-hairline)] px-3 py-1.5 text-xs font-medium text-[color:var(--color-ink-secondary)] hover:bg-gray-100 disabled:opacity-50"
         >

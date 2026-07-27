@@ -49,12 +49,18 @@ export default async function VariationsPage() {
 
               <div className="flex justify-between items-center pt-2">
                 <div className="flex gap-2">
-                  <button className="flex items-center gap-2 rounded-lg bg-[color:var(--color-ink)] px-4 py-2 text-sm font-medium text-[color:var(--color-surface)] hover:bg-[color:var(--color-ink-secondary)] transition-colors">
+                  <Link
+                    href={`/cc/projects/${vo.project_id}/variations/${vo.id}`}
+                    className="flex items-center gap-2 rounded-lg bg-[color:var(--color-ink)] px-4 py-2 text-sm font-medium text-[color:var(--color-surface)] hover:bg-[color:var(--color-ink-secondary)] transition-colors"
+                  >
                     <DollarSign size={16} /> Kalkulasi HPP
-                  </button>
-                  <button className="flex items-center gap-2 rounded-lg border border-[color:var(--color-hairline)] px-4 py-2 text-sm font-medium text-[color:var(--color-ink)] hover:bg-[color:var(--color-surface-secondary)] transition-colors">
-                    <Send size={16} /> Ajukan ke Klien
-                  </button>
+                  </Link>
+                  <Link
+                    href={`/cc/projects/${vo.project_id}/variations/${vo.id}`}
+                    className="flex items-center gap-2 rounded-lg border border-[color:var(--color-hairline)] px-4 py-2 text-sm font-medium text-[color:var(--color-ink)] hover:bg-[color:var(--color-surface-secondary)] transition-colors"
+                  >
+                    <Send size={16} /> Detail & Pengajuan
+                  </Link>
                 </div>
               </div>
             </Card>

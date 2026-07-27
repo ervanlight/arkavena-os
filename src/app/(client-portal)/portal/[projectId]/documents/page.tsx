@@ -71,9 +71,14 @@ export default async function ClientPortalFinancialPage({ params }: { params: Pr
                       <span className={`text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full ${inv.status === 'paid' ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/20 text-yellow-500'}`}>
                         {inv.status === 'paid' ? 'LUNAS' : 'MENUNGGU PEMBAYARAN'}
                       </span>
-                      <button className="flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-2 text-xs font-medium text-white bg-white/10 hover:bg-white/20 rounded-md transition-colors">
+                      <a
+                        href={`/cc/projects/${projectId}/invoices/${inv.id}/billing-pack`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-2 text-xs font-medium text-white bg-white/10 hover:bg-white/20 rounded-md transition-colors"
+                      >
                         <Download size={14} /> Unduh PDF
-                      </button>
+                      </a>
                     </div>
                   </div>
                 ))}
@@ -90,7 +95,12 @@ export default async function ClientPortalFinancialPage({ params }: { params: Pr
             </h2>
             
             <div className="space-y-3">
-              <button className="w-full flex items-center justify-between p-4 rounded-lg border border-white/5 bg-[#222] hover:bg-[#2A2A2A] transition-colors group">
+              <a
+                href="/cc/documents"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full flex items-center justify-between p-4 rounded-lg border border-white/5 bg-[#222] hover:bg-[#2A2A2A] transition-colors group"
+              >
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 bg-blue-500/10 rounded flex items-center justify-center text-blue-500">
                     <FileText size={20} />
@@ -101,9 +111,14 @@ export default async function ClientPortalFinancialPage({ params }: { params: Pr
                   </div>
                 </div>
                 <Download size={16} className="text-gray-500 group-hover:text-white transition-colors" />
-              </button>
+              </a>
               
-              <button className="w-full flex items-center justify-between p-4 rounded-lg border border-white/5 bg-[#222] hover:bg-[#2A2A2A] transition-colors group">
+              <a
+                href="/cc/documents"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full flex items-center justify-between p-4 rounded-lg border border-white/5 bg-[#222] hover:bg-[#2A2A2A] transition-colors group"
+              >
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 bg-purple-500/10 rounded flex items-center justify-center text-purple-500">
                     <ShieldCheck size={20} />
@@ -114,7 +129,7 @@ export default async function ClientPortalFinancialPage({ params }: { params: Pr
                   </div>
                 </div>
                 <Download size={16} className="text-gray-500 group-hover:text-white transition-colors" />
-              </button>
+              </a>
             </div>
             
             <div className="mt-6 rounded-lg bg-blue-500/10 p-4 border border-blue-500/20">
