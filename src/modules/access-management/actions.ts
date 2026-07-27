@@ -18,6 +18,65 @@ export type ExternalUserWithProjects = {
   projects: { projectId: string; projectName: string; role: string; memberId: string }[];
 };
 
+// ─── High Performance Batch Data Fetcher for Page Rendering ───────────────────
+
+export async function getAkunPageData(): Promise<{
+  allUsers: ExternalUserWithProjects[];
+  projects: { id: string; name: string }[];
+}> {
+  const supabase = await createServerSupabase();
+
+  const [membersRes, projectsRes] = await Promise.all([
+    supabase
+      .from('project_members')
+      .select(`
+        id,
+        project_role,
+        user_id,
+        projects!inner ( id, name, organization_id ),
+        users!inner ( id, full_name, email, status, managed_password )
+      `)
+      .in('project_role', ['subcontractor', 'photo_uploader', 'client_approver', 'client_viewer'])
+      .is('deleted_at', null),
+    supabase
+      .from('projects')
+      .select('id, name')
+      .is('deleted_at', null)
+      .order('name'),
+  ]);
+
+  if (membersRes.error !== null) throw membersRes.error;
+  if (projectsRes.error !== null) throw projectsRes.error;
+
+  const userMap = new Map<string, ExternalUserWithProjects>();
+  for (const row of membersRes.data ?? []) {
+    const user = row.users as unknown as { id: string; full_name: string; email: string; status: string; managed_password?: string | null };
+    const project = row.projects as unknown as { id: string; name: string };
+
+    if (!userMap.has(user.id)) {
+      userMap.set(user.id, {
+        userId: user.id,
+        fullName: user.full_name,
+        email: user.email,
+        status: user.status,
+        managedPassword: user.managed_password ?? null,
+        projects: [],
+      });
+    }
+    userMap.get(user.id)!.projects.push({
+      projectId: project.id,
+      projectName: project.name,
+      role: row.project_role,
+      memberId: row.id,
+    });
+  }
+
+  const allUsers = Array.from(userMap.values()).sort((a, b) => a.fullName.localeCompare(b.fullName));
+  const projects = projectsRes.data ?? [];
+
+  return { allUsers, projects };
+}
+
 // ─── List Subkon Users ─────────────────────────────────────────────────────────
 
 export const listSubkonUsersAction = safeAction(
@@ -27,48 +86,9 @@ export const listSubkonUsersAction = safeAction(
     permission: { resource: 'project_member', action: 'view' },
     loadContext: getActionContext,
   },
-  async (_input, ctx): Promise<ExternalUserWithProjects[]> => {
-    const supabase = await createServerSupabase();
-
-    const { data, error } = await supabase
-      .from('project_members')
-      .select(`
-        id,
-        project_role,
-        user_id,
-        projects!inner ( id, name, organization_id ),
-        users!inner ( id, full_name, email, status, managed_password )
-      `)
-      .in('project_role', ['subcontractor', 'photo_uploader'])
-      .eq('projects.organization_id', ctx.organizationId)
-      .is('deleted_at', null);
-
-    if (error !== null) throw error;
-
-    const userMap = new Map<string, ExternalUserWithProjects>();
-    for (const row of data ?? []) {
-      const user = row.users as unknown as { id: string; full_name: string; email: string; status: string; managed_password?: string | null };
-      const project = row.projects as unknown as { id: string; name: string };
-
-      if (!userMap.has(user.id)) {
-        userMap.set(user.id, {
-          userId: user.id,
-          fullName: user.full_name,
-          email: user.email,
-          status: user.status,
-          managedPassword: user.managed_password ?? null,
-          projects: [],
-        });
-      }
-      userMap.get(user.id)!.projects.push({
-        projectId: project.id,
-        projectName: project.name,
-        role: row.project_role,
-        memberId: row.id,
-      });
-    }
-
-    return Array.from(userMap.values()).sort((a, b) => a.fullName.localeCompare(b.fullName));
+  async (_input, _ctx): Promise<ExternalUserWithProjects[]> => {
+    const { allUsers } = await getAkunPageData();
+    return allUsers.filter((u) => u.projects.some((p) => p.role === 'subcontractor' || p.role === 'photo_uploader'));
   },
 );
 
@@ -81,48 +101,9 @@ export const listClientPortalUsersAction = safeAction(
     permission: { resource: 'project_member', action: 'view' },
     loadContext: getActionContext,
   },
-  async (_input, ctx): Promise<ExternalUserWithProjects[]> => {
-    const supabase = await createServerSupabase();
-
-    const { data, error } = await supabase
-      .from('project_members')
-      .select(`
-        id,
-        project_role,
-        user_id,
-        projects!inner ( id, name, organization_id ),
-        users!inner ( id, full_name, email, status, managed_password )
-      `)
-      .in('project_role', ['client_approver', 'client_viewer'])
-      .eq('projects.organization_id', ctx.organizationId)
-      .is('deleted_at', null);
-
-    if (error !== null) throw error;
-
-    const userMap = new Map<string, ExternalUserWithProjects>();
-    for (const row of data ?? []) {
-      const user = row.users as unknown as { id: string; full_name: string; email: string; status: string; managed_password?: string | null };
-      const project = row.projects as unknown as { id: string; name: string };
-
-      if (!userMap.has(user.id)) {
-        userMap.set(user.id, {
-          userId: user.id,
-          fullName: user.full_name,
-          email: user.email,
-          status: user.status,
-          managedPassword: user.managed_password ?? null,
-          projects: [],
-        });
-      }
-      userMap.get(user.id)!.projects.push({
-        projectId: project.id,
-        projectName: project.name,
-        role: row.project_role,
-        memberId: row.id,
-      });
-    }
-
-    return Array.from(userMap.values()).sort((a, b) => a.fullName.localeCompare(b.fullName));
+  async (_input, _ctx): Promise<ExternalUserWithProjects[]> => {
+    const { allUsers } = await getAkunPageData();
+    return allUsers.filter((u) => u.projects.some((p) => p.role === 'client_approver' || p.role === 'client_viewer'));
   },
 );
 
@@ -135,18 +116,9 @@ export const listProjectsForAccessAction = safeAction(
     permission: { resource: 'project', action: 'view' },
     loadContext: getActionContext,
   },
-  async (_input, ctx): Promise<{ id: string; name: string }[]> => {
-    const supabase = await createServerSupabase();
-
-    const { data, error } = await supabase
-      .from('projects')
-      .select('id, name')
-      .eq('organization_id', ctx.organizationId)
-      .is('deleted_at', null)
-      .order('name');
-
-    if (error !== null) throw error;
-    return data ?? [];
+  async (_input, _ctx): Promise<{ id: string; name: string }[]> => {
+    const { projects } = await getAkunPageData();
+    return projects;
   },
 );
 

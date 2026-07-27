@@ -7,6 +7,7 @@
  */
 
 export {
+  getAkunPageData,
   listSubkonUsersAction,
   listClientPortalUsersAction,
   listProjectsForAccessAction,

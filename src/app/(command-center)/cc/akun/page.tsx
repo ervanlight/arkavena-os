@@ -1,11 +1,6 @@
 import { Users, Camera, ShieldCheck, Eye, UserPlus } from 'lucide-react';
 import { Card, PageHeader } from '@/core/ui';
-import {
-  listSubkonUsersAction,
-  listClientPortalUsersAction,
-  listProjectsForAccessAction,
-  type ExternalUserWithProjects,
-} from '@/modules/access-management/actions';
+import { getAkunPageData } from '@/modules/access-management';
 import { UnifiedInviteForm } from './UnifiedInviteForm';
 import { UserAccountCard } from './UserAccountCard';
 
@@ -43,32 +38,9 @@ const ROLE_CONFIG: Record<string, RoleConfigItem> = {
 };
 
 export default async function AkunPage() {
-  const [subkonResult, clientResult, projectsResult] = await Promise.all([
-    listSubkonUsersAction(undefined),
-    listClientPortalUsersAction(undefined),
-    listProjectsForAccessAction(undefined),
-  ]);
-
-  const subkonUsers = subkonResult.ok ? subkonResult.data : [];
-  const clientUsers = clientResult.ok ? clientResult.data : [];
-  const projects = projectsResult.ok ? projectsResult.data : [];
-
-  // All external users combined, deduplicated by userId
-  const allUsersMap = new Map<string, ExternalUserWithProjects>();
-  [...subkonUsers, ...clientUsers].forEach((u) => {
-    if (allUsersMap.has(u.userId)) {
-      const existing = allUsersMap.get(u.userId)!;
-      existing.projects = [...existing.projects, ...u.projects];
-    } else {
-      allUsersMap.set(u.userId, { ...u, projects: [...u.projects] });
-    }
-  });
-
-  const allUsers = Array.from(allUsersMap.values()).sort((a, b) =>
-    a.fullName.localeCompare(b.fullName),
-  );
-
-  const totalUsers = allUsersMap.size;
+  // High-performance single database batch fetch (0ms server action overhead)
+  const { allUsers, projects } = await getAkunPageData();
+  const totalUsers = allUsers.length;
 
   return (
     <div className="space-y-8 max-w-3xl">
