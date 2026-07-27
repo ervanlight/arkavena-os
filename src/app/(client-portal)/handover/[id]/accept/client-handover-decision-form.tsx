@@ -3,7 +3,7 @@
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
 import { clientAcceptHandoverAction } from '@/modules/client-feed';
-import { Button, Input, Textarea, Label } from '@/core/ui';
+import { Button, Input, Textarea, Label, SignatureCanvas } from '@/core/ui';
 
 type FormState = { error: string | null; ok: boolean };
 const initialState: FormState = { error: null, ok: false };
@@ -35,11 +35,16 @@ export function ClientHandoverDecisionForm({ clientDecisionId }: { clientDecisio
 
   return (
     <div className="space-y-6">
-      <form action={acceptAction} className="space-y-2">
-        <Label htmlFor="acceptReason">Catatan konfirmasi</Label>
-        <Input id="acceptReason" name="acceptReason" required placeholder="mis. Diterima, semua sesuai" />
+      <form action={acceptAction} className="space-y-4">
+        <div>
+          <Label htmlFor="acceptReason">Catatan konfirmasi serah terima</Label>
+          <Input id="acceptReason" name="acceptReason" required placeholder="mis. Diterima, semua sesuai spesifikasi" />
+        </div>
+
+        <SignatureCanvas name="signature" />
+
         <Button type="submit" disabled={isAccepting} className="w-full">
-          {isAccepting ? 'Mengirim...' : 'Konfirmasi serah terima'}
+          {isAccepting ? 'Mengirim...' : 'Konfirmasi & Tanda Tangan BAST'}
         </Button>
         {acceptState.error !== null && (
           <p role="alert" className="text-sm text-[color:var(--color-danger)]">
