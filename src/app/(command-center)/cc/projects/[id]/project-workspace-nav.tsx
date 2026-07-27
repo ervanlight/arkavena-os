@@ -9,13 +9,9 @@ const TABS = [
   { suffix: '/aktivitas', label: 'Aktivitas' },
   { suffix: '/foto', label: 'Foto' },
   { suffix: '/laporan', label: 'Laporan' },
+  { suffix: '/rab', label: 'RAB' },
   { suffix: '/variations', label: 'Variation' },
-  { suffix: '/quality-gate', label: 'Quality' },
-  { suffix: '/cash-gate', label: 'Cash Gate' },
   { suffix: '/invoices', label: 'Invoice' },
-  { suffix: '/estimates', label: 'Estimasi' },
-  { suffix: '/procurement', label: 'Prokuremen' },
-  { suffix: '/handover', label: 'Handover' },
 ] as const;
 
 /**

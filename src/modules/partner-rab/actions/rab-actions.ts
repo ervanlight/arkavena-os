@@ -40,17 +40,25 @@ export const saveVendorRabItemAction = safeAction(
   },
   async (input, ctx) => {
     const { id, ...restInput } = input;
+
+    // Look up the actual project_id from the parent vendor_quote
+    const supabase = (await import('@/core/db/client.server')).createServerSupabase;
+    const sb = await supabase();
+    const { data: quote, error: quoteError } = await sb
+      .from('vendor_quotes')
+      .select('project_id')
+      .eq('id', input.vendor_quote_id)
+      .single();
+    if (quoteError || !quote) throw new Error('Vendor quote not found');
+
     const insertData: VendorQuoteItemInsert = {
       ...restInput,
       ...(id ? { id } : {}),
       group_name: input.group_name ?? null,
       organization_id: ctx.organizationId,
-      project_id: input.vendor_quote_id, // we might need to actually pass projectId if we needed it strictly, but let's assume it's fine for demo or we fetch it. Wait, the schema in db requires project_id? Let's just pass context projectId if we have it or fetch from quote. Let's assume quote id allows us to get project ID. Actually let's just omit project_id if it's optional, or we get it from DB. Let's fix this properly.
+      project_id: quote.project_id,
     };
     
-    // In safeAction, we don't have ctx.currentProjectId easily unless we pass it.
-    // Let's rely on DB or just pass a dummy if we must, wait, VendorQuoteItemInsert doesn't require project_id in our simplified version? 
-    // Actually we can just do:
     const data = await saveVendorQuoteItem(insertData);
     
     await updateVendorQuoteTotalAmount(input.vendor_quote_id);
