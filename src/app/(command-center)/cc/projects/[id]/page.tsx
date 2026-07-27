@@ -7,7 +7,7 @@ import {
   ZoneMap,
 } from '@/modules/projects';
 import { listStaffUsersAction } from '@/core/auth/invite-staff-user';
-import { Card, StatusBadge, EmptyState } from '@/core/ui';
+import { Card, StatusBadge, EmptyState, SCurveChart } from '@/core/ui';
 import { AddZoneForm } from './add-zone-form';
 import { StartWorkPackageForm } from './start-work-package-form';
 import { DelayDetectionWidget } from './delay-detection-widget';
@@ -93,6 +93,11 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
       </div>
 
       <DelayDetectionWidget projectId={project.id} />
+
+      <SCurveChart
+        startDate={project.start_date}
+        targetCompletionDate={project.target_end_date}
+      />
 
       <Card className="space-y-3">
         <div>

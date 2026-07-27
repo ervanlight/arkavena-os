@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { getClientProjectOverviewAction, listClientTimelineEventsAction } from '@/modules/client-feed';
 import { listClientVisibleEvidenceWithUrlsForProjectAction } from '@/modules/evidence';
 import { PortalNav } from '../../portal-nav';
+import { SCurveChart } from '@/core/ui';
 import { Activity, CheckCircle2, Clock, Image as ImageIcon, MapPin } from 'lucide-react';
 import { PhotoGallery } from './photo-gallery';
 
@@ -38,6 +39,14 @@ export default async function ClientPortalProgressPage({ params }: { params: Pro
       </div>
 
       <PortalNav projectId={projectId} active="/timeline" />
+
+      {/* S-Curve Chart Progress Tracker */}
+      <SCurveChart
+        title="Kurva S Progres Transparansi Proyek"
+        startDate={overview.start_date}
+        targetCompletionDate={overview.target_end_date}
+        className="bg-slate-900/90 text-slate-100 border-slate-800"
+      />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Left Column: Progress Timeline */}
