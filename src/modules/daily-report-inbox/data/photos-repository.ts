@@ -31,8 +31,8 @@ export async function listPhotosWithThumbnailUrls(supabase: ServerSupabase, proj
   const photos = await listPhotosForProject(supabase, projectId);
   return Promise.all(
     photos.map(async (photo) => {
-      const { data: signed } = await supabase.storage.from('photos').createSignedUrl(photo.thumbnail_path, PHOTO_URL_TTL_SECONDS);
-      return { ...photo, thumbnailUrl: signed?.signedUrl ?? null };
+      const signedUrl = await getDownloadPresignedUrl(photo.thumbnail_path, PHOTO_URL_TTL_SECONDS);
+      return { ...photo, thumbnailUrl: signedUrl };
     }),
   );
 }

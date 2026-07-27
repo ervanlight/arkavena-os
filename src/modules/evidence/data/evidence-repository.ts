@@ -1,6 +1,7 @@
 import 'server-only';
 import type { ServerSupabase } from '@/core/db/client.server';
 import { NotFoundError } from '@/core/errors/app-error';
+import { getDownloadPresignedUrl } from '@/core/storage/r2.server';
 import type { Evidence, EvidenceWithUrl, NewEvidence } from '../types';
 
 const THUMBNAIL_URL_TTL_SECONDS = 60 * 60; // 1 hour -- one page view's worth, same TTL as client-portal's photo signing.
@@ -74,8 +75,8 @@ export async function listClientVisibleEvidenceWithUrlsForProject(
   return Promise.all(
     rows.map(async ({ thumbnail_path, storage_path: _storagePath, ...rest }) => {
       if (thumbnail_path === null) return { ...rest, thumbnailUrl: null };
-      const { data: signed } = await supabase.storage.from('photos').createSignedUrl(thumbnail_path, THUMBNAIL_URL_TTL_SECONDS);
-      return { ...rest, thumbnailUrl: signed?.signedUrl ?? null };
+      const signedUrl = await getDownloadPresignedUrl(thumbnail_path, THUMBNAIL_URL_TTL_SECONDS);
+      return { ...rest, thumbnailUrl: signedUrl };
     }),
   );
 }

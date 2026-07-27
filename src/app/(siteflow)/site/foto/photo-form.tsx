@@ -5,6 +5,7 @@ import { createBrowserSupabase } from '@/core/db/client.browser';
 import { compressPhoto } from '@/core/storage/compress-image';
 import { photoStoragePath, photoThumbnailStoragePath } from '@/core/storage/paths';
 import { createPhotoAction } from '@/modules/daily-report-inbox';
+import { getUploadPresignedUrlAction } from '@/modules/daily-report-inbox/actions/r2-actions';
 import { enqueueMutation } from '@/core/offline/outbox';
 import { indexedDbOutboxStore } from '@/core/offline/indexeddb-store';
 import { Card, Button, Input, Select, Label } from '@/core/ui';
@@ -59,20 +60,27 @@ export function PhotoForm({
     const thumbnailPath = photoThumbnailStoragePath({ organizationId, projectId, zoneId, date, photoId });
 
     try {
-      const supabase = createBrowserSupabase();
+      // Get presigned URL for main image and upload directly to R2
+      const mainUrlResult = await getUploadPresignedUrlAction({ path: storagePath, contentType: 'image/webp' });
+      if (!mainUrlResult.ok) throw new Error(mainUrlResult.error.message);
+      
+      const mainUploadRes = await fetch(mainUrlResult.data.url, {
+        method: 'PUT',
+        body: main,
+        headers: { 'Content-Type': 'image/webp' },
+      });
+      if (!mainUploadRes.ok) throw new Error('Gagal mengunggah foto utama ke Cloudflare R2');
 
-      // upsert: true makes a retried upload (same photoId, same path) safe
-      // -- without it, re-uploading after a dropped connection would fail
-      // with "already exists" instead of just succeeding again.
-      const mainUpload = await supabase.storage
-        .from('photos')
-        .upload(storagePath, main, { contentType: 'image/webp', upsert: true });
-      if (mainUpload.error !== null) throw new Error(mainUpload.error.message);
-
-      const thumbUpload = await supabase.storage
-        .from('photos')
-        .upload(thumbnailPath, thumbnail, { contentType: 'image/webp', upsert: true });
-      if (thumbUpload.error !== null) throw new Error(thumbUpload.error.message);
+      // Get presigned URL for thumbnail and upload directly to R2
+      const thumbUrlResult = await getUploadPresignedUrlAction({ path: thumbnailPath, contentType: 'image/webp' });
+      if (!thumbUrlResult.ok) throw new Error(thumbUrlResult.error.message);
+      
+      const thumbUploadRes = await fetch(thumbUrlResult.data.url, {
+        method: 'PUT',
+        body: thumbnail,
+        headers: { 'Content-Type': 'image/webp' },
+      });
+      if (!thumbUploadRes.ok) throw new Error('Gagal mengunggah thumbnail ke Cloudflare R2');
 
       const result = await createPhotoAction({
         id: photoId,

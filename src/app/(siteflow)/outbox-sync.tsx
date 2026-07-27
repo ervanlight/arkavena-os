@@ -11,6 +11,7 @@ import {
   createPhotoAction,
   createProgressEntryAction,
 } from '@/modules/daily-report-inbox';
+import { getUploadPresignedUrlAction } from '@/modules/daily-report-inbox/actions/r2-actions';
 
 /**
  * Registers what the offline outbox (core/offline) replays each mutation
@@ -60,16 +61,27 @@ export function OutboxSync(): null {
         thumbnailBlob: Blob;
       };
 
-      const supabase = createBrowserSupabase();
-      const mainUpload = await supabase.storage
-        .from('photos')
-        .upload(fields.storagePath, fields.mainBlob, { contentType: 'image/webp', upsert: true });
-      if (mainUpload.error !== null) return { ok: false, error: mainUpload.error.message };
+      // Get presigned URL for main image and upload directly to R2
+      const mainUrlResult = await getUploadPresignedUrlAction({ path: fields.storagePath, contentType: 'image/webp' });
+      if (!mainUrlResult.ok) return { ok: false, error: mainUrlResult.error.message };
+      
+      const mainUploadRes = await fetch(mainUrlResult.data.url, {
+        method: 'PUT',
+        body: fields.mainBlob,
+        headers: { 'Content-Type': 'image/webp' },
+      });
+      if (!mainUploadRes.ok) return { ok: false, error: 'Gagal mengunggah foto utama ke Cloudflare R2' };
 
-      const thumbUpload = await supabase.storage
-        .from('photos')
-        .upload(fields.thumbnailPath, fields.thumbnailBlob, { contentType: 'image/webp', upsert: true });
-      if (thumbUpload.error !== null) return { ok: false, error: thumbUpload.error.message };
+      // Get presigned URL for thumbnail and upload directly to R2
+      const thumbUrlResult = await getUploadPresignedUrlAction({ path: fields.thumbnailPath, contentType: 'image/webp' });
+      if (!thumbUrlResult.ok) return { ok: false, error: thumbUrlResult.error.message };
+      
+      const thumbUploadRes = await fetch(thumbUrlResult.data.url, {
+        method: 'PUT',
+        body: fields.thumbnailBlob,
+        headers: { 'Content-Type': 'image/webp' },
+      });
+      if (!thumbUploadRes.ok) return { ok: false, error: 'Gagal mengunggah thumbnail ke Cloudflare R2' };
 
       const result = await createPhotoAction({
         id: mutation.entityId,

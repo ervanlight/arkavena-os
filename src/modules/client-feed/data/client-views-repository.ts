@@ -83,8 +83,8 @@ export async function listClientProgressPhotos(
   const photos = await Promise.all(
     data.map(async ({ thumbnail_path, storage_path: _storagePath, ...rest }) => {
       if (thumbnail_path === null) return { ...rest, thumbnailUrl: null };
-      const { data: signed } = await supabase.storage.from('photos').createSignedUrl(thumbnail_path, PHOTO_URL_TTL_SECONDS);
-      return { ...rest, thumbnailUrl: signed?.signedUrl ?? null };
+      const signedUrl = await getDownloadPresignedUrl(thumbnail_path, PHOTO_URL_TTL_SECONDS);
+      return { ...rest, thumbnailUrl: signedUrl };
     }),
   );
   return photos as ClientProgressPhoto[];
