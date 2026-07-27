@@ -72,8 +72,8 @@ export const inviteProjectMemberAction = safeAction(
     loadContext: getActionContext,
     name: 'projects.inviteProjectMember',
   },
-  async (input, ctx): Promise<ProjectMember & { temporaryPassword: string | null }> => {
-    const { userId, temporaryPassword } = await provisionExternalUser({
+  async (input, ctx): Promise<ProjectMember & { temporaryPassword: string | null; email: string }> => {
+    const { userId, temporaryPassword, email: provisionedEmail } = await provisionExternalUser({
       organizationId: ctx.organizationId,
       email: input.email,
       fullName: input.fullName,
@@ -112,7 +112,7 @@ export const inviteProjectMemberAction = safeAction(
       requestId: ctx.requestId,
     });
 
-    return { ...member, temporaryPassword };
+    return { ...member, temporaryPassword, email: provisionedEmail };
   },
 );
 

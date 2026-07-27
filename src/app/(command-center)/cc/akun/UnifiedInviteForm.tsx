@@ -70,7 +70,7 @@ export function UnifiedInviteForm({ projects }: Props) {
       if (result.data.temporaryPassword) {
         setModalData({
           name: String(formData.get('fullName') ?? ''),
-          email: rawEmail.includes('@') ? rawEmail : `${rawEmail}@arkavena.com`,
+          email: result.data.email,
           password: result.data.temporaryPassword,
         });
       }

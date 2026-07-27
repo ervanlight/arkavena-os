@@ -11,6 +11,9 @@ export default function ForgotPasswordPage() {
           <p className="mt-1 text-[15px] text-[color:var(--color-ink-secondary)]">
             Masukkan email Anda untuk menerima tautan atur ulang.
           </p>
+          <div className="mt-3 text-xs bg-orange-50 text-orange-700 p-2 rounded-lg border border-orange-200">
+            <strong>Catatan:</strong> Fitur ini hanya untuk Staff Arkavena. Bagi Klien, Subkon, dan Pengawas yang lupa password, silakan hubungi CS/Admin.
+          </div>
         </div>
         <div className="rounded-[var(--radius-sheet)] bg-[color:var(--color-surface)] p-7 shadow-[var(--shadow-sheet)]">
           <ForgotPasswordForm />
