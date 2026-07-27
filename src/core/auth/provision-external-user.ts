@@ -5,23 +5,38 @@ import { generateTemporaryPassword } from './generate-temporary-password';
 
 export type ProvisionedUser = {
   userId: string;
-  /** Only set when a new account was actually created -- null when an existing row was reused, since re-provisioning must never silently change an existing password. */
+  email: string;
   temporaryPassword: string | null;
 };
 
 /**
- * Creates the `auth.users`/`public.users` rows an external contact (client,
- * supplier, subcontractor) needs before they can ever sign in. Sign-in itself
- * deliberately never self-provisions (ADR 0025 SS1: no sign-up form anywhere),
- * so someone has to write these rows first.
+ * Normalizes input string to a valid email format.
+ * If user enters "budi" or "klien1", turns it into "budi@arkavena.com".
+ */
+export function normalizeUserEmail(rawInput: string): string {
+  let email = rawInput.trim().toLowerCase();
+  if (!email.includes('@')) {
+    email = `${email}@arkavena.com`;
+  }
+  return email;
+}
+
+/**
+ * Provisions an external user (client, subcontractor, pengawas).
+ * Can accept a custom password or auto-generate one.
+ * Stores the password in managed_password so Admin/CS can view & manage credentials anytime.
  */
 export async function provisionExternalUser(input: {
   organizationId: string;
   email: string;
   fullName: string;
+  customPassword?: string | null | undefined;
 }): Promise<ProvisionedUser> {
   const admin = createAdminSupabase();
-  const email = input.email.trim().toLowerCase();
+  const email = normalizeUserEmail(input.email);
+  const activePassword = input.customPassword && input.customPassword.trim().length > 0
+    ? input.customPassword.trim()
+    : generateTemporaryPassword();
 
   // 1. Check if user exists in public.users
   const { data: existing, error: existingError } = await admin
@@ -44,17 +59,22 @@ export async function provisionExternalUser(input: {
         meta: { email },
       });
     }
-    return { userId: existing.id, temporaryPassword: null };
+
+    // Update password in Auth & managed_password in DB if a custom password was provided
+    if (input.customPassword) {
+      await admin.auth.admin.updateUserById(existing.id, { password: activePassword });
+      await admin.from('users').update({ managed_password: activePassword }).eq('id', existing.id);
+    }
+
+    return { userId: existing.id, email, temporaryPassword: activePassword };
   }
 
   // 2. User not in public.users -> create in auth.users
-  const temporaryPassword = generateTemporaryPassword();
   let userId: string | null = null;
-  let isNewAuthUser = false;
 
   const { data: created, error: createError } = await admin.auth.admin.createUser({
     email,
-    password: temporaryPassword,
+    password: activePassword,
     email_confirm: true,
   });
 
@@ -72,6 +92,8 @@ export async function provisionExternalUser(input: {
       const authUser = listData?.users?.find((u) => u.email?.toLowerCase() === email);
       if (authUser) {
         userId = authUser.id;
+        // Update password for existing Auth user
+        await admin.auth.admin.updateUserById(userId, { password: activePassword });
       } else {
         throw new ValidationError(`Email ${email} already registered in Auth`, {
           userMessage: `Email ${email} sudah terdaftar di sistem Auth.`,
@@ -84,10 +106,9 @@ export async function provisionExternalUser(input: {
     }
   } else {
     userId = created.user.id;
-    isNewAuthUser = true;
   }
 
-  // 3. Upsert into public.users
+  // 3. Upsert into public.users with managed_password
   const { data: inserted, error: insertError } = await admin
     .from('users')
     .upsert(
@@ -98,6 +119,7 @@ export async function provisionExternalUser(input: {
         full_name: input.fullName,
         org_role: null,
         status: 'invited',
+        managed_password: activePassword,
       },
       { onConflict: 'id' },
     )
@@ -112,6 +134,31 @@ export async function provisionExternalUser(input: {
 
   return {
     userId: inserted.id,
-    temporaryPassword: isNewAuthUser ? temporaryPassword : null,
+    email,
+    temporaryPassword: activePassword,
   };
+}
+
+/**
+ * Resets user password (updates Auth + managed_password column in public.users)
+ */
+export async function adminResetUserPassword(userId: string, newPassword: string): Promise<void> {
+  const admin = createAdminSupabase();
+  const { error: authError } = await admin.auth.admin.updateUserById(userId, { password: newPassword });
+  if (authError !== null) {
+    throw new ValidationError(`Failed to update auth password: ${authError.message}`, {
+      userMessage: `Gagal memperbarui password: ${authError.message}`,
+    });
+  }
+  await admin.from('users').update({ managed_password: newPassword }).eq('id', userId);
+}
+
+/**
+ * Permanently deletes user account from project_members, public.users, and auth.users
+ */
+export async function adminDeleteUserAccount(userId: string): Promise<void> {
+  const admin = createAdminSupabase();
+  await admin.from('project_members').delete().eq('user_id', userId);
+  await admin.from('users').delete().eq('id', userId);
+  await admin.auth.admin.deleteUser(userId);
 }

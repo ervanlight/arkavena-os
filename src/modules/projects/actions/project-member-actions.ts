@@ -77,6 +77,7 @@ export const inviteProjectMemberAction = safeAction(
       organizationId: ctx.organizationId,
       email: input.email,
       fullName: input.fullName,
+      customPassword: input.password,
     });
 
     const supabase = await createServerSupabase();

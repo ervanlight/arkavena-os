@@ -3384,6 +3384,7 @@ export type Database = {
           full_name: string
           id: string
           last_seen_at: string | null
+          managed_password: string | null
           org_role: Database["public"]["Enums"]["org_role"] | null
           organization_id: string
           phone: string | null
@@ -3397,6 +3398,7 @@ export type Database = {
           full_name: string
           id: string
           last_seen_at?: string | null
+          managed_password?: string | null
           org_role?: Database["public"]["Enums"]["org_role"] | null
           organization_id: string
           phone?: string | null
@@ -3410,6 +3412,7 @@ export type Database = {
           full_name?: string
           id?: string
           last_seen_at?: string | null
+          managed_password?: string | null
           org_role?: Database["public"]["Enums"]["org_role"] | null
           organization_id?: string
           phone?: string | null

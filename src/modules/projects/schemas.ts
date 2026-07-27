@@ -53,9 +53,10 @@ export type RemoveProjectMemberInput = z.infer<typeof removeProjectMemberSchema>
  */
 export const inviteProjectMemberSchema = z.object({
   projectId: z.string().uuid(),
-  email: z.string().trim().email('Format email tidak valid'),
+  email: z.string().trim().min(1, 'ID / Email wajib diisi'),
   fullName: z.string().trim().min(1, 'Nama wajib diisi').max(200),
   projectRole: z.enum([...PROJECT_ROLES]),
+  password: z.string().trim().optional(),
 });
 export type InviteProjectMemberInput = z.infer<typeof inviteProjectMemberSchema>;
 

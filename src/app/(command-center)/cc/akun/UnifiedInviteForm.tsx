@@ -54,11 +54,15 @@ export function UnifiedInviteForm({ projects }: Props) {
   const [state, formAction, isPending] = useActionState(
     async (_prev: FormState, formData: FormData) => {
       const role = String(formData.get('projectRole') ?? '');
+      const rawEmail = String(formData.get('email') ?? '');
+      const customPassword = String(formData.get('password') ?? '').trim();
+
       const result = await inviteProjectMemberAction({
         projectId: String(formData.get('projectId') ?? ''),
-        email: String(formData.get('email') ?? ''),
+        email: rawEmail,
         fullName: String(formData.get('fullName') ?? ''),
         projectRole: role as 'subcontractor' | 'photo_uploader' | 'client_approver' | 'client_viewer',
+        password: customPassword.length > 0 ? customPassword : undefined,
       });
 
       if (!result.ok) return { error: result.error.message, ok: false };
@@ -66,7 +70,7 @@ export function UnifiedInviteForm({ projects }: Props) {
       if (result.data.temporaryPassword) {
         setModalData({
           name: String(formData.get('fullName') ?? ''),
-          email: String(formData.get('email') ?? ''),
+          email: rawEmail.includes('@') ? rawEmail : `${rawEmail}@arkavena.com`,
           password: result.data.temporaryPassword,
         });
       }
@@ -89,20 +93,29 @@ export function UnifiedInviteForm({ projects }: Props) {
       )}
 
       <form action={formAction} className="space-y-5">
-        {/* Row 1: Name + Email */}
+        {/* Row 1: Name + Email/ID */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <Label htmlFor="inv-fullName">Nama Lengkap *</Label>
             <Input id="inv-fullName" name="fullName" placeholder="Nama pengguna" required />
           </div>
           <div>
-            <Label htmlFor="inv-email">Email *</Label>
-            <Input id="inv-email" name="email" type="email" placeholder="email@domain.com" required />
+            <Label htmlFor="inv-email">ID / Username Login *</Label>
+            <Input
+              id="inv-email"
+              name="email"
+              type="text"
+              placeholder="Contoh: klien.budi atau budi@arkavena.com"
+              required
+            />
+            <p className="mt-1 text-[11px] text-[color:var(--color-ink-tertiary)]">
+              Jika diisi username tanpa @, otomatis ditambah @arkavena.com
+            </p>
           </div>
         </div>
 
-        {/* Row 2: Project + Role */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {/* Row 2: Password (Optional) + Project */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div>
             <Label htmlFor="inv-projectId">Proyek *</Label>
             {projects.length === 0 ? (
@@ -137,21 +150,30 @@ export function UnifiedInviteForm({ projects }: Props) {
               ))}
             </Select>
             {roleDesc && (
-              <p className="mt-1.5 text-xs text-[color:var(--color-ink-secondary)]">{roleDesc}</p>
+              <p className="mt-1 text-[11px] text-[color:var(--color-ink-secondary)]">{roleDesc}</p>
             )}
+          </div>
+          <div>
+            <Label htmlFor="inv-password">Password (Opsional)</Label>
+            <Input
+              id="inv-password"
+              name="password"
+              type="text"
+              placeholder="Kosongkan = Auto-generate"
+            />
           </div>
         </div>
 
         {/* Submit */}
         <div className="flex items-center gap-3 pt-1">
           <Button type="submit" disabled={isPending || projects.length === 0}>
-            {isPending ? 'Membuat akun...' : 'Buat Akun & Undang'}
+            {isPending ? 'Membuat akun...' : 'Buat Akun & Simpan'}
           </Button>
           {state.error && (
-            <p role="alert" className="text-sm text-[color:var(--color-danger)]">{state.error}</p>
+            <p role="alert" className="text-sm font-medium text-[color:var(--color-danger)]">{state.error}</p>
           )}
           {state.ok && !modalData && (
-            <p className="text-sm text-green-600">Akun berhasil dibuat (email sudah punya akun).</p>
+            <p className="text-sm font-medium text-green-600">Akun berhasil diperbarui/di-assign.</p>
           )}
         </div>
       </form>
