@@ -11,11 +11,10 @@ export const metadata: Metadata = {
   manifest: '/manifest.json',
   icons: {
     icon: [
+      { url: '/logo.png', type: 'image/png' },
       { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
       { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
     ],
-    // iOS's "Add to Home Screen" reads this specific tag, not the web
-    // manifest's `icons` array at all.
     apple: '/apple-touch-icon.png',
   },
 };

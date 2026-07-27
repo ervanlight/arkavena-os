@@ -59,10 +59,8 @@ export default async function CommandCenterLayout({ children }: { children: Reac
   return (
     <div className="flex min-h-screen bg-[color:var(--color-canvas)]">
       <aside className="flex w-[240px] shrink-0 flex-col border-r border-[color:var(--color-hairline)] bg-[color:var(--color-surface-secondary)] px-3 py-5">
-        <Link href="/cc" className="mb-6 flex items-center gap-2 px-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-[color:var(--color-ink)] text-sm font-bold text-white">
-            B
-          </div>
+        <Link href="/cc" className="mb-6 flex items-center gap-2.5 px-2">
+          <img src="/logo.png" alt="Arkavena Logo" className="h-8 w-8 rounded-[10px] object-cover shadow-sm" />
           <span className="text-[15px] font-semibold text-[color:var(--color-ink)]">Arkavena OS</span>
         </Link>
 

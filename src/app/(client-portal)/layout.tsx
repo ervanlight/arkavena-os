@@ -14,9 +14,7 @@ export default async function ClientPortalLayout({ children }: { children: React
       <header className="sticky top-0 z-10 border-b border-white/10 bg-[#1A1A1A]">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3.5">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-white text-sm font-bold text-[#151515]">
-              B
-            </div>
+            <img src="/logo.png" alt="Arkavena Logo" className="h-8 w-8 rounded-[10px] object-cover shadow-sm" />
             <div>
               <p className="text-[15px] font-semibold leading-tight text-white">Arkavena OS</p>
               <p className="text-[11px] leading-tight text-gray-400">Portal Klien</p>
