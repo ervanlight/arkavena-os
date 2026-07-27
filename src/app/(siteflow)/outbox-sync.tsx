@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { useOutboxSync } from '@/core/offline/use-outbox-sync';
 import type { SyncHandler } from '@/core/offline/types';
-import { createBrowserSupabase } from '@/core/db/client.browser';
+
 import {
   createDailyLogAction,
   createIssueAction,

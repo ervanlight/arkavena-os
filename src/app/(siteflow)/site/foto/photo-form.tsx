@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
-import { createBrowserSupabase } from '@/core/db/client.browser';
+
 import { compressPhoto } from '@/core/storage/compress-image';
 import { photoStoragePath, photoThumbnailStoragePath } from '@/core/storage/paths';
 import { createPhotoAction } from '@/modules/daily-report-inbox';

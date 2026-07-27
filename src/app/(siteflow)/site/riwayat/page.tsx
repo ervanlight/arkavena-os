@@ -76,25 +76,55 @@ export default async function RiwayatPage({ searchParams }: { searchParams: Prom
         {photos.length === 0 ? (
           <EmptyState title="Belum ada foto" />
         ) : (
-          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
-            {photos.map((photo) => (
-              <figure
-                key={photo.id}
-                className="overflow-hidden rounded-[var(--radius-card)] bg-[color:var(--color-surface)] shadow-[var(--shadow-card)]"
-              >
-                {photo.thumbnailUrl !== null ? (
-                  /* Time-limited signed URL -- see the staff Foto tab for the same reasoning. */
-                  <img src={photo.thumbnailUrl} alt={photo.caption ?? 'Foto proyek'} className="aspect-square w-full object-cover" />
-                ) : (
-                  <div className="flex aspect-square w-full items-center justify-center bg-[color:var(--color-surface-secondary)] text-[color:var(--color-ink-tertiary)]">
-                    —
+          <div className="space-y-3">
+            {Object.entries(
+              photos.reduce((acc, photo) => {
+                const dateStr = new Date(photo.created_at).toLocaleDateString('sv-SE');
+                if (!acc[dateStr]) acc[dateStr] = [];
+                acc[dateStr].push(photo);
+                return acc;
+              }, {} as Record<string, typeof photos>)
+            )
+            .sort(([dateA], [dateB]) => dateB.localeCompare(dateA)) // Sort newest first
+            .map(([date, datePhotos]) => (
+              <details key={date} className="group rounded-[var(--radius-card)] bg-[color:var(--color-surface)] shadow-[var(--shadow-card)]">
+                <summary className="flex cursor-pointer items-center justify-between p-3 focus:outline-none">
+                  <div className="flex items-center gap-2 text-[color:var(--color-ink)]">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[color:var(--color-surface-secondary)] text-[color:var(--color-ink-secondary)]">
+                      📁
+                    </span>
+                    <div>
+                      <h3 className="text-sm font-semibold">{new Date(date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</h3>
+                      <p className="text-xs text-[color:var(--color-ink-tertiary)]">{datePhotos.length} foto</p>
+                    </div>
                   </div>
-                )}
-                <figcaption className="p-2">
-                  <p className="truncate text-xs font-medium text-[color:var(--color-ink)]">{photo.caption ?? '—'}</p>
-                  <p className="mt-0.5 text-[11px] text-[color:var(--color-ink-tertiary)]">{formatDate(photo.created_at)}</p>
-                </figcaption>
-              </figure>
+                  <span className="text-[color:var(--color-ink-tertiary)] transition-transform duration-200 group-open:rotate-90">
+                    ▶
+                  </span>
+                </summary>
+                
+                <div className="border-t border-[color:var(--color-border)] p-3">
+                  <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+                    {datePhotos.map((photo) => (
+                      <figure
+                        key={photo.id}
+                        className="overflow-hidden rounded-md bg-[color:var(--color-surface-secondary)]"
+                      >
+                        {photo.thumbnailUrl !== null ? (
+                          <img src={photo.thumbnailUrl} alt={photo.caption ?? 'Foto proyek'} className="aspect-square w-full object-cover" />
+                        ) : (
+                          <div className="flex aspect-square w-full items-center justify-center text-[color:var(--color-ink-tertiary)]">
+                            —
+                          </div>
+                        )}
+                        <figcaption className="p-1.5">
+                          <p className="truncate text-[11px] font-medium text-[color:var(--color-ink)]">{photo.caption ?? '—'}</p>
+                        </figcaption>
+                      </figure>
+                    ))}
+                  </div>
+                </div>
+              </details>
             ))}
           </div>
         )}
