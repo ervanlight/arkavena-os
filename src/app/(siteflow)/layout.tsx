@@ -3,6 +3,7 @@ import { LogOut } from 'lucide-react';
 import { getCurrentUser } from '@/core/auth/session';
 import { signOut } from '@/core/auth/login';
 import { InstallBanner } from '@/core/pwa/install-banner';
+import { Logo } from '@/core/ui';
 import { OutboxSync } from './outbox-sync';
 
 /**
@@ -26,7 +27,7 @@ export default async function SiteFlowLayout({ children }: { children: React.Rea
       <InstallBanner />
       <header className="glass sticky top-0 z-10 flex items-center justify-between border-b border-[color:var(--color-hairline)] px-5 py-3.5">
         <div className="flex items-center gap-2">
-          <img src="/logo.png" alt="Arkavena Logo" className="h-7 w-7 rounded-[8px] object-cover shadow-sm" />
+          <Logo size={28} />
           <span className="text-[17px] font-semibold text-[color:var(--color-ink)]">SiteFlow</span>
         </div>
         <form

@@ -6,3 +6,4 @@ export { PageHeader } from './PageHeader';
 export { EmptyState } from './EmptyState';
 export { cn } from './cn';
 export { TemporaryPasswordModal } from './TemporaryPasswordModal';
+export { Logo } from './Logo';

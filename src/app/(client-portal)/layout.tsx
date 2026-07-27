@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { LogOut } from 'lucide-react';
 import { getCurrentUser } from '@/core/auth/session';
 import { signOut } from '@/core/auth/login';
+import { Logo } from '@/core/ui';
 
 export default async function ClientPortalLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
@@ -10,11 +11,11 @@ export default async function ClientPortalLayout({ children }: { children: React
   }
 
   return (
-    <div className="min-h-screen bg-[#151515] text-white">
-      <header className="sticky top-0 z-10 border-b border-white/10 bg-[#1A1A1A]">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3.5">
+    <div className="min-h-screen bg-[#0f172a] text-slate-100">
+      <header className="sticky top-0 z-40 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="Arkavena Logo" className="h-8 w-8 rounded-[10px] object-cover shadow-sm" />
+            <Logo size={32} />
             <div>
               <p className="text-[15px] font-semibold leading-tight text-white">Arkavena OS</p>
               <p className="text-[11px] leading-tight text-gray-400">Portal Klien</p>

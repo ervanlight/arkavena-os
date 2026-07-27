@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { getCurrentUser } from '@/core/auth/session';
 import { signOut } from '@/core/auth/login';
+import { Logo } from '@/core/ui';
 
 // Product Redesign v2.0: 10 Main Modules for Arkavena PM Control
 const NAV_ITEMS = [
@@ -63,7 +64,7 @@ export default async function CommandCenterLayout({ children }: { children: Reac
     <div className="flex min-h-screen bg-[color:var(--color-canvas)]">
       <aside className="flex w-[240px] shrink-0 flex-col border-r border-[color:var(--color-hairline)] bg-[color:var(--color-surface-secondary)] px-3 py-5">
         <Link href="/cc" className="mb-6 flex items-center gap-2.5 px-2">
-          <img src="/logo.png" alt="Arkavena Logo" className="h-8 w-8 rounded-[10px] object-cover shadow-sm" />
+          <Logo size={32} />
           <span className="text-[15px] font-semibold text-[color:var(--color-ink)]">Arkavena OS</span>
         </Link>
 
