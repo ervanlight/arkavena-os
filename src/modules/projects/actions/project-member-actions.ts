@@ -88,7 +88,6 @@ export const inviteProjectMemberAction = safeAction(
       .select('*')
       .eq('project_id', input.projectId)
       .eq('user_id', userId)
-      .is('deleted_at', null)
       .maybeSingle();
 
     if (existingMember !== null) {
