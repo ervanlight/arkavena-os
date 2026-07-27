@@ -25,28 +25,30 @@ export default async function SiteFlowLayout({ children }: { children: React.Rea
     <div className="min-h-screen bg-[color:var(--color-canvas)]">
       <OutboxSync />
       <InstallBanner />
-      <header className="glass sticky top-0 z-10 flex items-center justify-between border-b border-[color:var(--color-hairline)] px-5 py-3.5">
-        <div className="flex items-center gap-2">
-          <Logo size={28} />
-          <span className="text-[17px] font-semibold text-[color:var(--color-ink)]">SiteFlow</span>
-        </div>
-        <form
-          action={async () => {
-            'use server';
-            await signOut();
-            redirect('/login');
-          }}
-        >
-          <button
-            type="submit"
-            aria-label="Keluar"
-            className="flex h-8 w-8 items-center justify-center rounded-full text-[color:var(--color-ink-tertiary)] active:bg-[color:var(--color-danger)]/10 active:text-[color:var(--color-danger)]"
+      <header className="glass sticky top-0 z-10 border-b border-[color:var(--color-hairline)] px-4 py-3.5 sm:px-6">
+        <div className="mx-auto flex max-w-4xl items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Logo size={28} />
+            <span className="text-[17px] font-semibold text-[color:var(--color-ink)]">SiteFlow</span>
+          </div>
+          <form
+            action={async () => {
+              'use server';
+              await signOut();
+              redirect('/login');
+            }}
           >
-            <LogOut size={16} />
-          </button>
-        </form>
+            <button
+              type="submit"
+              aria-label="Keluar"
+              className="flex h-8 w-8 items-center justify-center rounded-full text-[color:var(--color-ink-tertiary)] hover:bg-[color:var(--color-surface-tertiary)] active:bg-[color:var(--color-danger)]/10 active:text-[color:var(--color-danger)]"
+            >
+              <LogOut size={16} />
+            </button>
+          </form>
+        </div>
       </header>
-      <main className="px-4 py-5">{children}</main>
+      <main className="mx-auto max-w-4xl px-4 py-5 sm:px-6">{children}</main>
     </div>
   );
 }
