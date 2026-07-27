@@ -42,8 +42,7 @@ export async function getAkunPageData(): Promise<{
         users!inner ( id, full_name, email, status, managed_password )
       `)
       .in('project_role', ['subcontractor', 'photo_uploader', 'client_approver', 'client_viewer'])
-      .eq('projects.organization_id', ctx.organizationId)
-      .is('deleted_at', null),
+      .eq('projects.organization_id', ctx.organizationId),
     supabase
       .from('projects')
       .select('id, name')
