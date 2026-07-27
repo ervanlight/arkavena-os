@@ -100,7 +100,16 @@ export const getInvoiceIssuanceStatusAction = safeAction(
 
     
 
-    const holdPoints: HoldPointState[] = [];
+    const { data: inspectionsData } = await supabase
+      .from('inspections')
+      .select('status, hold_point_templates(name)')
+      .eq('project_id', invoice.project_id)
+      .is('deleted_at', null);
+
+    const holdPoints: HoldPointState[] = (inspectionsData ?? []).map((insp) => ({
+      status: insp.status as any,
+      templateName: (insp.hold_point_templates as any)?.name ?? 'Inspection',
+    }));
 
     let changeOrder: { status: string } | null = null;
     if (invoice.change_order_id !== null) {
