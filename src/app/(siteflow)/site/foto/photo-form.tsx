@@ -64,7 +64,7 @@ export function PhotoForm({
       const mainUrlResult = await getUploadPresignedUrlAction({ path: storagePath, contentType: 'image/webp' });
       if (!mainUrlResult.ok) throw new Error(mainUrlResult.error.message);
       
-      const mainUploadRes = await fetch(mainUrlResult.data.url, {
+      const mainUploadRes = await fetch((mainUrlResult.data as { url: string }).url, {
         method: 'PUT',
         body: main,
         headers: { 'Content-Type': 'image/webp' },
@@ -75,7 +75,7 @@ export function PhotoForm({
       const thumbUrlResult = await getUploadPresignedUrlAction({ path: thumbnailPath, contentType: 'image/webp' });
       if (!thumbUrlResult.ok) throw new Error(thumbUrlResult.error.message);
       
-      const thumbUploadRes = await fetch(thumbUrlResult.data.url, {
+      const thumbUploadRes = await fetch((thumbUrlResult.data as { url: string }).url, {
         method: 'PUT',
         body: thumbnail,
         headers: { 'Content-Type': 'image/webp' },

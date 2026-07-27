@@ -65,7 +65,7 @@ export function OutboxSync(): null {
       const mainUrlResult = await getUploadPresignedUrlAction({ path: fields.storagePath, contentType: 'image/webp' });
       if (!mainUrlResult.ok) return { ok: false, error: mainUrlResult.error.message };
       
-      const mainUploadRes = await fetch(mainUrlResult.data.url, {
+      const mainUploadRes = await fetch((mainUrlResult.data as { url: string }).url, {
         method: 'PUT',
         body: fields.mainBlob,
         headers: { 'Content-Type': 'image/webp' },
@@ -76,7 +76,7 @@ export function OutboxSync(): null {
       const thumbUrlResult = await getUploadPresignedUrlAction({ path: fields.thumbnailPath, contentType: 'image/webp' });
       if (!thumbUrlResult.ok) return { ok: false, error: thumbUrlResult.error.message };
       
-      const thumbUploadRes = await fetch(thumbUrlResult.data.url, {
+      const thumbUploadRes = await fetch((thumbUrlResult.data as { url: string }).url, {
         method: 'PUT',
         body: fields.thumbnailBlob,
         headers: { 'Content-Type': 'image/webp' },
