@@ -86,9 +86,9 @@ export default async function SiteFlowHomePage() {
 
       {/* Quick Actions Footer for ad-hoc submissions */}
       <div className="fixed bottom-0 left-0 right-0 bg-[color:var(--color-canvas)] border-t border-[color:var(--color-hairline)] p-3 glass flex justify-around pb-safe max-w-lg mx-auto">
-        <Link href={"/site/payments" as never} className="flex flex-col items-center gap-1 text-[color:var(--color-ink-secondary)] hover:text-[color:var(--color-ink)]">
-          <CheckCircle2 size={22} strokeWidth={1.5} />
-          <span className="text-[11px] font-medium">Pembayaran</span>
+        <Link href={"/site/riwayat" as never} className="flex flex-col items-center gap-1 text-[color:var(--color-ink-secondary)] hover:text-[color:var(--color-ink)]">
+          <FileText size={22} strokeWidth={1.5} />
+          <span className="text-[11px] font-medium">Riwayat</span>
         </Link>
         <Link href="/site/foto" className="flex flex-col items-center gap-1 text-[color:var(--color-accent)] font-semibold">
           <Camera size={22} strokeWidth={2} />
@@ -97,6 +97,10 @@ export default async function SiteFlowHomePage() {
         <Link href="/site/masalah" className="flex flex-col items-center gap-1 text-[color:var(--color-ink-secondary)] hover:text-[color:var(--color-ink)]">
           <AlertTriangle size={22} strokeWidth={1.5} />
           <span className="text-[11px] font-medium">Lapor Masalah</span>
+        </Link>
+        <Link href={"/site/payments" as never} className="flex flex-col items-center gap-1 text-[color:var(--color-ink-secondary)] hover:text-[color:var(--color-ink)]">
+          <CheckCircle2 size={22} strokeWidth={1.5} />
+          <span className="text-[11px] font-medium">Bayar</span>
         </Link>
       </div>
     </div>
