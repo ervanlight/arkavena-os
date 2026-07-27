@@ -48,6 +48,7 @@ export async function listClientVisibleEvidenceForProject(supabase: ServerSupaba
 
 export type EvidenceWithProject = Evidence & {
   project_name: string;
+  url: string | null;
 };
 
 export async function listDocumentEvidence(supabase: ServerSupabase): Promise<EvidenceWithProject[]> {
@@ -59,10 +60,24 @@ export async function listDocumentEvidence(supabase: ServerSupabase): Promise<Ev
     .order('captured_at', { ascending: false });
 
   if (error !== null) throw error;
-  return data.map((row: any) => ({
-    ...row,
-    project_name: row.projects?.name ?? 'Unknown Project',
-  }));
+
+  return Promise.all(
+    data.map(async (row: any) => {
+      let url: string | null = null;
+      if (row.storage_path) {
+        try {
+          url = await getDownloadPresignedUrl(row.storage_path, 3600);
+        } catch {
+          url = null;
+        }
+      }
+      return {
+        ...row,
+        project_name: row.projects?.name ?? 'Unknown Project',
+        url,
+      };
+    }),
+  );
 }
 
 /** The Client Timeline's own read, with browser-loadable thumbnail URLs resolved (ADR 0026 §4.2 "Hari Ini"/"Update Terbaru"). */

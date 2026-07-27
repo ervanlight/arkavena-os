@@ -102,13 +102,14 @@ export const getInvoiceIssuanceStatusAction = safeAction(
 
     const { data: inspectionsData } = await supabase
       .from('inspections')
-      .select('status, hold_point_templates(name)')
+      .select('status, overridden_at, hold_point_templates(name)')
       .eq('project_id', invoice.project_id)
       .is('deleted_at', null);
 
-    const holdPoints: HoldPointState[] = (inspectionsData ?? []).map((insp) => ({
-      status: insp.status as any,
-      templateName: (insp.hold_point_templates as any)?.name ?? 'Inspection',
+    const holdPoints: HoldPointState[] = (inspectionsData ?? []).map((insp: any) => ({
+      templateName: insp.hold_point_templates?.name ?? 'Inspection',
+      passed: insp.status === 'passed',
+      overridden: insp.overridden_at !== null,
     }));
 
     let changeOrder: { status: string } | null = null;

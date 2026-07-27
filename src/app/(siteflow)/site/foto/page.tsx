@@ -11,12 +11,14 @@ export default async function PhotoPage({ searchParams }: { searchParams: Promis
   if (user === null) redirect('/login');
 
   const { projectId: rawProjectId } = await searchParams;
-  let projectId = rawProjectId;
 
+  const projectsResult = await listMyFieldProjectsAction(undefined);
+  const projects = projectsResult.ok ? projectsResult.data : [];
+
+  let projectId = rawProjectId;
   if (!projectId) {
-    const projectsResult = await listMyFieldProjectsAction(undefined);
-    const projects = projectsResult.ok ? projectsResult.data : [];
-    if (projects.length === 0) {
+    const firstProject = projects[0];
+    if (!firstProject) {
       return (
         <Card>
           <p className="text-sm text-[color:var(--color-ink-secondary)] font-medium">
@@ -25,7 +27,7 @@ export default async function PhotoPage({ searchParams }: { searchParams: Promis
         </Card>
       );
     }
-    projectId = projects[0].id;
+    projectId = firstProject.id;
   }
 
   const [zonesResult, workPackagesResult] = await Promise.all([
@@ -36,11 +38,34 @@ export default async function PhotoPage({ searchParams }: { searchParams: Promis
   const zones = zonesResult.ok ? zonesResult.data : [];
   const workPackages = workPackagesResult.ok ? workPackagesResult.data : [];
 
-  if (user === null) redirect('/login');
-
   return (
     <div className="space-y-4">
-      <h1 className="text-[19px] font-semibold text-[color:var(--color-ink)]">Ambil Foto</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <h1 className="text-[19px] font-semibold text-[color:var(--color-ink)]">Ambil Foto Lapangan</h1>
+
+        {/* Project Selector dropdown if Pengawas is assigned to multiple projects */}
+        {projects.length > 1 && (
+          <form method="GET" action="/site/foto" className="flex items-center gap-2">
+            <label htmlFor="projectSelect" className="text-xs font-semibold text-[color:var(--color-ink-secondary)] shrink-0">
+              Pilih Proyek:
+            </label>
+            <select
+              id="projectSelect"
+              name="projectId"
+              defaultValue={projectId}
+              onChange={(e) => e.target.form?.submit()}
+              className="rounded-lg border border-[color:var(--color-hairline)] bg-[color:var(--color-surface)] px-3 py-1.5 text-xs font-medium text-[color:var(--color-ink)] shadow-sm focus:outline-none"
+            >
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </form>
+        )}
+      </div>
+
       {zones.length === 0 ? (
         <Card>
           <p className="text-sm text-[color:var(--color-ink-secondary)]">

@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { GitPullRequest, DollarSign, Send } from 'lucide-react';
 import { Card, EmptyState } from '@/core/ui';
 import { listAllChangeOrdersAction } from '@/modules/variations';

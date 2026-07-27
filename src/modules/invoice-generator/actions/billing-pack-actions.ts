@@ -53,14 +53,14 @@ export const getBillingPackAction = safeAction(
 
     const { data: inspectionsData } = await supabase
       .from('inspections')
-      .select('status, overridden, hold_point_templates(name)')
+      .select('status, overridden_at, hold_point_templates(name)')
       .eq('project_id', invoice.project_id)
       .is('deleted_at', null);
 
-    const qcStatus: BillingPackHoldPoint[] = (inspectionsData ?? []).map((insp) => ({
-      templateName: (insp.hold_point_templates as any)?.name ?? 'QC Inspection',
+    const qcStatus: BillingPackHoldPoint[] = (inspectionsData ?? []).map((insp: any) => ({
+      templateName: insp.hold_point_templates?.name ?? 'QC Inspection',
       status: insp.status,
-      overridden: Boolean((insp as any).overridden),
+      overridden: insp.overridden_at !== null,
     }));
 
     const variation = changeOrderResult !== null && changeOrderResult.ok ? changeOrderResult.data : null;

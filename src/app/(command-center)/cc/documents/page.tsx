@@ -47,15 +47,19 @@ export default async function DocumentsPage() {
                     Dokumen Internal
                   </span>
                 )}
-                <a
-                  href={doc.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  download
-                  className="flex items-center gap-1.5 rounded-lg border border-[color:var(--color-hairline)] px-3 py-1.5 text-xs font-medium text-[color:var(--color-ink)] hover:bg-gray-50 transition-colors"
-                >
-                  <Download size={14} /> Unduh
-                </a>
+                {doc.url ? (
+                  <a
+                    href={doc.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    download
+                    className="flex items-center gap-1.5 rounded-lg border border-[color:var(--color-hairline)] px-3 py-1.5 text-xs font-medium text-[color:var(--color-ink)] hover:bg-gray-50 transition-colors"
+                  >
+                    <Download size={14} /> Unduh
+                  </a>
+                ) : (
+                  <span className="text-xs text-[color:var(--color-ink-tertiary)]">Tidak Ada File</span>
+                )}
               </div>
             </Card>
           ))}
