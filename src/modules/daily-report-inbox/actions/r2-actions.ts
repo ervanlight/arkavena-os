@@ -12,7 +12,7 @@ export const getUploadPresignedUrlAction = safeAction(
       path: z.string().min(1),
       contentType: z.string().default('image/webp'),
     }),
-    permission: { resource: 'photo', action: 'add' }, // Using photo add permission as a baseline
+    permission: { resource: 'photo', action: 'create' }, // Using photo create permission as a baseline
     loadContext: getActionContext,
   },
   async ({ path, contentType }, _ctx): Promise<{ url: string }> => {

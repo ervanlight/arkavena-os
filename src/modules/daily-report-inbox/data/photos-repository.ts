@@ -1,6 +1,7 @@
 import 'server-only';
 import type { ServerSupabase } from '@/core/db/client.server';
 import { NotFoundError } from '@/core/errors/app-error';
+import { getDownloadPresignedUrl } from '@/core/storage/r2.server';
 import type { NewPhoto, Photo, PhotoUpdate, ProjectPhoto } from '../types';
 
 /** All direct `photos` table access lives here (ARCHITECTURE.md 1.2). Uploading the actual bytes is core/storage's job, not this repository's. */

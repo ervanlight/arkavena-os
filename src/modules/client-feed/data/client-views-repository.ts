@@ -1,6 +1,7 @@
 import 'server-only';
 import { rupiahFromColumn } from '@/core/money/rupiah';
 import type { ServerSupabase } from '@/core/db/client.server';
+import { getDownloadPresignedUrl } from '@/core/storage/r2.server';
 import type { ClientProgressPhoto, ClientProjectOverview, ClientTimelineEvent, ClientZoneProgress } from '../types';
 
 /**
