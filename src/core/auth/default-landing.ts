@@ -1,7 +1,7 @@
 import type { Enums } from '@/core/db/database.types';
 import type { Role } from '@/core/permissions/matrix';
 
-const FIELD_PROJECT_ROLES: ReadonlySet<Enums<'project_role'>> = new Set(['site_coordinator', 'mandor']);
+const FIELD_PROJECT_ROLES: ReadonlySet<Enums<'project_role'>> = new Set(['site_coordinator', 'mandor', 'photo_uploader']);
 const CLIENT_PROJECT_ROLES: ReadonlySet<Enums<'project_role'>> = new Set(['client_approver', 'client_viewer']);
 const PARTNER_PROJECT_ROLES: ReadonlySet<Enums<'project_role'>> = new Set(['supplier', 'subcontractor']);
 

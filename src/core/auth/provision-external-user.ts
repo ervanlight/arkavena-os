@@ -1,5 +1,5 @@
 import 'server-only';
-import { createAdminSupabase } from '@/core/db/admin.server';
+import { createAdminSupabase, type AdminSupabase } from '@/core/db/admin.server';
 import { ConflictError, ValidationError } from '@/core/errors/app-error';
 import { generateTemporaryPassword } from './generate-temporary-password';
 
@@ -19,6 +19,23 @@ export function normalizeUserEmail(rawInput: string): string {
     email = `${email}@arkavena.com`;
   }
   return email;
+}
+
+/**
+ * Robust email lookup in Supabase Auth across paginated results
+ */
+async function findAuthUserByEmail(admin: AdminSupabase, email: string) {
+  const target = email.toLowerCase();
+  let page = 1;
+  while (page <= 10) {
+    const { data } = await admin.auth.admin.listUsers({ page, perPage: 100 });
+    if (!data?.users || data.users.length === 0) break;
+    const found = data.users.find((u) => u.email?.toLowerCase() === target);
+    if (found) return found;
+    if (data.users.length < 100) break;
+    page++;
+  }
+  return null;
 }
 
 /**
@@ -87,9 +104,8 @@ export async function provisionExternalUser(input: {
       (createError as { status?: number }).status === 422;
 
     if (isAlreadyExists) {
-      // User exists in Supabase Auth, but was missing from public.users
-      const { data: listData } = await admin.auth.admin.listUsers();
-      const authUser = listData?.users?.find((u) => u.email?.toLowerCase() === email);
+      // User exists in Supabase Auth, find via paginated search
+      const authUser = await findAuthUserByEmail(admin, email);
       if (authUser) {
         userId = authUser.id;
         // Update password for existing Auth user

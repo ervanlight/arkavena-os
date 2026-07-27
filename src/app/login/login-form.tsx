@@ -30,15 +30,15 @@ export function LoginForm() {
   return (
     <form action={formAction} className="space-y-5">
       <div>
-        <Label htmlFor="email">Alamat email</Label>
+        <Label htmlFor="email">ID / Email Login</Label>
         <Input
           id="email"
           name="email"
-          type="email"
+          type="text"
           required
-          autoComplete="email"
+          autoComplete="username"
           defaultValue={state.email}
-          placeholder="nama@perusahaan.com"
+          placeholder="Contoh: klien.budi atau budi@arkavena.com"
         />
       </div>
 

@@ -55,6 +55,9 @@ export default async function CommandCenterLayout({ children }: { children: Reac
   if (user === null) {
     redirect('/login');
   }
+  if (user.orgRole === null) {
+    redirect('/');
+  }
 
   return (
     <div className="flex min-h-screen bg-[color:var(--color-canvas)]">
@@ -66,7 +69,7 @@ export default async function CommandCenterLayout({ children }: { children: Reac
 
         <nav className="flex-1 space-y-0.5 overflow-y-auto">
           <p className="px-2 pb-1 text-[11px] font-bold uppercase tracking-wider text-[color:var(--color-ink-tertiary)]">
-            Main Modules v2.0
+            Modul Utama
           </p>
           {NAV_ITEMS.map(({ href, label, icon: Icon }) => (
             <Link

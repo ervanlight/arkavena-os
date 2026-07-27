@@ -14,6 +14,7 @@ import {
   Lock,
   X,
   UserX,
+  MessageSquare,
 } from 'lucide-react';
 import { StatusBadge } from '@/core/ui';
 import {
@@ -73,6 +74,7 @@ export function UserAccountCard({ user }: UserAccountCardProps) {
   const router = useRouter();
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [copiedPassword, setCopiedPassword] = useState(false);
+  const [copiedWa, setCopiedWa] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [resetPending, setResetPending] = useState(false);
@@ -98,6 +100,13 @@ export function UserAccountCard({ user }: UserAccountCardProps) {
     await navigator.clipboard.writeText(user.managedPassword);
     setCopiedPassword(true);
     setTimeout(() => setCopiedPassword(false), 2000);
+  }
+
+  async function handleCopyWaFormat() {
+    const waText = `Halo ${user.fullName}, berikut kredensial login Anda ke Arkavena OS:\n\nURL Login: ${window.location.origin}\nID / Username: ${user.email}\nPassword: ${user.managedPassword ?? '(gunakan password Anda)'}\n\nSilakan simpan informasi login ini.`;
+    await navigator.clipboard.writeText(waText);
+    setCopiedWa(true);
+    setTimeout(() => setCopiedWa(false), 2000);
   }
 
   async function handleResetPassword(e: React.FormEvent) {
@@ -218,11 +227,11 @@ export function UserAccountCard({ user }: UserAccountCardProps) {
         </div>
       </div>
 
-      {/* Password display banner */}
-      <div className="ml-13 flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs">
+      {/* Password & Copy WA Banner */}
+      <div className="ml-13 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs">
         <div className="flex items-center gap-2">
           <Lock className="h-3.5 w-3.5 text-slate-400" />
-          <span className="text-slate-500 font-medium">Password Login:</span>
+          <span className="text-slate-500 font-medium">Password:</span>
           {user.managedPassword ? (
             <span className="font-mono font-bold text-slate-900 tracking-wider text-sm">
               {user.managedPassword}
@@ -231,24 +240,44 @@ export function UserAccountCard({ user }: UserAccountCardProps) {
             <span className="text-slate-400 italic">Belum diset / Password kustom</span>
           )}
         </div>
-        {user.managedPassword && (
+        <div className="flex items-center gap-2">
+          {user.managedPassword && (
+            <button
+              onClick={handleCopyPassword}
+              className="flex items-center gap-1 rounded bg-white px-2 py-1 text-slate-700 border border-slate-200 hover:bg-slate-100 font-medium shadow-sm transition-colors"
+            >
+              {copiedPassword ? (
+                <>
+                  <Check className="h-3 w-3 text-green-600" />
+                  <span className="text-green-600">Tersalin</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="h-3 w-3 text-slate-500" />
+                  <span>Salin Password</span>
+                </>
+              )}
+            </button>
+          )}
+
+          {/* Salin Format WA button */}
           <button
-            onClick={handleCopyPassword}
-            className="flex items-center gap-1 rounded bg-white px-2 py-1 text-slate-700 border border-slate-200 hover:bg-slate-100 font-medium shadow-sm transition-colors"
+            onClick={handleCopyWaFormat}
+            className="flex items-center gap-1 rounded bg-emerald-50 px-2 py-1 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 font-medium shadow-sm transition-colors"
           >
-            {copiedPassword ? (
+            {copiedWa ? (
               <>
-                <Check className="h-3 w-3 text-green-600" />
-                <span className="text-green-600">Tersalin</span>
+                <Check className="h-3 w-3 text-emerald-600" />
+                <span className="text-emerald-600">Format WA Tersalin!</span>
               </>
             ) : (
               <>
-                <Copy className="h-3 w-3 text-slate-500" />
-                <span>Salin Password</span>
+                <MessageSquare className="h-3 w-3 text-emerald-600" />
+                <span>Salin Format WA</span>
               </>
             )}
           </button>
-        )}
+        </div>
       </div>
 
       {/* Projects */}

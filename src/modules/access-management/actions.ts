@@ -6,6 +6,8 @@ import { getActionContext } from '@/core/auth/session';
 import { createServerSupabase } from '@/core/db/client.server';
 import { inviteProjectMemberAction } from '@/modules/projects';
 import { adminResetUserPassword, adminDeleteUserAccount } from '@/core/auth/provision-external-user';
+import { requirePermission } from '@/core/permissions/guard';
+import { ValidationError } from '@/core/errors/app-error';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -24,6 +26,9 @@ export async function getAkunPageData(): Promise<{
   allUsers: ExternalUserWithProjects[];
   projects: { id: string; name: string }[];
 }> {
+  const ctx = await getActionContext();
+  requirePermission(ctx, 'project_member', 'view');
+
   const supabase = await createServerSupabase();
 
   const [membersRes, projectsRes] = await Promise.all([
@@ -37,10 +42,12 @@ export async function getAkunPageData(): Promise<{
         users!inner ( id, full_name, email, status, managed_password )
       `)
       .in('project_role', ['subcontractor', 'photo_uploader', 'client_approver', 'client_viewer'])
+      .eq('projects.organization_id', ctx.organizationId)
       .is('deleted_at', null),
     supabase
       .from('projects')
       .select('id, name')
+      .eq('organization_id', ctx.organizationId)
       .is('deleted_at', null)
       .order('name'),
   ]);
@@ -154,7 +161,20 @@ export const resetUserPasswordAction = safeAction(
     permission: { resource: 'project_member', action: 'update' },
     loadContext: getActionContext,
   },
-  async ({ userId, newPassword }, _ctx): Promise<null> => {
+  async ({ userId, newPassword }, ctx): Promise<null> => {
+    const supabase = await createServerSupabase();
+    const { data: targetUser } = await supabase
+      .from('users')
+      .select('id, organization_id')
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (!targetUser || targetUser.organization_id !== ctx.organizationId) {
+      throw new ValidationError('Pengguna tidak ditemukan dalam organisasi Anda.', {
+        userMessage: 'Pengguna tidak ditemukan dalam organisasi Anda.',
+      });
+    }
+
     await adminResetUserPassword(userId, newPassword);
     return null;
   },
@@ -169,7 +189,20 @@ export const deleteUserAccountAction = safeAction(
     permission: { resource: 'project_member', action: 'remove' },
     loadContext: getActionContext,
   },
-  async ({ userId }, _ctx): Promise<null> => {
+  async ({ userId }, ctx): Promise<null> => {
+    const supabase = await createServerSupabase();
+    const { data: targetUser } = await supabase
+      .from('users')
+      .select('id, organization_id')
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (!targetUser || targetUser.organization_id !== ctx.organizationId) {
+      throw new ValidationError('Pengguna tidak ditemukan dalam organisasi Anda.', {
+        userMessage: 'Pengguna tidak ditemukan dalam organisasi Anda.',
+      });
+    }
+
     await adminDeleteUserAccount(userId);
     return null;
   },

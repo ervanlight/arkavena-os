@@ -14,8 +14,10 @@ import { logger } from '@/core/logging/logger';
  * form anywhere.
  */
 
+import { normalizeUserEmail } from './provision-external-user';
+
 const loginSchema = z.object({
-  email: z.string().trim().toLowerCase().email('Alamat email tidak valid'),
+  email: z.string().trim().min(1, 'ID / Email wajib diisi'),
   password: z.string().min(1, 'Kata sandi wajib diisi'),
 });
 
@@ -37,7 +39,8 @@ export async function signInWithPassword(formData: FormData): Promise<ActionResu
     });
   }
 
-  const { email, password } = parsed.data;
+  const email = normalizeUserEmail(parsed.data.email);
+  const { password } = parsed.data;
   const supabase = await createServerSupabase();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 

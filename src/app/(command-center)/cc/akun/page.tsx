@@ -2,7 +2,7 @@ import { Users, Camera, ShieldCheck, Eye, UserPlus } from 'lucide-react';
 import { Card, PageHeader } from '@/core/ui';
 import { getAkunPageData } from '@/modules/access-management';
 import { UnifiedInviteForm } from './UnifiedInviteForm';
-import { UserAccountCard } from './UserAccountCard';
+import { UserAccountList } from './UserAccountList';
 
 export const metadata = { title: 'Manajemen Akun — Arkavena OS' };
 
@@ -73,7 +73,7 @@ export default async function AkunPage() {
         </Card>
       </section>
 
-      {/* ── Existing Users List ──────────────────────────────────────────── */}
+      {/* ── Existing Users List with Search & Filter ─────────────────────── */}
       <section>
         <div className="flex items-center gap-2 mb-4">
           <Users className="h-4 w-4 text-[color:var(--color-ink-secondary)]" />
@@ -83,21 +83,7 @@ export default async function AkunPage() {
           </span>
         </div>
 
-        {allUsers.length === 0 ? (
-          <Card>
-            <p className="text-sm text-[color:var(--color-ink-secondary)] text-center py-4">
-              Belum ada akun eksternal. Gunakan form di atas untuk membuat akun pertama.
-            </p>
-          </Card>
-        ) : (
-          <Card>
-            <ul className="divide-y divide-[color:var(--color-hairline)]">
-              {allUsers.map((user) => (
-                <UserAccountCard key={user.userId} user={user} />
-              ))}
-            </ul>
-          </Card>
-        )}
+        <UserAccountList allUsers={allUsers} />
       </section>
 
       {/* ── Legend ──────────────────────────────────────────────────────── */}
