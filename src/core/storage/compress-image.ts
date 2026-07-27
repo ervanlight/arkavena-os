@@ -81,7 +81,7 @@ function canvasToBlob(canvas: HTMLCanvasElement, quality: number): Promise<Blob>
         }
         resolve(blob);
       },
-      'image/jpeg',
+      'image/webp',
       quality,
     );
   });

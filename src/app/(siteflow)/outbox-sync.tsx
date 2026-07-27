@@ -63,12 +63,12 @@ export function OutboxSync(): null {
       const supabase = createBrowserSupabase();
       const mainUpload = await supabase.storage
         .from('photos')
-        .upload(fields.storagePath, fields.mainBlob, { contentType: 'image/jpeg', upsert: true });
+        .upload(fields.storagePath, fields.mainBlob, { contentType: 'image/webp', upsert: true });
       if (mainUpload.error !== null) return { ok: false, error: mainUpload.error.message };
 
       const thumbUpload = await supabase.storage
         .from('photos')
-        .upload(fields.thumbnailPath, fields.thumbnailBlob, { contentType: 'image/jpeg', upsert: true });
+        .upload(fields.thumbnailPath, fields.thumbnailBlob, { contentType: 'image/webp', upsert: true });
       if (thumbUpload.error !== null) return { ok: false, error: thumbUpload.error.message };
 
       const result = await createPhotoAction({

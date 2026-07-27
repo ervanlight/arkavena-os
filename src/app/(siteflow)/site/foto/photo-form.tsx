@@ -66,12 +66,12 @@ export function PhotoForm({
       // with "already exists" instead of just succeeding again.
       const mainUpload = await supabase.storage
         .from('photos')
-        .upload(storagePath, main, { contentType: 'image/jpeg', upsert: true });
+        .upload(storagePath, main, { contentType: 'image/webp', upsert: true });
       if (mainUpload.error !== null) throw new Error(mainUpload.error.message);
 
       const thumbUpload = await supabase.storage
         .from('photos')
-        .upload(thumbnailPath, thumbnail, { contentType: 'image/jpeg', upsert: true });
+        .upload(thumbnailPath, thumbnail, { contentType: 'image/webp', upsert: true });
       if (thumbUpload.error !== null) throw new Error(thumbUpload.error.message);
 
       const result = await createPhotoAction({
