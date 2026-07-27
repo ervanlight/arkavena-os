@@ -75,9 +75,13 @@ export default async function ProjectPhotosPage(props: {
                     —
                   </div>
                 )}
-                <figcaption className="p-2.5">
+                <figcaption className="p-2.5 space-y-1">
                   <p className="truncate text-xs font-medium text-[color:var(--color-ink)]">{photo.caption ?? '—'}</p>
-                  <p className="mt-0.5 text-[11px] text-[color:var(--color-ink-tertiary)]">
+                  <div className="flex flex-wrap items-center gap-1 text-[10px] text-[color:var(--color-ink-tertiary)]">
+                    <span className="font-semibold text-[color:var(--color-accent)]">{photo.uploader_name ?? 'Pengawas'}</span>
+                    {photo.zone_name && <span>&middot; {photo.zone_name}</span>}
+                  </div>
+                  <p className="text-[10px] text-[color:var(--color-ink-tertiary)]">
                     {photo.photo_stage !== null ? (STAGE_LABEL[photo.photo_stage] ?? photo.photo_stage) : 'Tanpa Tahapan'}
                   </p>
                 </figcaption>
@@ -95,15 +99,18 @@ export default async function ProjectPhotosPage(props: {
   const groupedPhotos = photos.reduce((acc, photo) => {
     const dateStr = toDateString(photo.created_at);
     if (!acc[dateStr]) {
-      acc[dateStr] = { date: dateStr, count: 0, latestUrl: null as string | null };
+      acc[dateStr] = { date: dateStr, count: 0, latestUrl: null as string | null, uploaders: new Set<string>() };
     }
     acc[dateStr].count += 1;
+    if (photo.uploader_name) {
+      acc[dateStr].uploaders.add(photo.uploader_name);
+    }
     // Keep the first one we see (latest by created_at since it's ordered desc)
     if (!acc[dateStr].latestUrl && photo.thumbnailUrl) {
       acc[dateStr].latestUrl = photo.thumbnailUrl;
     }
     return acc;
-  }, {} as Record<string, { date: string; count: number; latestUrl: string | null }>);
+  }, {} as Record<string, { date: string; count: number; latestUrl: string | null; uploaders: Set<string> }>);
 
   // Convert to array and sort descending by date
   const folders = Object.values(groupedPhotos).sort((a, b) => b.date.localeCompare(a.date));
@@ -117,17 +124,19 @@ export default async function ProjectPhotosPage(props: {
           year: 'numeric',
         });
 
+        const uploaderNames = Array.from(folder.uploaders).join(', ');
+
         return (
           <Link
             key={folder.date}
             href={`/cc/projects/${id}/foto?date=${folder.date}`}
-            className="group flex flex-col overflow-hidden rounded-[var(--radius-card)] bg-[color:var(--color-surface)] shadow-[var(--shadow-card)] transition-transform hover:-translate-y-0.5 hover:shadow-md active:translate-y-0"
+            className="group flex flex-col overflow-hidden rounded-[var(--radius-card)] bg-[color:var(--color-surface)] shadow-[var(--shadow-card)] transition-transform hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 border border-[color:var(--color-hairline)]"
           >
             <div className="relative aspect-[4/3] w-full bg-[color:var(--color-surface-secondary)]">
               {folder.latestUrl ? (
                 <>
                   <img src={folder.latestUrl} alt={`Cover ${displayDate}`} className="h-full w-full object-cover opacity-80 transition-opacity group-hover:opacity-100" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 </>
               ) : (
                 <div className="flex h-full w-full items-center justify-center text-[color:var(--color-ink-tertiary)]">
@@ -141,7 +150,9 @@ export default async function ProjectPhotosPage(props: {
             </div>
             <div className="p-3">
               <h3 className="text-sm font-semibold text-[color:var(--color-ink)]">{displayDate}</h3>
-              <p className="mt-0.5 text-xs text-[color:var(--color-ink-tertiary)]">Ketuk untuk membuka</p>
+              <p className="mt-0.5 text-xs font-medium text-[color:var(--color-accent)] truncate">
+                📷 {uploaderNames || 'Pengawas'}
+              </p>
             </div>
           </Link>
         );

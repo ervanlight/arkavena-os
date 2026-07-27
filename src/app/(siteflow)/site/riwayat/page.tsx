@@ -117,8 +117,11 @@ export default async function RiwayatPage({ searchParams }: { searchParams: Prom
                             —
                           </div>
                         )}
-                        <figcaption className="p-1.5">
+                        <figcaption className="p-1.5 space-y-0.5">
                           <p className="truncate text-[11px] font-medium text-[color:var(--color-ink)]">{photo.caption ?? '—'}</p>
+                          <p className="truncate text-[10px] text-[color:var(--color-accent)] font-semibold">
+                            👤 {photo.uploader_name ?? 'Pengawas'} {photo.zone_name ? `• ${photo.zone_name}` : ''}
+                          </p>
                         </figcaption>
                       </figure>
                     ))}

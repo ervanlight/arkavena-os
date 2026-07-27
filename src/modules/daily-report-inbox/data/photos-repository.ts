@@ -9,10 +9,10 @@ import type { NewPhoto, Photo, PhotoUpdate, ProjectPhoto } from '../types';
 /** One hour: long enough to browse a project gallery, short enough that a leaked URL expires. Same TTL the client portal's photo resolver uses. */
 const PHOTO_URL_TTL_SECONDS = 3600;
 
-export async function listPhotosForProject(supabase: ServerSupabase, projectId: string): Promise<Photo[]> {
+export async function listPhotosForProject(supabase: ServerSupabase, projectId: string): Promise<any[]> {
   const { data, error } = await supabase
     .from('photos')
-    .select('*')
+    .select('*, uploader:users!uploaded_by(full_name, email), zones(name)')
     .eq('project_id', projectId)
     .is('deleted_at', null)
     .order('created_at', { ascending: false });
@@ -33,7 +33,12 @@ export async function listPhotosWithThumbnailUrls(supabase: ServerSupabase, proj
   return Promise.all(
     photos.map(async (photo) => {
       const signedUrl = await getDownloadPresignedUrl(photo.thumbnail_path, PHOTO_URL_TTL_SECONDS);
-      return { ...photo, thumbnailUrl: signedUrl };
+      return {
+        ...photo,
+        thumbnailUrl: signedUrl,
+        uploader_name: photo.uploader?.full_name ?? photo.uploader?.email ?? 'Pengawas',
+        zone_name: photo.zones?.name ?? null,
+      };
     }),
   );
 }

@@ -15,7 +15,11 @@ export type NewPhoto = TablesInsert<'photos'>;
 export type PhotoUpdate = TablesUpdate<'photos'>;
 
 /** A photo with its `thumbnail_path` resolved to a time-limited signed URL for rendering -- storage paths aren't directly viewable. */
-export type ProjectPhoto = Photo & { thumbnailUrl: string | null };
+export type ProjectPhoto = Photo & {
+  thumbnailUrl: string | null;
+  uploader_name?: string | null;
+  zone_name?: string | null;
+};
 
 export type MaterialRequest = Tables<'material_requests'>;
 export type NewMaterialRequest = TablesInsert<'material_requests'>;
