@@ -85,7 +85,7 @@ export async function listMyFieldProjects(
     .from('project_members')
     .select('project:projects(id, name)')
     .eq('user_id', userId)
-    .in('project_role', ['site_coordinator', 'mandor']);
+    .in('project_role', ['site_coordinator', 'mandor', 'photo_uploader']);
 
   if (error !== null) throw error;
   return data.flatMap((row) => (row.project === null ? [] : [row.project]));
