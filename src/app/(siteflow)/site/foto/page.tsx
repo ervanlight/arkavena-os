@@ -38,6 +38,8 @@ export default async function PhotoPage({ searchParams }: { searchParams: Promis
   const zones = zonesResult.ok ? zonesResult.data : [];
   const workPackages = workPackagesResult.ok ? workPackagesResult.data : [];
 
+  const activeProject = projects.find((p) => p.id === projectId);
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -76,6 +78,8 @@ export default async function PhotoPage({ searchParams }: { searchParams: Promis
         <PhotoForm
           organizationId={user.organizationId}
           projectId={projectId}
+          projectName={activeProject?.name}
+          uploaderName={user.fullName}
           zones={zones}
           workPackages={workPackages}
         />

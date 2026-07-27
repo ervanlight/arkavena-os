@@ -35,11 +35,15 @@ function today(): string {
 export function PhotoForm({
   organizationId,
   projectId,
+  projectName,
+  uploaderName,
   zones,
   workPackages,
 }: {
   organizationId: string;
   projectId: string;
+  projectName?: string | undefined;
+  uploaderName?: string | undefined;
   zones: Zone[];
   workPackages: WorkPackage[];
 }) {
@@ -50,12 +54,53 @@ export function PhotoForm({
     }
 
     const zoneId = String(formData.get('zoneId'));
+    const selectedZone = zones.find((z) => z.id === zoneId);
     const workPackageId = String(formData.get('workPackageId') ?? '').trim() || undefined;
     const caption = String(formData.get('caption') ?? '').trim() || undefined;
     const photoId = crypto.randomUUID();
     const date = today();
 
-    const { main, thumbnail } = await compressPhoto(file);
+    // Get browser GPS coordinates with a quick 3s fallback
+    let gpsCoords: string | null = null;
+    if (typeof window !== 'undefined' && 'geolocation' in navigator) {
+      try {
+        gpsCoords = await new Promise<string | null>((resolve) => {
+          const timer = setTimeout(() => resolve(null), 3000);
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              clearTimeout(timer);
+              resolve(`${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`);
+            },
+            () => {
+              clearTimeout(timer);
+              resolve(null);
+            },
+            { timeout: 3000, enableHighAccuracy: true },
+          );
+        });
+      } catch {
+        gpsCoords = null;
+      }
+    }
+
+    const dateStr = new Date().toLocaleString('id-ID', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    }) + ' WIB';
+
+    const watermarkMeta = {
+      projectName,
+      zoneName: selectedZone?.name,
+      uploaderName,
+      dateStr,
+      gpsCoords,
+    };
+
+    const { main, thumbnail } = await compressPhoto(file, watermarkMeta);
     const storagePath = photoStoragePath({ organizationId, projectId, zoneId, date, photoId });
     const thumbnailPath = photoThumbnailStoragePath({ organizationId, projectId, zoneId, date, photoId });
 
