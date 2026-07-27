@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useState, useActionState } from 'react';
 import { useRouter } from 'next/navigation';
 import { inviteProjectMemberAction, removeProjectMemberAction, type ProjectMember } from '@/modules/projects';
 import { Label, Input, Select, Button, StatusBadge } from '@/core/ui';
@@ -8,14 +8,8 @@ import { Label, Input, Select, Button, StatusBadge } from '@/core/ui';
 type FormState = { error: string | null; ok: boolean; temporaryPassword: string | null };
 const initialState: FormState = { error: null, ok: false, temporaryPassword: null };
 
-/**
- * The onboarding path for everyone who is not staff. Until this shipped, a
- * client_approver/client_viewer or site_coordinator/mandor could only be
- * created by writing rows directly into the database -- the Client Timeline
- * and SiteFlow were both unreachable for any real person invited through the
- * app (only suppliers had an invite form, on /cc/vendors/[id]).
- */
 const ROLE_LABEL_ID: Record<string, string> = {
+  photo_uploader: 'Petugas Foto Lapangan',
   site_coordinator: 'Koordinator Lapangan',
   mandor: 'Mandor',
   client_approver: 'Klien (bisa menyetujui)',
@@ -25,6 +19,7 @@ const ROLE_LABEL_ID: Record<string, string> = {
 };
 
 const ROLE_TONE: Record<string, 'neutral' | 'info' | 'success' | 'warning'> = {
+  photo_uploader: 'info',
   site_coordinator: 'info',
   mandor: 'info',
   client_approver: 'success',
@@ -34,10 +29,11 @@ const ROLE_TONE: Record<string, 'neutral' | 'info' | 'success' | 'warning'> = {
 };
 
 const INVITABLE_ROLES = [
-  'client_approver',
-  'client_viewer',
+  'photo_uploader',
   'site_coordinator',
   'mandor',
+  'client_approver',
+  'client_viewer',
   'subcontractor',
 ] as const;
 
@@ -45,12 +41,17 @@ export function ProjectMembersPanel({
   projectId,
   members,
   nameByUserId,
+  allOrgUsers = [],
 }: {
   projectId: string;
   members: ProjectMember[];
   nameByUserId: Record<string, string>;
+  allOrgUsers?: Array<{ id: string; full_name: string; email: string }>;
 }) {
   const router = useRouter();
+  const [selectedUserId, setSelectedUserId] = useState<string>('');
+  const [selectedFullName, setSelectedFullName] = useState<string>('');
+  const [selectedEmail, setSelectedEmail] = useState<string>('');
 
   const [state, formAction, isPending] = useActionState(async (_prev: FormState, formData: FormData) => {
     const result = await inviteProjectMemberAction({
@@ -68,12 +69,27 @@ export function ProjectMembersPanel({
     return { error: null, ok: true, temporaryPassword: result.data.temporaryPassword };
   }, initialState);
 
+  // Filter out users who are already members of this project
+  const memberUserIds = new Set(members.map((m) => m.user_id));
+  const availableUsers = allOrgUsers.filter((u) => !memberUserIds.has(u.id));
+
+  const handleSelectUser = (userId: string) => {
+    setSelectedUserId(userId);
+    const target = availableUsers.find((u) => u.id === userId);
+    if (target) {
+      setSelectedFullName(target.full_name);
+      setSelectedEmail(target.email);
+    } else {
+      setSelectedFullName('');
+      setSelectedEmail('');
+    }
+  };
+
   return (
     <div className="space-y-4">
       {members.length === 0 ? (
         <p className="text-sm text-[color:var(--color-ink-tertiary)]">
-          Belum ada anggota. Undang klien agar mereka bisa membuka Portal Klien, atau mandor agar bisa memakai
-          SiteFlow.
+          Belum ada anggota. Undang klien agar mereka bisa membuka Portal Klien, atau pengawas/mandor agar bisa memakai SiteFlow.
         </p>
       ) : (
         <ul className="divide-y divide-[color:var(--color-hairline)]">
@@ -95,27 +111,65 @@ export function ProjectMembersPanel({
         </ul>
       )}
 
-      <form action={formAction} className="grid grid-cols-1 gap-4 border-t border-dashed border-[color:var(--color-hairline)] pt-4 sm:grid-cols-3">
-        <div>
-          <Label htmlFor="member-fullName">Nama *</Label>
-          <Input id="member-fullName" name="fullName" required />
-        </div>
-        <div>
-          <Label htmlFor="member-email">Email *</Label>
-          <Input id="member-email" name="email" type="email" required />
-        </div>
-        <div>
-          <Label htmlFor="member-projectRole">Peran *</Label>
-          <Select id="member-projectRole" name="projectRole" required defaultValue="client_approver">
-            {INVITABLE_ROLES.map((role) => (
-              <option key={role} value={role}>
-                {ROLE_LABEL_ID[role]}
-              </option>
-            ))}
-          </Select>
+      <form action={formAction} className="space-y-4 border-t border-dashed border-[color:var(--color-hairline)] pt-4">
+        {availableUsers.length > 0 && (
+          <div className="rounded-lg bg-[color:var(--color-surface-secondary)] p-3 border border-[color:var(--color-hairline)]">
+            <Label htmlFor="member-selectUser" className="text-xs font-semibold text-[color:var(--color-accent)]">
+              ✨ Assign Cepat dari Akun Terdaftar (Opsional)
+            </Label>
+            <Select
+              id="member-selectUser"
+              value={selectedUserId}
+              onChange={(e) => handleSelectUser(e.target.value)}
+              className="mt-1 bg-white text-sm"
+            >
+              <option value="">-- Pilih Akun Terdaftar --</option>
+              {availableUsers.map((user) => (
+                <option key={user.id} value={user.id}>
+                  {user.full_name} ({user.email})
+                </option>
+              ))}
+            </Select>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div>
+            <Label htmlFor="member-fullName">Nama *</Label>
+            <Input
+              id="member-fullName"
+              name="fullName"
+              required
+              value={selectedFullName}
+              onChange={(e) => setSelectedFullName(e.target.value)}
+              placeholder="Contoh: Budi Santoso"
+            />
+          </div>
+          <div>
+            <Label htmlFor="member-email">Email *</Label>
+            <Input
+              id="member-email"
+              name="email"
+              type="email"
+              required
+              value={selectedEmail}
+              onChange={(e) => setSelectedEmail(e.target.value)}
+              placeholder="budi@arkavena.com"
+            />
+          </div>
+          <div>
+            <Label htmlFor="member-projectRole">Peran *</Label>
+            <Select id="member-projectRole" name="projectRole" required defaultValue="site_coordinator">
+              {INVITABLE_ROLES.map((role) => (
+                <option key={role} value={role}>
+                  {ROLE_LABEL_ID[role]}
+                </option>
+              ))}
+            </Select>
+          </div>
         </div>
 
-        <div className="sm:col-span-3">
+        <div>
           {state.error !== null && (
             <p role="alert" className="text-sm text-[color:var(--color-danger)]">
               {state.error}
@@ -126,22 +180,22 @@ export function ProjectMembersPanel({
               role="status"
               className="rounded-[var(--radius-control)] border border-[color:var(--color-success)]/30 bg-[color:var(--color-success)]/12 p-3 text-sm"
             >
-              <p className="text-[color:var(--color-success)]">
-                Berhasil diundang. Kata sandi awal (sampaikan langsung ke orangnya, tidak dikirim lewat email):
+              <p className="text-[color:var(--color-success)] font-medium">
+                Berhasil diundang! Kata sandi akun baru (sampaikan langsung ke pengawas/klien):
               </p>
-              <p className="mt-1 font-mono text-base font-semibold text-[color:var(--color-success)]">
+              <p className="mt-1 font-mono text-base font-bold text-[color:var(--color-success)]">
                 {state.temporaryPassword}
               </p>
             </div>
           )}
           {state.ok && state.temporaryPassword === null && (
-            <p className="text-sm text-[color:var(--color-success)]">
-              Orang ini sudah punya akun sebelumnya, langsung ditambahkan ke proyek.
+            <p className="text-sm font-medium text-[color:var(--color-success)]">
+              ✓ Pengguna terdaftar berhasil ditambahkan ke tim proyek ini!
             </p>
           )}
           <div className="mt-2">
             <Button type="submit" disabled={isPending}>
-              {isPending ? 'Mengundang...' : 'Undang ke proyek'}
+              {isPending ? 'Menambahkan...' : 'Assign / Tambahkan ke Tim Proyek'}
             </Button>
           </div>
         </div>

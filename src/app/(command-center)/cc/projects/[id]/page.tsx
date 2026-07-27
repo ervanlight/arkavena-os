@@ -101,7 +101,12 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             Klien yang diundang di sini bisa membuka Portal Klien; mandor/koordinator bisa memakai SiteFlow.
           </p>
         </div>
-        <ProjectMembersPanel projectId={project.id} members={members} nameByUserId={nameByUserId} />
+        <ProjectMembersPanel
+          projectId={project.id}
+          members={members}
+          nameByUserId={nameByUserId}
+          allOrgUsers={usersResult.ok ? usersResult.data : []}
+        />
       </Card>
 
       <div className="space-y-3">
