@@ -63,6 +63,8 @@ export const addProjectMemberAction = safeAction(
  * it is null when the email already had an account, since re-inviting must
  * never silently reset someone's existing password.
  */
+import { ValidationError } from '@/core/errors/app-error';
+
 export const inviteProjectMemberAction = safeAction(
   {
     schema: inviteProjectMemberSchema,
@@ -78,6 +80,22 @@ export const inviteProjectMemberAction = safeAction(
     });
 
     const supabase = await createServerSupabase();
+
+    // Check if user is already a member of this project
+    const { data: existingMember } = await supabase
+      .from('project_members')
+      .select('*')
+      .eq('project_id', input.projectId)
+      .eq('user_id', userId)
+      .is('deleted_at', null)
+      .maybeSingle();
+
+    if (existingMember !== null) {
+      throw new ValidationError('User is already a member of this project.', {
+        userMessage: 'Pengguna ini sudah terdaftar sebagai anggota di proyek ini.',
+      });
+    }
+
     const member = await insertProjectMember(supabase, {
       project_id: input.projectId,
       user_id: userId,

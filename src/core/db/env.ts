@@ -6,12 +6,13 @@
  * means it fails at startup, with the name of the variable that is missing.
  */
 
+import { ValidationError } from '@/core/errors/app-error';
+
 function required(name: string, value: string | undefined): string {
   if (value === undefined || value === '') {
-    throw new Error(
-      `Missing environment variable ${name}. Copy .env.example to .env.local and fill it in; ` +
-        'the local values are printed by `supabase start`.',
-    );
+    throw new ValidationError(`Missing environment variable ${name}`, {
+      userMessage: `Konfigurasi server belum lengkap (variabel ${name} tidak ditemukan). Harap periksa environment variables di server.`,
+    });
   }
   return value;
 }

@@ -9,6 +9,7 @@ import { createServerSupabase } from '@/core/db/client.server';
 import { getClient, insertClient, listClients, updateClient, insertClientUser } from '../data/clients-repository';
 import { createClientSchema, updateClientSchema } from '../schemas';
 import type { Client } from '../types';
+import { ValidationError } from '@/core/errors/app-error';
 import { provisionExternalUser, type ProvisionedUser } from '@/core/auth/provision-external-user';
 
 /**
@@ -109,7 +110,9 @@ export const provisionClientAccountAction = safeAction(
     const client = await getClient(supabase, input.clientId);
     
     if (!client.email) {
-      throw new Error('Klien harus memiliki alamat email untuk dapat dibuatkan akun.');
+      throw new ValidationError('Client has no email.', {
+        userMessage: 'Klien ini belum memiliki alamat email. Harap isi email klien terlebih dahulu.',
+      });
     }
 
     const provisionResult = await provisionExternalUser({
